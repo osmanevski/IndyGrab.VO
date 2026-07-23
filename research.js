@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const noBlacklistMessage = document.getElementById('no-blacklist-items');
     const permanentBanCounter = document.getElementById('permanent-ban-counter');
     const clearBlacklistBtn = document.getElementById('clear-blacklist-btn');
-    const syncBlacklistBtn = document.getElementById('sync-blacklist-btn');
     const addBlacklistBtn = document.getElementById('add-blacklist-btn');
     const blacklistInput = document.getElementById('blacklist-input');
     const analyzeRiskBtn = document.getElementById('analyze-risk-btn');
@@ -904,20 +903,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    if (syncBlacklistBtn) {
-        syncBlacklistBtn.addEventListener('click', () => {
-            syncBlacklistBtn.disabled = true;
-            syncBlacklistBtn.textContent = 'Eşitleniyor...';
-            chrome.runtime.sendMessage({ action: "forceSyncBlacklist" }, (response) => {
-                setTimeout(() => {
-                    syncBlacklistBtn.disabled = false;
-                    syncBlacklistBtn.textContent = '🔄 Eşitle';
-                }, 1000);
-            });
-        });
-    }
-    
-    chrome.runtime.sendMessage({ action: "forceSyncBlacklist" });
+    // LOCAL MODE: Global kara liste sunucu senkronu kaldırıldı ("🔄 Eşitle" butonu ve
+    // forceSyncBlacklist çağrıları silindi). Kara liste tamamen yereldir.
 
     blacklistList.addEventListener('change', (event) => {
         if (event.target.classList.contains('blacklist-days-input')) {

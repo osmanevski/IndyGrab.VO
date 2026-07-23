@@ -1148,12 +1148,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })();
         return true;
     }
-    if (message.action === "forceSyncBlacklist") {
-        syncGlobalBlacklist().then(() => {
-            sendResponse({ status: "success" });
-        });
-        return true;
-    }
+    // LOCAL MODE: "forceSyncBlacklist" handler'ı kaldırıldı (global sunucu senkronu yok).
 });
 
 function updateBadge() {
