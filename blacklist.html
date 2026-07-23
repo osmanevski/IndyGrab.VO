@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="blacklist_title">Blacklist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+            align-items: center;
+        }
+        .input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        #blacklistFileInput {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #uploadBlacklistBtn {
+            background-color: #28a745;
+        }
+        #uploadBlacklistBtn:hover {
+            background-color: #218838;
+        }
+        #deleteSelectedBtn {
+            background-color: #dc3545;
+        }
+        #deleteSelectedBtn:hover {
+            background-color: #c82333;
+        }
+        .asin-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .asin-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .delete-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .asin-column a {
+            color: #0066c0;
+            text-decoration: none;
+        }
+        .asin-column a:hover {
+            text-decoration: underline;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        .notification.show {
+            display: block;
+        }
+        body {
+            background-color: #333;
+            color: #fff;
+        }
+        body .container {
+            background-color: #444;
+        }
+        body .input, body #blacklistFileInput {
+            background-color: #555;
+            color: #fff;
+            border-color: #666;
+        }
+        body .asin-column a {
+            color: #66b0ff;
+        }
+        body .delete-icon {
+            filter: brightness(0) invert(1);
+        }
+        body #uploadBlacklistBtn {
+            background-color: #1a7c34;
+        }
+        body #uploadBlacklistBtn:hover {
+            background-color: #15652b;
+        }
+        body #deleteSelectedBtn {
+            background-color: #a71d2a;
+        }
+        body #deleteSelectedBtn:hover {
+            background-color: #911823;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .select-all-label {
+            font-size: 14px;
+        }
+        .asin-checkbox {
+            margin-right: 8px;
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .pagination-controls button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        body .pagination-controls button:disabled {
+            background-color: #666;
+            color: #aaa;
+        }
+        #pageInfo {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        :root { --ink: #0a0b0d; --panel: #1b1c20; --line: #47484f; --text: #f1f2f4; --blue: #2563eb; --blue-deep: #1d4ed8; --crimson: #8d2b35; --crimson-deep: #641b24; }
+        body { background: var(--ink); color: var(--text); }
+        body .container { background: var(--panel); border: 1px solid var(--line); box-shadow: 0 16px 36px rgba(0, 0, 0, .35); }
+        body .input, body #blacklistFileInput { background: #111114; color: var(--text); border-color: var(--line); }
+        .button, body #uploadBlacklistBtn { background-color: var(--blue); }
+        .button:hover, body #uploadBlacklistBtn:hover { background-color: var(--blue-deep); }
+        body #deleteSelectedBtn { background-color: var(--crimson); }
+        body #deleteSelectedBtn:hover { background-color: var(--crimson-deep); }
+        body .asin-column a { color: #8bb9ff; }
+        body .pagination-controls button:disabled { background: #353136; color: #93878a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 data-i18n="blacklist_title">Blacklist</h1>
+        <div class="input-group">
+            <input type="text" id="blacklistAsinInput" class="input" placeholder="Enter ASIN (e.g., B0...)" maxlength="10">
+            <button id="addBlacklistBtn" class="button" data-i18n="add_to_blacklist">Add to Blacklist</button>
+        </div>
+        <div class="input-group">
+            <input type="file" id="blacklistFileInput" accept=".txt,.csv">
+            <button id="uploadBlacklistBtn" class="button">Upload ASINs</button>
+        </div>
+        <div class="control-group">
+            <input type="checkbox" id="selectAllCheckbox">
+            <label for="selectAllCheckbox" class="select-all-label">Select All</label>
+            <button id="deleteSelectedBtn" class="button">Delete Selected</button>
+        </div>
+        <div id="blacklistOutput" class="asin-list"></div>
+        <div id="paginationControls" class="pagination-controls" style="display: none;">
+            <button id="prevPageBtn" class="button">◀</button>
+            <span id="pageInfo"></span>
+            <button id="nextPageBtn" class="button">▶</button>
+        </div>
+        <div id="notification" class="notification"></div>
+    </div>
+    <script src="blacklist.js"></script>
+</body>
+</html>

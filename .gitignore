@@ -1,0 +1,15 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Claude Code yerel ayar/izin geçmişi (sunucu yolları içerir)
+.claude/
+
+# Yerel çok-ajanlı koordinasyon dosyası — sunucu IP/kullanıcı adı içerdiği için
+# repoya dahil edilmez (ajanlar yereldeki dosyayı doğrudan okur).
+AI_HANDOFF.md
+
+# Yedekler / geçici
+*.backups/
+*.broken-*/
+scratchpad/

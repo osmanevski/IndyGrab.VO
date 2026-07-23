@@ -1,0 +1,39 @@
+/* custom_styles.css */
+
+.indygrab-action-button {
+    /* Genel Buton Stili */
+    background: linear-gradient(to bottom, #3f78d0, #24539c) !important;
+    color: white !important;
+    border: 1px solid #5d94e7 !important;
+    padding: 8px 12px !important;
+    margin: 10px 5px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2) !important;
+    transition: all 0.2s ease !important;
+    display: inline-block !important; /* Düzgün hizalama için */
+    line-height: normal !important; /* Düzgün hizalama için */
+    height: auto !important; /* Düzgün hizalama için */
+}
+
+.indygrab-action-button:hover {
+    background: linear-gradient(to bottom, #5b90df, #2e65b2) !important;
+    transform: translateY(-1px);
+}
+
+.indygrab-action-button:disabled {
+    background: linear-gradient(to bottom, #2f7d62, #215845) !important;
+    cursor: not-allowed !important;
+    opacity: 0.9 !important;
+}
+
+/* Amazon'daki butonu form genişliğine yaymak için */
+#address-ui-widgets-enterAddressFormContainer .indygrab-action-button,
+#a-popover-content-3 .indygrab-action-button {
+    display: block !important;
+    width: 95% !important;
+    margin: 15px auto !important;
+}
