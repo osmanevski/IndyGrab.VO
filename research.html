@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
+            background-color: var(--t-121212);
+            color: var(--t-e0e0e0);
             margin: 0;
             width: 850px;
             min-height: 500px;
@@ -18,7 +18,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(26, 26, 26, 0.70);
+            background: rgba(var(--rgbs1), 0.70);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             padding: 12px 15px;
@@ -29,9 +29,9 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
         .nav-btn {
-            background-color: rgba(44, 62, 80, 0.8);
-            color: #ecf0f1;
-            border: 1px solid rgba(52, 73, 94, 0.5);
+            background-color: rgba(var(--rgbs6), 0.8);
+            color: var(--t-ecf0f1);
+            border: 1px solid rgba(var(--rgbs7), 0.5);
             padding: 8px 18px;
             border-radius: 20px;
             cursor: pointer;
@@ -42,13 +42,13 @@
             align-items: center;
         }
         .nav-btn:hover {
-            background-color: rgba(52, 73, 94, 1);
+            background-color: rgba(var(--rgbs7), 1);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .nav-btn.active {
             background-color: rgba(46, 204, 113, 0.9);
-            color: #121212;
+            color: var(--t-121212);
             border-color: #27ae60;
             box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
         }
@@ -64,7 +64,7 @@
             transition: all 0.3s;
         }
         .nav-btn.active .nav-badge {
-            background-color: #121212;
+            background-color: var(--t-121212);
             color: #2ecc71;
         }
 
@@ -75,7 +75,7 @@
         .skeleton-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, rgba(30,30,30,0.85) 4%, rgba(60,60,60,0.85) 25%, rgba(30,30,30,0.85) 36%);
+            background: linear-gradient(to right, rgba(var(--rgbs8),0.85) 4%, rgba(var(--rgbs9),0.85) 25%, rgba(var(--rgbs8),0.85) 36%);
             background-size: 1000px 1000px;
             animation: shimmer 2s infinite linear;
             z-index: 20;
@@ -97,7 +97,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--t-333);
             padding-bottom: 10px;
             flex-wrap: wrap;
         }
@@ -118,19 +118,19 @@
         .danger-btn:hover { background-color: #e74c3c; }
         .action-btn { background-color: #27ae60; color: white; }
         .action-btn:hover { background-color: #2ecc71; }
-        .action-btn:disabled { background-color: #4a4a4a; cursor: not-allowed; color: #aaa; }
+        .action-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-aaa); }
         .info-btn { background-color: #d35400; color: white; }
         .info-btn:hover { background-color: #e67e22; }
         .secondary-btn { background-color: #7f8c8d; color: white; }
-        .secondary-btn:hover { background-color: #95a5a6; }
-        .secondary-btn:disabled { background-color: #4a4a4a; cursor: not-allowed; color: #777; }
+        .secondary-btn:hover { background-color: var(--t-95a5a6); }
+        .secondary-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-777); }
 
         #sort-products {
             padding: 8px;
-            border: 1px solid #444;
+            border: 1px solid var(--t-444);
             border-radius: 5px;
-            background-color: #2c2c2c;
-            color: #e0e0e0;
+            background-color: var(--t-2c2c2c);
+            color: var(--t-e0e0e0);
             font-size: 14px;
             cursor: pointer;
             outline: none;
@@ -138,17 +138,17 @@
         .counter {
             font-size: 14px;
             font-weight: 600;
-            background-color: #333;
-            color: #ccc;
+            background-color: var(--t-333);
+            color: var(--t-ccc);
             padding: 5px 10px;
             border-radius: 15px;
         }
         .store-links-section, .blacklist-section, .analysis-queue-section {
-            background-color: #1e1e1e;
+            background-color: var(--t-1e1e1e);
             padding: 15px; border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
             margin-bottom: 25px;
-            border: 1px solid #333;
+            border: 1px solid var(--t-333);
         }
         .store-links-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         #automation-controls { display: flex; gap: 8px; margin-left: auto; margin-right: 15px; align-items: center; }
@@ -162,13 +162,13 @@
         .control-btn.pause:hover { background-color: #f1c40f; }
         .control-btn.stop { background-color: #c0392b; }
         .control-btn.stop:hover { background-color: #e74c3c; }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; background-color: #444; }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; background-color: var(--t-444); }
         
         .add-link-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         #store-link-input {
-            padding: 8px 12px; border: 1px solid #444; border-radius: 5px;
+            padding: 8px 12px; border: 1px solid var(--t-444); border-radius: 5px;
             font-size: 14px; resize: vertical; min-height: 60px;
-            background-color: #2c2c2c; color: #e0e0e0;
+            background-color: var(--t-2c2c2c); color: var(--t-e0e0e0);
         }
         #add-link-btn {
             background-color: #2980b9; color: white; border: none; padding: 10px;
@@ -184,10 +184,10 @@
         #blacklist-input {
             flex-grow: 1;
             padding: 8px 12px;
-            border: 1px solid #444;
+            border: 1px solid var(--t-444);
             border-radius: 5px;
             font-size: 14px;
-            background-color: #2c2c2c; color: #e0e0e0;
+            background-color: var(--t-2c2c2c); color: var(--t-e0e0e0);
         }
         #add-blacklist-btn {
             background-color: #34495e;
@@ -205,7 +205,7 @@
         }
         .store-link-item, .blacklist-item {
             display: flex; justify-content: space-between; align-items: center; padding: 10px; 
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--t-333);
         }
         .store-link-item:last-child, .blacklist-item:last-child { border-bottom: none; }
         
@@ -213,22 +213,22 @@
         .store-link-item.visited a { color: #a569bd; }
         
         .store-link-item .store-name { font-weight: 600; }
-        .store-link-item.visited .store-name { text-decoration: line-through; color: #777; }
+        .store-link-item.visited .store-name { text-decoration: line-through; color: var(--t-777); }
         .store-link-item .controls { display: flex; align-items: center; gap: 15px; }
         .visited-icon { display: none; color: #27ae60; font-weight: bold; }
         .store-link-item.visited .visited-icon { display: inline; }
         .delete-link-btn { background: transparent; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 14px; }
         
-        .blacklist-item .store-info { flex-grow: 1; font-size: 14px; color: #e0e0e0; }
+        .blacklist-item .store-info { flex-grow: 1; font-size: 14px; color: var(--t-e0e0e0); }
         .blacklist-item .store-info .store-name-blacklisted { font-weight: 600; color: #fff; }
         .blacklist-item .time-remaining { font-size: 13px; color: #999; font-style: italic; margin-right: 15px; }
         .remove-from-blacklist-btn { background: transparent; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 14px; }
         
         #product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
         .product-card {
-            background-color: #1e1e1e;
+            background-color: var(--t-1e1e1e);
             border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            border: 1px solid #333;
+            border: 1px solid var(--t-333);
             overflow: hidden; display: flex; flex-direction: column; position: relative;
         }
         .remove-product-btn {
@@ -240,7 +240,7 @@
         .product-card:hover .remove-product-btn { opacity: 1; }
         .remove-product-btn:hover { background-color: #c0392b; }
         
-        .product-image-container { width: 100%; padding-top: 100%; position: relative; background-color: #2c2c2c; }
+        .product-image-container { width: 100%; padding-top: 100%; position: relative; background-color: var(--t-2c2c2c); }
         .product-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; padding: 10px; box-sizing: border-box; }
         
         .product-info { padding: 15px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
@@ -255,14 +255,14 @@
             transition: background-color 0.2s;
         }
         .fetch-btn:hover { background-color: #219150; }
-        .fetch-btn:disabled { background-color: #4a4a4a; cursor: not-allowed; color: #aaa; }
+        .fetch-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-aaa); }
         
         .fetched-label {
             position: absolute; bottom: 10px; left: 10px; background-color: rgba(39, 174, 96, 0.9);
             color: white; padding: 4px 8px; font-size: 12px; font-weight: bold;
             border-radius: 4px; z-index: 5;
         }
-        #no-products, #no-links, #no-blacklist-items { text-align: center; padding: 20px; color: #777; font-size: 16px; }
+        #no-products, #no-links, #no-blacklist-items { text-align: center; padding: 20px; color: var(--t-777); font-size: 16px; }
         .hidden { display: none !important; }
         
         .product-details {
@@ -278,20 +278,20 @@
             gap: 4px;
             font-size: 13px;
         }
-        .product-meta span { display: block; color: #bbb; }
+        .product-meta span { display: block; color: var(--t-bbb); }
         .product-price { font-weight: bold; color: #2ecc71; }
-        .product-seller, .product-customers { color: #aaa; font-weight: 500; }
-        .product-seller .label, .product-customers .label { font-weight: normal; color: #777; }
+        .product-seller, .product-customers { color: var(--t-aaa); font-weight: 500; }
+        .product-seller .label, .product-customers .label { font-weight: normal; color: var(--t-777); }
 
         #progress-wrapper {
             width: 100%;
-            background-color: #2c2c2c;
+            background-color: var(--t-2c2c2c);
             border-radius: 8px;
             margin-bottom: 15px;
             height: 26px;
             overflow: hidden;
             display: none; 
-            border: 1px solid #444;
+            border: 1px solid var(--t-444);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
             position: relative;
         }
@@ -340,13 +340,13 @@
             background-color: #34495e; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;
         }
         .pagination-controls button:hover:not(:disabled) { background-color: #2c3e50; }
-        .pagination-controls button:disabled { background-color: #1e1e1e; color: #555; cursor: not-allowed; border: 1px solid #333; }
-        .pagination-info { font-size: 14px; color: #bbb; font-weight: bold; }
+        .pagination-controls button:disabled { background-color: var(--t-1e1e1e); color: var(--t-555); cursor: not-allowed; border: 1px solid var(--t-333); }
+        .pagination-info { font-size: 14px; color: var(--t-bbb); font-weight: bold; }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #121212; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        ::-webkit-scrollbar-track { background: var(--t-121212); }
+        ::-webkit-scrollbar-thumb { background: var(--t-444); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--t-555); }
 
         /* IndyGrab.VO dashboard refresh */
         :root {
@@ -367,6 +367,30 @@
             --violet: #2563eb;
             --radius: 16px;
             --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+        }
+        :root { --rgbs0: 7,11,20; --rgbs1: 26,26,26; --rgbs2: 30,29,32; --rgbs3: 20,20,23; --rgbs4: 39,37,40; --rgbs5: 22,22,25; --rgbs6: 44,62,80; --rgbs7: 52,73,94; --rgbs8: 30,30,30; --rgbs9: 60,60,60; }
+        :root[data-theme="light"] { --rgbs0: 255,255,255; --rgbs1: 248,250,252; --rgbs2: 255,255,255; --rgbs3: 241,244,248; --rgbs4: 255,255,255; --rgbs5: 241,244,248; --rgbs6: 226,232,240; --rgbs7: 203,213,225; --rgbs8: 255,255,255; --rgbs9: 226,232,240; }
+        :root[data-theme="light"] .store-links-section, :root[data-theme="light"] .blacklist-section, :root[data-theme="light"] .analysis-queue-section, :root[data-theme="light"] #product-list, :root[data-theme="light"] #store-link-input, :root[data-theme="light"] #blacklist-input, :root[data-theme="light"] .store-link-item, :root[data-theme="light"] .blacklist-item { color: #1c1f26; }
+        :root { --t-121212: #121212; --t-e0e0e0: #e0e0e0; --t-ecf0f1: #ecf0f1; --t-333: #333; --t-4a4a4a: #4a4a4a; --t-aaa: #aaa; --t-95a5a6: #95a5a6; --t-777: #777; --t-444: #444; --t-2c2c2c: #2c2c2c; --t-ccc: #ccc; --t-1e1e1e: #1e1e1e; --t-bbb: #bbb; --t-555: #555; --t-0a0b0d: #0a0b0d; --t-cbd5e1: #cbd5e1; }
+        :root[data-theme="light"] { --t-121212: #f4f6f9; --t-e0e0e0: #1c1f26; --t-ecf0f1: #1c1f26; --t-333: #dfe3ea; --t-4a4a4a: #d5dae2; --t-aaa: #6b7280; --t-95a5a6: #6b7280; --t-777: #6b7280; --t-444: #d5dae2; --t-2c2c2c: #eef1f6; --t-ccc: #5c6470; --t-1e1e1e: #ffffff; --t-bbb: #5c6470; --t-555: #c7cdd6; --t-0a0b0d: #f4f6f9; --t-cbd5e1: #6b7280; }
+        :root[data-theme="light"] h1, :root[data-theme="light"] h2 { color: #14161b; }
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f6f9;
+            --surface: rgba(255, 255, 255, 0.96);
+            --surface-strong: #ffffff;
+            --surface-soft: #eef1f6;
+            --border: rgba(20, 24, 33, 0.12);
+            --border-strong: rgba(37, 99, 235, 0.45);
+            --text: #16181d;
+            --muted: #5c6470;
+            --primary: #2563eb;
+            --primary-light: #1d4ed8;
+            --success: #15935f;
+            --warning: #b7791f;
+            --danger: #c0392b;
+            --violet: #2563eb;
+            --shadow: 0 18px 42px rgba(20, 24, 33, 0.12);
         }
 
         * { box-sizing: border-box; }
@@ -395,14 +419,14 @@
             align-items: center;
             gap: 24px;
             padding: 14px clamp(20px, 3vw, 42px);
-            background: rgba(7, 11, 20, 0.82);
+            background: rgba(var(--rgbs0), 0.82);
             border-bottom: 1px solid var(--border);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
         }
         .brand-lockup { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
         .brand-mark {
             width: 40px; height: 40px; display: grid; place-items: center;
-            overflow: hidden; border-radius: 12px; background: #0a0b0d;
+            overflow: hidden; border-radius: 12px; background: var(--t-0a0b0d);
             box-shadow: 0 9px 24px rgba(0, 0, 0, .28), inset 0 1px rgba(255,255,255,.08);
         }
         .brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -412,7 +436,7 @@
         .nav-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
         .nav-btn {
             gap: 2px; padding: 9px 12px; border-radius: 11px;
-            background: transparent; color: #cbd5e1; border: 1px solid transparent;
+            background: transparent; color: var(--t-cbd5e1); border: 1px solid transparent;
             font-size: 12px; box-shadow: none;
         }
         .nav-btn:hover {
@@ -425,14 +449,14 @@
         }
         .nav-badge, .nav-btn.active .nav-badge {
             min-width: 22px; margin-left: 5px; padding: 2px 6px; text-align: center;
-            background: rgba(148, 163, 184, 0.16); color: #cbd5e1; border: 1px solid var(--border);
+            background: rgba(148, 163, 184, 0.16); color: var(--t-cbd5e1); border: 1px solid var(--border);
         }
         .nav-btn.active .nav-badge { background: var(--primary); color: white; border-color: transparent; }
 
         .container { width: min(1440px, 100%); margin: 0 auto; padding: 28px clamp(20px, 3vw, 42px) 48px; }
         .store-links-section, .blacklist-section, .analysis-queue-section, #section-products {
             position: relative; margin: 0 0 24px !important; padding: 22px;
-            background: linear-gradient(145deg, rgba(30, 29, 32, .96), rgba(20, 20, 23, .95));
+            background: linear-gradient(145deg, rgba(var(--rgbs2), .96), rgba(var(--rgbs3), .95));
             border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
         }
         #section-products { padding-bottom: 24px; }
@@ -473,7 +497,7 @@
         .add-link-form, .add-blacklist-form { gap: 10px; margin-bottom: 14px; }
         .add-link-form { display: grid; grid-template-columns: 1fr auto; align-items: stretch; }
         #store-link-input, #blacklist-input, #main-cat-input, #sub-cat-input, #sort-products, .key-textarea {
-            background: rgba(7, 11, 20, .58) !important; color: #e5edf7 !important;
+            background: rgba(var(--rgbs0), .58) !important; color: #e5edf7 !important;
             border: 1px solid var(--border) !important; border-radius: 10px !important;
             padding: 9px 12px !important; outline: none;
         }
@@ -485,7 +509,7 @@
         #add-blacklist-btn { background: var(--surface-soft); border: 1px solid var(--border); color: white; }
 
         #store-links-list, #blacklist-list, #analysis-queue-list {
-            max-height: 280px; border: 1px solid var(--border); border-radius: 12px; background: rgba(7, 11, 20, .28);
+            max-height: 280px; border: 1px solid var(--border); border-radius: 12px; background: rgba(var(--rgbs0), .28);
         }
         .store-link-item, .blacklist-item, #analysis-queue-list > li {
             min-height: 48px; padding: 10px 13px; border-bottom: 1px solid var(--border) !important;
@@ -493,12 +517,12 @@
         .store-link-item:hover, .blacklist-item:hover, #analysis-queue-list > li:hover { background: rgba(255, 255, 255, .035); }
         .store-link-item a { color: #8bb9ff; }
         .delete-link-btn, .remove-from-blacklist-btn, .remove-queue-item { color: var(--danger) !important; }
-        .counter { background: rgba(148, 163, 184, .1) !important; color: #cbd5e1; border: 1px solid var(--border); }
+        .counter { background: rgba(148, 163, 184, .1) !important; color: var(--t-cbd5e1); border: 1px solid var(--border); }
 
         .product-toolbar {
             display: flex !important; gap: 10px !important; align-items: center !important; flex-wrap: wrap !important;
             width: 100% !important; margin-bottom: 18px !important; padding: 12px !important;
-            background: rgba(7, 11, 20, .30) !important; border: 1px solid var(--border) !important; border-radius: 12px !important;
+            background: rgba(var(--rgbs0), .30) !important; border: 1px solid var(--border) !important; border-radius: 12px !important;
             justify-content: space-between !important;
         }
         .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -509,7 +533,7 @@
 
         #product-list { grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 16px; }
         .product-card {
-            background: linear-gradient(160deg, rgba(39, 37, 40, .96), rgba(22, 22, 25, .98));
+            background: linear-gradient(160deg, rgba(var(--rgbs4), .96), rgba(var(--rgbs5), .98));
             border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.18);
             transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
         }
@@ -520,10 +544,10 @@
         .product-title { height: 43px; margin-bottom: 12px; -webkit-line-clamp: 2; }
         .product-details { margin-top: 0; padding: 0 15px 14px; }
         .product-price { color: #5ce0a4; }
-        .remove-product-btn { top: 9px; right: 9px; width: 28px; height: 28px; line-height: 28px; background: rgba(7,11,20,.76); }
+        .remove-product-btn { top: 9px; right: 9px; width: 28px; height: 28px; line-height: 28px; background: rgba(var(--rgbs0),.76); }
         .fetched-label { border-radius: 8px; background: rgba(34, 201, 131, .92); }
 
-        #progress-wrapper { height: 30px; margin-bottom: 18px; background: rgba(7,11,20,.55); border-color: var(--border); border-radius: 10px; }
+        #progress-wrapper { height: 30px; margin-bottom: 18px; background: rgba(var(--rgbs0),.55); border-color: var(--border); border-radius: 10px; }
         #progress-bar { background-color: var(--violet); }
         .status-strip { padding: 11px 13px !important; margin-bottom: 12px !important; background: rgba(96, 165, 250, .07) !important; border: 1px solid rgba(96, 165, 250, .17) !important; border-radius: 10px !important; }
         #queue-status { color: #ead7d9 !important; }
@@ -537,7 +561,7 @@
 
         .section-description { max-width: 880px; color: var(--muted) !important; font-size: 13px !important; line-height: 1.65; }
         .category-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px !important; }
-        .category-panel { padding: 16px !important; background: rgba(7,11,20,.30) !important; border: 1px solid var(--border) !important; border-radius: 13px !important; }
+        .category-panel { padding: 16px !important; background: rgba(var(--rgbs0),.30) !important; border: 1px solid var(--border) !important; border-radius: 13px !important; }
         .category-panel p { color: var(--muted) !important; }
         .category-panel ul { border-top: 1px solid var(--border); }
         .category-panel #add-main-cat-btn, .category-panel #add-sub-cat-btn { background: rgba(240, 93, 111, .15) !important; border: 1px solid rgba(240, 93, 111, .25) !important; color: #ff8997 !important; }
@@ -571,6 +595,7 @@
         <div class="brand-lockup" aria-label="IndyGrab.VO AI Araştırma">
             <div class="brand-mark"><img src="assets/indyg-monogram-icon.png" alt="IndyGrab"></div>
             <div class="brand-copy"><strong>IndyGrab.VO</strong><span>AI Research Console</span></div>
+            <button id="theme-toggle" title="Aydınlık moda geç" style="margin-left:14px; background:var(--surface-soft); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:15px; line-height:1;">☀️</button>
         </div>
         <div class="nav-actions">
             <button class="nav-btn" data-target="section-stores">🏪 Mağazalar <span id="badge-stores" class="nav-badge">0</span></button>
@@ -586,33 +611,33 @@
             <div class="store-links-header">
                 <div class="section-title-group"><span class="section-kicker">Kaynak Yönetimi</span><h2>Kaydedilen Mağaza Linkleri</h2></div>
                 <div id="automation-controls">
-                    <label class="toggle-chip" style="cursor: pointer; color: #ddd; font-size: 13px; display: flex; align-items: center; margin-right: 10px; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 5px 8px; border-radius: 5px;">
+                    <label class="toggle-chip" style="cursor: pointer; color: var(--text); font-size: 13px; display: flex; align-items: center; margin-right: 10px; font-weight: bold; background: rgba(46, 204, 113, 0.14); padding: 5px 8px; border-radius: 5px;">
                         <input type="checkbox" id="auto-queue-checkbox" style="margin-right: 5px; accent-color: #2ecc71;"> Oto AI Kuyruk
                     </label>
-                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: #2c2c2c; padding: 5px 10px; border-radius: 5px; border: 1px solid #444; display: flex; gap: 8px;">
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="scan_mode" value="live" checked> Canlı
                         </label>
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="scan_mode" value="sold"> Satılmış
                         </label>
                     </div>
-                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: #2c2c2c; padding: 5px 10px; border-radius: 5px; border: 1px solid #444; display: flex; gap: 8px;">
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="catch_sensitivity" value="wide"> Geniş
                         </label>
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="catch_sensitivity" value="normal" checked> Normal
                         </label>
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="catch_sensitivity" value="strict"> Sıkı
                         </label>
                     </div>
-                    <div class="concurrency-picker" style="background: #2c2c2c; padding: 5px 10px; border-radius: 5px; border: 1px solid #444; display: flex; gap: 8px;">
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="auto_concurrency" value="1" checked> 1 Sekme
                         </label>
-                        <label style="cursor: pointer; color: #ddd; font-size: 13px;">
+                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="auto_concurrency" value="2"> 2 Sekme
                         </label>
                     </div>
@@ -644,14 +669,14 @@
                         <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Potansiyel Ürünler (C4+)</h1></div>
                     </div>
                 </div>
-                <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: #1e1e1e; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; width: 100%; justify-content: space-between;">
+                <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: space-between;">
                     <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center;">
                         <span id="key-count-label" style="font-size:12px; font-weight:600; color:#bbb;">0 Key</span>
                         <button id="manage-keys-btn" class="action-btn" style="background-color: #34495e;">🔑 Key</button>
                         <button id="analyze-risk-btn" class="action-btn" style="background-color: #8e44ad;">Risk Analizi (AI)</button>
                     </div>
                     
-                    <div id="header-middle-controls" class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid #444; padding-left: 10px;">
+                    <div id="header-middle-controls" class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
                         <select id="sort-products">
                             <option value="newest">En Yeniler</option>
                             <option value="oldest">En Eskiler</option>
@@ -663,7 +688,7 @@
                         </select>
                     </div>
 
-                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid #444; padding-left: 10px;">
+                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
                         <button id="fetch-all-btn" class="action-btn">Tümünü Çek</button>
                         <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">Çekilenleri Sil</button>
                         <button id="clear-all-btn" class="danger-btn">Temizle</button>
@@ -695,8 +720,8 @@
                     <button id="clear-queue-btn" class="secondary-btn">Temizle</button>
                 </div>
             </div>
-            <div class="status-strip" style="background: #2c2c2c; padding: 10px; border: 1px solid #444; border-radius: 5px; margin-bottom: 10px;">
-                <span id="queue-status" style="color: #ddd;">Durum: Bekliyor | Kuyrukta: 0 | Aktif Sekme: 0/5</span>
+            <div class="status-strip" style="background: var(--surface-soft); padding: 10px; border: 1px solid var(--border); border-radius: 5px; margin-bottom: 10px;">
+                <span id="queue-status" style="color: var(--muted);">Durum: Bekliyor | Kuyrukta: 0 | Aktif Sekme: 0/5</span>
             </div>
             <ul id="analysis-queue-list"></ul>
         </section>
@@ -726,11 +751,11 @@
                     <span id="forbidden-cats-counter" class="counter">0 Kategori</span>
                 </div>
             </div>
-            <p class="section-description" style="color:#aaa; font-size:13px; margin-bottom:16px;">
+            <p class="section-description" style="color:var(--muted); font-size:13px; margin-bottom:16px;">
                 Otomasyon sırasında tespit edilen mağaza, aşağıdaki listelerden herhangi birine uyan bir kategori gösteriyorsa <strong style="color:#e74c3c;">süresiz yasaklanır</strong>. Ana kategori (1. seviye) ve ilk alt kategori (2. seviye) ayrı ayrı kontrol edilir.
             </p>
             <div class="category-grid" style="display: flex; gap: 16px; align-items: flex-start;">
-                <div class="category-panel" style="flex:1; background:#1e1e1e; border:1px solid #444; border-radius:8px; padding:14px;">
+                <div class="category-panel" style="flex:1; background:var(--surface-strong); border:1px solid var(--border); border-radius:8px; padding:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h3 style="margin:0; color:#fff; font-size:15px;">🗂 Ana Kategori</h3>
                         <div style="display:flex; gap:6px; align-items:center;">
@@ -740,13 +765,13 @@
                     </div>
                     <p style="color:#888; font-size:12px; margin:0 0 10px 0;">eBay'deki birinci seviye kategori adı (ör: <em>eBay Motors</em>, <em>Toys &amp; Hobbies</em>)</p>
                     <div style="display:flex; gap:6px; margin-bottom:10px;">
-                        <input type="text" id="main-cat-input" placeholder="Ana kategori adı..." style="flex-grow:1; padding:7px 10px; border:1px solid #555; border-radius:5px; font-size:13px; background-color:#2c2c2c; color:#e0e0e0;">
+                        <input type="text" id="main-cat-input" placeholder="Ana kategori adı..." style="flex-grow:1; padding:7px 10px; border:1px solid var(--border); border-radius:5px; font-size:13px; background-color:var(--surface-soft); color:var(--text);">
                         <button id="add-main-cat-btn" style="background-color:#c0392b; color:white; border:none; padding:7px 13px; border-radius:5px; cursor:pointer; font-weight:bold; white-space:nowrap;">+ Ekle</button>
                     </div>
                     <ul id="main-cats-list" style="list-style:none; padding:0; margin:0; max-height:260px; overflow-y:auto;"></ul>
-                    <div id="no-main-cats" style="color:#555; font-size:13px; padding:8px 0;">Henüz ana kategori eklenmedi.</div>
+                    <div id="no-main-cats" style="color:var(--border); font-size:13px; padding:8px 0;">Henüz ana kategori eklenmedi.</div>
                 </div>
-                <div class="category-panel" style="flex:1; background:#1e1e1e; border:1px solid #444; border-radius:8px; padding:14px;">
+                <div class="category-panel" style="flex:1; background:var(--surface-strong); border:1px solid var(--border); border-radius:8px; padding:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h3 style="margin:0; color:#fff; font-size:15px;">📁 Alt Kategori</h3>
                         <div style="display:flex; gap:6px; align-items:center;">
@@ -756,15 +781,16 @@
                     </div>
                     <p style="color:#888; font-size:12px; margin:0 0 10px 0;">Ana kategorinin hemen altındaki ilk alt kategori adı (ör: <em>Lawn Mower Parts</em>)</p>
                     <div style="display:flex; gap:6px; margin-bottom:10px;">
-                        <input type="text" id="sub-cat-input" placeholder="Alt kategori adı..." style="flex-grow:1; padding:7px 10px; border:1px solid #555; border-radius:5px; font-size:13px; background-color:#2c2c2c; color:#e0e0e0;">
+                        <input type="text" id="sub-cat-input" placeholder="Alt kategori adı..." style="flex-grow:1; padding:7px 10px; border:1px solid var(--border); border-radius:5px; font-size:13px; background-color:var(--surface-soft); color:var(--text);">
                         <button id="add-sub-cat-btn" style="background-color:#c0392b; color:white; border:none; padding:7px 13px; border-radius:5px; cursor:pointer; font-weight:bold; white-space:nowrap;">+ Ekle</button>
                     </div>
                     <ul id="sub-cats-list" style="list-style:none; padding:0; margin:0; max-height:260px; overflow-y:auto;"></ul>
-                    <div id="no-sub-cats" style="color:#555; font-size:13px; padding:8px 0;">Henüz alt kategori eklenmedi.</div>
+                    <div id="no-sub-cats" style="color:var(--border); font-size:13px; padding:8px 0;">Henüz alt kategori eklenmedi.</div>
                 </div>
             </div>
         </section>
     </div>
+    <script src="theme.js"></script>
     <script src="research.js"></script>
 </body>
 </html>

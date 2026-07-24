@@ -27,6 +27,26 @@
             --color-purple-600: #4e6290;
             --color-purple-700: #374563;
         }
+:root {   }
+:root[data-theme="light"] {   }
+:root[data-theme="light"] h1, :root[data-theme="light"] h2, :root[data-theme="light"] h3, :root[data-theme="light"] th { color:#14161b; }
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --color-gray-100: #16181d;
+            --color-gray-900: #f4f6f9;
+            --color-gray-800: #ffffff;
+            --color-gray-700: #eef1f6;
+            --color-gray-600: rgba(20,24,33,.16);
+            --color-gray-400: #5c6470;
+            --color-gray-50: #e9ecf1;
+            --color-blue-500: #2563eb;
+            --color-blue-600: #1d4ed8;
+            --color-blue-700: #1e40af;
+            --color-green-600: #2563eb;
+            --color-green-700: #1d4ed8;
+            --color-purple-600: #4e6290;
+            --color-purple-700: #374563;
+        }
 
         /* Temel Tailwind Sınıfları */
         body {
@@ -314,6 +334,7 @@
 
         <p id="notification" class="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 hidden"></p>
     </div>
+    <script src="theme.js"></script>
     <script src="mixer.js"></script>
 </body>
 </html>

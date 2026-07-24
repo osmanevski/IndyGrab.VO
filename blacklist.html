@@ -32,7 +32,7 @@
         .input {
             flex: 1;
             padding: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--t-ccc);
             border-radius: 4px;
         }
         .button {
@@ -48,7 +48,7 @@
         }
         #blacklistFileInput {
             padding: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--t-ccc);
             border-radius: 4px;
         }
         #uploadBlacklistBtn {
@@ -91,7 +91,7 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #333;
+            background-color: var(--t-333);
             color: white;
             padding: 10px 20px;
             border-radius: 4px;
@@ -101,14 +101,14 @@
             display: block;
         }
         body {
-            background-color: #333;
+            background-color: var(--t-333);
             color: #fff;
         }
         body .container {
-            background-color: #444;
+            background-color: var(--t-444);
         }
         body .input, body #blacklistFileInput {
-            background-color: #555;
+            background-color: var(--t-555);
             color: #fff;
             border-color: #666;
         }
@@ -154,13 +154,17 @@
         }
         body .pagination-controls button:disabled {
             background-color: #666;
-            color: #aaa;
+            color: var(--t-aaa);
         }
         #pageInfo {
             font-weight: bold;
             font-size: 14px;
         }
-        :root { --ink: #0a0b0d; --panel: #1b1c20; --line: #47484f; --text: #f1f2f4; --blue: #2563eb; --blue-deep: #1d4ed8; --crimson: #8d2b35; --crimson-deep: #641b24; }
+        :root { color-scheme: dark; --ink: #0a0b0d; --panel: #1b1c20; --line: #47484f; --text: #f1f2f4; --blue: #2563eb; --blue-deep: #1d4ed8; --crimson: #8d2b35; --crimson-deep: #641b24; }
+:root { --t-ccc: #ccc; --t-333: #333; --t-444: #444; --t-555: #555; --t-aaa: #aaa;  }
+:root[data-theme="light"] { --t-ccc: #5c6470; --t-333: #dfe3ea; --t-444: #d5dae2; --t-555: #c7cdd6; --t-aaa: #6b7280;  }
+:root[data-theme="light"] h1, :root[data-theme="light"] h2, :root[data-theme="light"] h3, :root[data-theme="light"] th { color:#14161b; }
+        :root[data-theme="light"] { color-scheme: light; --ink: #f4f6f9; --panel: #ffffff; --line: rgba(20,24,33,.14); --text: #16181d; --blue: #2563eb; --blue-deep: #1d4ed8; --crimson: #c0392b; --crimson-deep: #8d2b35; }
         body { background: var(--ink); color: var(--text); }
         body .container { background: var(--panel); border: 1px solid var(--line); box-shadow: 0 16px 36px rgba(0, 0, 0, .35); }
         body .input, body #blacklistFileInput { background: #111114; color: var(--text); border-color: var(--line); }
@@ -170,6 +174,9 @@
         body #deleteSelectedBtn:hover { background-color: var(--crimson-deep); }
         body .asin-column a { color: #8bb9ff; }
         body .pagination-controls button:disabled { background: #353136; color: #93878a; }
+
+        :root[data-theme="light"] .input, :root[data-theme="light"] #blacklistFileInput { background: #ffffff !important; color: #16181d !important; border-color: rgba(20,24,33,.18) !important; }
+        :root[data-theme="light"] .notification { background: #1c1f26 !important; color: #fff !important; }
     </style>
 </head>
 <body>
@@ -196,6 +203,7 @@
         </div>
         <div id="notification" class="notification"></div>
     </div>
+    <script src="theme.js"></script>
     <script src="blacklist.js"></script>
 </body>
 </html>

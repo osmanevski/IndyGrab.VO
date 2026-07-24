@@ -10,6 +10,11 @@
         code { background:#29292e; color:#f1ebeb; padding:2px 6px; border-radius:4px; }
         a { color:#8bb9ff; }
         ul { line-height:1.7; }
+        :root[data-theme="light"] body { background-color:#f4f6f9; color:#16181d; }
+        :root[data-theme="light"] h1 { color:#16181d; }
+        :root[data-theme="light"] .card { background:#ffffff; border-color:rgba(20,24,33,.14); box-shadow:0 14px 32px rgba(20,24,33,.10); }
+        :root[data-theme="light"] code { background:#eef1f6; color:#16181d; }
+        :root[data-theme="light"] a { color:#1d4ed8; }
     </style>
 </head>
 <body>
@@ -29,6 +34,7 @@
         <p>Anahtar yalnızca tarayıcının yerel deposunda (<code>chrome.storage.local</code>) saklanır.</p>
     </div>
     <p id="status"></p>
+    <script src="theme.js"></script>
     <script src="options.js"></script>
 </body>
 </html>

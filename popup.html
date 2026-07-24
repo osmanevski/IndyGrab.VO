@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IndyGrab.VO</title>
+    <script src="theme.js"></script>
     <script src="popup.js" defer></script>
     <style>
         * {
@@ -42,10 +43,10 @@
             color: #1a202c;
             font-weight: 700;
         }
-        body .brand-logo {
+        [data-theme="dark"] .brand-logo {
             color: #63b3ed;
         }
-        body .brand-logo .brand-suffix {
+        [data-theme="dark"] .brand-logo .brand-suffix {
             color: #e2e8f0;
         }
         .top-bar {
@@ -106,12 +107,12 @@
             background: #1d4ed8;
             transform: translateY(-1px);
         }
-        body .mixer-btn, body .blacklist-btn, 
-        body .stock-btn, body .auto-btn {
+        [data-theme="dark"] .mixer-btn, [data-theme="dark"] .blacklist-btn, 
+        [data-theme="dark"] .stock-btn, [data-theme="dark"] .auto-btn {
             background: #3f5a8f;
         }
-        body .mixer-btn:hover, body .blacklist-btn:hover, 
-        body .stock-btn:hover, body .auto-btn:hover {
+        [data-theme="dark"] .mixer-btn:hover, [data-theme="dark"] .blacklist-btn:hover, 
+        [data-theme="dark"] .stock-btn:hover, [data-theme="dark"] .auto-btn:hover {
             background: #173166;
         }
         .tab-container {
@@ -119,7 +120,7 @@
             border-bottom: 1px solid #e2e8f0;
             margin-bottom: 15px;
         }
-        body .tab-container {
+        [data-theme="dark"] .tab-container {
             border-bottom: 1px solid #4a5568;
         }
         .tab {
@@ -133,7 +134,7 @@
             font-size: 0.8rem;
             transition: all 0.2s ease;
         }
-        body .tab {
+        [data-theme="dark"] .tab {
             background: #2d3748;
             color: #a0aec0;
         }
@@ -143,7 +144,7 @@
             font-weight: 600;
             border-bottom: 2px solid #2b6cb0;
         }
-        body .tab.active {
+        [data-theme="dark"] .tab.active {
             background: #1a202c;
             color: #e2e8f0;
         }
@@ -160,7 +161,7 @@
             background: #fff;
             overflow: hidden;
         }
-        body details {
+        [data-theme="dark"] details {
             border: 1px solid #4a5568;
             background: #2d3748;
         }
@@ -176,7 +177,7 @@
             background: #edf2f7;
             transition: background 0.2s ease;
         }
-        body summary {
+        [data-theme="dark"] summary {
             color: #e2e8f0;
             background: #2d3748;
         }
@@ -184,7 +185,7 @@
             border-bottom: 1px solid #e2e8f0;
             margin-bottom: 8px;
         }
-        body details[open] summary {
+        [data-theme="dark"] details[open] summary {
             border-bottom: 1px solid #4a5568;
         }
         details > div {
@@ -204,7 +205,7 @@
         summary:hover {
             background: #e2e8f0;
         }
-        body summary:hover {
+        [data-theme="dark"] summary:hover {
             background: #4a5568;
         }
         @keyframes slideDown {
@@ -224,7 +225,7 @@
             margin-bottom: 5px;
             font-weight: 500;
         }
-        body label {
+        [data-theme="dark"] label {
             color: #e2e8f0;
         }
         select, input {
@@ -238,8 +239,8 @@
             color: #1a202c;
             transition: border-color 0.2s ease, background 0.3s ease, color 0.3s ease;
         }
-        body select,
-        body input {
+        [data-theme="dark"] select,
+        [data-theme="dark"] input {
             background: #2d3748;
             color: #e2e8f0;
             border: 1px solid #4a5568;
@@ -255,7 +256,7 @@
             padding-bottom: 4px;
             border-bottom: 1px solid #e2e8f0;
         }
-        body h4 {
+        [data-theme="dark"] h4 {
             color: #63b3ed;
             border-bottom-color: #4a5568;
         }
@@ -264,7 +265,7 @@
             border-top: 1px solid #e2e8f0;
             margin: 12px 0;
         }
-        body hr {
+        [data-theme="dark"] hr {
             border-top-color: #4a5568;
         }
         .flex-container {
@@ -299,7 +300,7 @@
             color: #1a202c;
             transition: border-color 0.2s ease, background 0.3s ease, color 0.3s ease;
         }
-        body textarea {
+        [data-theme="dark"] textarea {
             background: #2d3748;
             color: #e2e8f0;
             border: 1px solid #4a5568;
@@ -390,7 +391,7 @@
             margin-bottom: 8px;
             text-align: center;
         }
-        body #memory p {
+        [data-theme="dark"] #memory p {
             color: #a0aec0;
         }
         .export-history {
@@ -402,7 +403,7 @@
             color: #1a202c;
             margin-bottom: 8px;
         }
-        body .export-history h3 {
+        [data-theme="dark"] .export-history h3 {
             color: #e2e8f0;
         }
         .export-history ul {
@@ -413,7 +414,7 @@
             border-radius: 4px;
             padding: 4px;
         }
-        body .export-history ul {
+        [data-theme="dark"] .export-history ul {
             border: 1px solid #4a5568;
         }
         .export-history li {
@@ -425,7 +426,7 @@
             color: #1a202c;
             border-bottom: 1px solid #e2e8f0;
         }
-        body .export-history li {
+        [data-theme="dark"] .export-history li {
             color: #e2e8f0;
             border-bottom: 1px solid #4a5568;
         }
@@ -467,12 +468,12 @@
             color: #1a202c;
             box-sizing: border-box;
         }
-        body .history-details .custom-date input {
+        [data-theme="dark"] .history-details .custom-date input {
             background: #2d3748;
             color: #e2e8f0;
             border: 1px solid #4a5568;
         }
-        body .history-details .custom-date input:focus {
+        [data-theme="dark"] .history-details .custom-date input:focus {
             border-color: #63b3ed;
             outline: none;
         }
@@ -496,7 +497,7 @@
             text-decoration: none;
             font-weight: 500;
         }
-        body .how-to-use-link {
+        [data-theme="dark"] .how-to-use-link {
             color: #63b3ed;
         }
         .how-to-use-link:hover {
@@ -516,7 +517,7 @@
             transition: border-color 0.2s ease, background 0.3s ease, color 0.3s ease;
             line-height: 1.2;
         }
-        body .asin-list {
+        [data-theme="dark"] .asin-list {
             background: #2d3748;
             color: #e2e8f0;
             border: 1px solid #4a5568;
@@ -531,7 +532,7 @@
         .asin-list a:hover {
             text-decoration: underline;
         }
-        body .asin-list a {
+        [data-theme="dark"] .asin-list a {
             color: #63b3ed;
         }
         .asin-list:empty::before {
@@ -539,7 +540,7 @@
             color: #718096;
             font-size: 0.8rem;
         }
-        body .asin-list:empty::before {
+        [data-theme="dark"] .asin-list:empty::before {
             color: #a0aec0;
         }
         .update-container {
@@ -566,7 +567,7 @@
             padding-bottom: 12px;
             border-bottom: 1px solid #e2e8f0;
         }
-        body .auto-collect-section {
+        [data-theme="dark"] .auto-collect-section {
             border-bottom: 1px solid #4a5568;
         }
         .feature-toggle-section {
@@ -574,7 +575,7 @@
             padding-top: 12px;
             border-top: 1px solid #e2e8f0;
         }
-        body .feature-toggle-section {
+        [data-theme="dark"] .feature-toggle-section {
             border-top: 1px solid #4a5568;
         }
         .feature-toggle {
@@ -593,7 +594,7 @@
             transition: background 0.3s ease, border-color 0.3s ease;
             margin-right: 8px;
         }
-        body .feature-toggle input[type="checkbox"] {
+        [data-theme="dark"] .feature-toggle input[type="checkbox"] {
             border-color: #4a5568;
         }
         .feature-toggle input[type="checkbox"]:checked {
@@ -614,7 +615,7 @@
             color: #1a202c;
             font-weight: 500;
         }
-        body .feature-toggle label {
+        [data-theme="dark"] .feature-toggle label {
             color: #e2e8f0;
         }
         .asin-row {
@@ -694,7 +695,7 @@
             overflow-y: auto;
             margin-bottom: 8px;
         }
-        body #bannedWordsContainer {
+        [data-theme="dark"] #bannedWordsContainer {
             border-color: #4a5568;
         }
         .banned-word-tag {
@@ -708,7 +709,7 @@
             gap: 6px;
             font-weight: 500;
         }
-        body .banned-word-tag {
+        [data-theme="dark"] .banned-word-tag {
             background: #4a5568;
             color: #e2e8f0;
         }
@@ -721,10 +722,10 @@
         .remove-word-btn:hover {
             color: #1a202c;
         }
-        body .remove-word-btn {
+        [data-theme="dark"] .remove-word-btn {
             color: #a0aec0;
         }
-        body .remove-word-btn:hover {
+        [data-theme="dark"] .remove-word-btn:hover {
             color: #fff;
         }
         .banned-words-footer {
@@ -749,32 +750,33 @@
             font-size: 0.75rem;
             color: #718096;
         }
-        body #bannedWordCount {
+        [data-theme="dark"] #bannedWordCount {
             color: #a0aec0;
         }
         /* IndyGrab.VO charcoal / crimson palette */
         :root { --ink: #0a0b0d; --panel: #1b1c20; --panel-raised: #292a2f; --line: #47484f; --text: #f1f2f4; --muted: #a9abb2; --blue: #2563eb; --blue-light: #60a5fa; --blue-deep: #1d4ed8; --crimson: #8d2b35; --crimson-deep: #641b24; }
+        :root[data-theme="light"] { color-scheme: light; --ink: #f4f6f9; --panel: #ffffff; --panel-raised: #eef1f6; --line: rgba(20,24,33,.14); --text: #16181d; --muted: #5c6470; --blue: #2563eb; --blue-light: #1d4ed8; --blue-deep: #1e40af; --crimson: #c0392b; --crimson-deep: #8d2b35; }
         body { background: var(--ink); color: var(--text); }
-        body .brand-logo { color: var(--blue-light); }
+        [data-theme="dark"] .brand-logo { color: var(--blue-light); }
         .brand-logo { display: flex; align-items: flex-end; justify-content: center; gap: 5px; }
         .brand-wordmark { width: 214px; height: auto; display: block; }
         .language-selector img.selected { border-color: var(--blue-light); }
-        body .mixer-btn, body .blacklist-btn, body .stock-btn, body .auto-btn { background: #292a2f; border: 1px solid #41434a; }
-        body .mixer-btn:hover, body .blacklist-btn:hover, body .stock-btn:hover, body .auto-btn:hover { background: #363840; border-color: #5b8edc; }
-        body .tab-container, body hr { border-color: var(--line); }
-        body .tab, body details, body select, body input, body textarea, body .asin-list, body .auto-collect-section, body .feature-toggle-section { background: var(--panel); color: var(--text); border-color: var(--line); }
-        body .tab { color: var(--muted); }
-        body .tab.active { background: #24252a; color: var(--text); border-bottom-color: var(--blue-light); }
-        body summary { color: var(--text); }
-        body summary:hover { color: #cbdcff; }
-        body input:focus, body select:focus, body textarea:focus { border-color: var(--blue-light); box-shadow: 0 0 0 2px rgba(96, 165, 250, .16); }
+        [data-theme="dark"] .mixer-btn, [data-theme="dark"] .blacklist-btn, [data-theme="dark"] .stock-btn, [data-theme="dark"] .auto-btn { background: #292a2f; border: 1px solid #41434a; }
+        [data-theme="dark"] .mixer-btn:hover, [data-theme="dark"] .blacklist-btn:hover, [data-theme="dark"] .stock-btn:hover, [data-theme="dark"] .auto-btn:hover { background: #363840; border-color: #5b8edc; }
+        [data-theme="dark"] .tab-container, [data-theme="dark"] hr { border-color: var(--line); }
+        [data-theme="dark"] .tab, [data-theme="dark"] details, [data-theme="dark"] select, [data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] .asin-list, [data-theme="dark"] .auto-collect-section, [data-theme="dark"] .feature-toggle-section { background: var(--panel); color: var(--text); border-color: var(--line); }
+        [data-theme="dark"] .tab { color: var(--muted); }
+        [data-theme="dark"] .tab.active { background: #24252a; color: var(--text); border-bottom-color: var(--blue-light); }
+        [data-theme="dark"] summary { color: var(--text); }
+        [data-theme="dark"] summary:hover { color: #cbdcff; }
+        [data-theme="dark"] input:focus, [data-theme="dark"] select:focus, [data-theme="dark"] textarea:focus { border-color: var(--blue-light); box-shadow: 0 0 0 2px rgba(96, 165, 250, .16); }
         button { background-color: #303137 !important; border: 1px solid #45464d !important; }
         button:hover:not(:disabled) { background-color: #3a3c43 !important; border-color: #5d6069 !important; }
         #updateBtn, #saveToMemoryBtn, #copyAllBtn, #exportCsvBtn, #exportJsonBtn, #mixMemoryBtn, #addBannedWordBtn, #copyBannedWordsBtn, #startAutoBtn { background-color: var(--blue) !important; border-color: #4d85ef !important; }
         #updateBtn:hover, #saveToMemoryBtn:hover, #copyAllBtn:hover, #exportCsvBtn:hover, #exportJsonBtn:hover, #mixMemoryBtn:hover, #addBannedWordBtn:hover, #copyBannedWordsBtn:hover, #startAutoBtn:hover { background-color: var(--blue-deep) !important; }
         #stopAutoBtn, #clearMemoryBtn, #sendToBlacklistBtn { background-color: var(--crimson) !important; border-color: #bd5962 !important; }
         #stopAutoBtn:hover, #clearMemoryBtn:hover, #sendToBlacklistBtn:hover { background-color: var(--crimson-deep) !important; }
-        body a, body .asin-column a { color: #8bb9ff; }
+        [data-theme="dark"] a, [data-theme="dark"] .asin-column a { color: #8bb9ff; }
     </style>
 </head>
 <body>
@@ -786,6 +788,7 @@
             </div>
         </div>
         <div class="links-container">
+            <button id="theme-toggle" title="Aydınlık moda geç" style="padding:2px 7px; font-size:0.85rem; line-height:1; border:1px solid var(--line); border-radius:4px; background:var(--panel-raised); color:var(--text); cursor:pointer;">☀️</button>
             <a href="mixer.html" target="_blank" class="mixer-btn">Mixer</a>
             <a href="blacklist.html" target="_blank" class="blacklist-btn">Blacklist</a>
             <a href="titles.html" target="_blank" class="stock-btn">AI Başlık</a>
