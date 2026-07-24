@@ -63,8 +63,10 @@
         "mixer.js",
         "blacklist.html",
         "blacklist.js",
-        "research.html", 
+        "research.html",
         "research.js",
+        "popup.js",
+        "theme.js",
         "titles.html",
         "titles.js"
       ],

@@ -588,6 +588,63 @@
             .category-grid { grid-template-columns: 1fr; }
             #product-list { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
         }
+
+        /* ===== Amazon Paneli (popup'tan taşındı) ===== */
+        #section-amazon .flag-container { display:flex; gap:8px; }
+        #section-amazon .lang-flag { width:26px; height:26px; border-radius:5px; cursor:pointer; opacity:.45; transition:opacity .2s, transform .2s; }
+        #section-amazon .lang-flag.selected { opacity:1; transform:scale(1.08); outline:2px solid var(--primary); }
+        #section-amazon .tab-container { display:flex; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--border); padding-bottom:10px; }
+        #section-amazon .tab { padding:9px 20px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); background:var(--surface-soft); border:1px solid var(--border); transition:all .18s; }
+        #section-amazon .tab:hover { color:var(--text); transform:translateY(-1px); }
+        #section-amazon .tab.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+        #section-amazon .tab-content { display:none; }
+        #section-amazon .tab-content.active { display:block; }
+        #section-amazon details { border:1px solid var(--border); border-radius:12px; background:var(--surface-soft); margin-bottom:12px; overflow:hidden; }
+        #section-amazon summary { padding:12px 14px; cursor:pointer; font-weight:600; font-size:13px; color:var(--text); list-style:none; display:flex; align-items:center; gap:10px; }
+        #section-amazon summary::-webkit-details-marker { display:none; }
+        #section-amazon summary:hover { background:rgba(96,165,250,.08); }
+        #section-amazon .summary-icon { display:inline-flex; width:18px; height:18px; align-items:center; justify-content:center; border-radius:6px; background:var(--primary); color:#fff; font-size:12px; transition:transform .2s; }
+        #section-amazon details[open] .summary-icon { transform:rotate(45deg); }
+        #section-amazon details > div { padding:14px; border-top:1px solid var(--border); }
+        #section-amazon label { display:block; font-size:12px; font-weight:600; color:var(--muted); margin:0 0 6px; }
+        #section-amazon select, #section-amazon input[type="text"], #section-amazon input[type="number"] {
+            width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--border);
+            background:var(--surface-strong); color:var(--text); font-size:13px; margin-bottom:12px; outline:none;
+        }
+        #section-amazon select:focus, #section-amazon input:focus { border-color:var(--border-strong); }
+        #section-amazon .flex-container { display:flex; gap:10px; }
+        #section-amazon .flex-container-inline { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        #section-amazon .feature-toggle { display:flex; align-items:center; gap:8px; padding:7px 9px; border-radius:9px; background:var(--surface-strong); border:1px solid var(--border); }
+        #section-amazon .feature-toggle input { width:auto; margin:0; }
+        #section-amazon .feature-toggle label { margin:0; font-size:12px; color:var(--text); font-weight:500; }
+        #section-amazon .banned-words-controls { display:grid; grid-template-columns:2fr 1fr; gap:10px; margin-bottom:10px; }
+        #section-amazon .banned-words-add-container { display:flex; gap:8px; }
+        #section-amazon .banned-words-add-container input { margin-bottom:0; }
+        #section-amazon #bannedWordsContainer { display:flex; flex-wrap:wrap; gap:6px; max-height:140px; overflow-y:auto; padding:8px; border:1px solid var(--border); border-radius:10px; background:var(--surface-strong); min-height:44px; }
+        #section-amazon .banned-words-footer { display:flex; justify-content:space-between; align-items:center; margin:10px 0 14px; font-size:12px; color:var(--muted); }
+        #section-amazon .asin-list { max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface-strong); padding:10px; margin-bottom:14px; font-size:13px; line-height:1.8; }
+        #section-amazon .update-container { display:flex; gap:12px; margin-bottom:14px; }
+        #section-amazon .update-icon { width:34px; height:34px; padding:6px; border-radius:10px; background:var(--surface-soft); border:1px solid var(--border); cursor:pointer; transition:all .18s; }
+        #section-amazon .update-icon:hover { transform:translateY(-2px); border-color:var(--border-strong); }
+        #section-amazon button { padding:10px 16px; border:none; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; background:linear-gradient(135deg, var(--primary), #1747b5); color:#fff; transition:transform .15s, opacity .2s; }
+        #section-amazon button:hover { transform:translateY(-1px); }
+        #section-amazon button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+        #section-amazon #saveToMemoryBtn, #section-amazon #clearMemoryBtn { width:100%; margin-bottom:10px; }
+        #section-amazon #clearMemoryBtn { background:rgba(240,93,111,.16); color:#ff8997; border:1px solid rgba(240,93,111,.3); }
+        #section-amazon .memory-buttons { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+        #section-amazon .export-history { margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+        #section-amazon .export-history h3 { font-size:14px; margin:0 0 10px; color:var(--text); }
+        #section-amazon .export-history ul { list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto; }
+        #section-amazon .export-history li { padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:var(--surface-strong); margin-bottom:7px; font-size:12px; }
+        #section-amazon h4 { font-size:13px; color:var(--primary-light); margin:14px 0 10px; }
+        #section-amazon hr { border:none; border-top:1px solid var(--border); margin:16px 0; }
+        #section-amazon p { font-size:12px; color:var(--muted); margin:0 0 10px; }
+        #section-amazon #notification { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:11px 20px; border-radius:10px; font-size:13px; font-weight:600; display:none; z-index:99999; box-shadow:var(--shadow); }
+        #section-amazon #notification.show { display:block; }
+        @media (min-width: 1100px) {
+            #section-amazon .amazon-panel > .tab-content#filtering { column-count:2; column-gap:18px; }
+            #section-amazon .amazon-panel > .tab-content#filtering > details { break-inside:avoid; display:inline-block; width:100%; }
+        }
     </style>
 </head>
 <body>
@@ -603,6 +660,7 @@
             <button class="nav-btn" data-target="section-queue">⚡ AI Kuyruğu <span id="badge-queue" class="nav-badge">0</span></button>
             <button class="nav-btn" data-target="section-blacklist">⛔ Kara Liste <span id="badge-blacklist" class="nav-badge">0</span></button>
             <button class="nav-btn" data-target="section-forbidden-cats">🚫 Yasaklı Kategoriler</button>
+            <button class="nav-btn" data-target="section-amazon">🧲 Amazon Paneli</button>
         </div>
     </nav>
 
@@ -789,8 +847,323 @@
                 </div>
             </div>
         </section>
+
+        <section class="store-links-section" id="section-amazon" style="display:none;">
+            <div class="section-header">
+                <div class="section-title-group"><span class="section-kicker">Amazon</span><h2>Toplama · Filtre · Hafıza</h2></div>
+                <div class="flag-container" title="Arayüz dili">
+                    <img src="images/us.png" alt="EN" data-lang="en" class="lang-flag selected">
+                    <img src="images/tr.png" alt="TR" data-lang="tr" class="lang-flag">
+                </div>
+            </div>
+            <div class="amazon-panel">
+<div class="tab-container">
+        <div class="tab active" data-tab="collect" data-i18n="tab_collect">Collect</div>
+        <div class="tab" data-tab="filtering" data-i18n="tab_filter">Filter</div>
+        <div class="tab" data-tab="memory" data-i18n="tab_memory">Memory</div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <div id="collect" class="tab-content active">
+        <div class="update-container">
+            <img src="images/update-icon.png" alt="Refresh ASINs" class="update-icon" id="updateBtn" title="Refresh ASINs">
+            <img src="images/start-auto-icon.png" alt="Start Auto Collect" class="update-icon" id="startAutoBtn" title="Start Auto Collect">
+            <img src="images/stop-auto-icon.png" alt="Stop Auto Collect" class="update-icon" id="stopAutoBtn" title="Stop Auto Collect">
+        </div>
+        <div id="asinOutput" class="asin-list"></div>
+        <button id="saveToMemoryBtn" data-i18n="save_to_memory">Save to Memory (0 ASIN)</button>
+    </div>
+
+    <div id="filtering" class="tab-content">
+        <details>
+            <summary>
+                <span class="summary-icon">+</span>
+                <span data-i18n="auto_collect">Auto Collect Settings</span>
+            </summary>
+            <div>
+                <div class="flex-container-inline">
+                    <div>
+                        <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
+                        <input type="number" id="autoPageLimit" min="1" placeholder="E.g., 10">
+                    </div>
+                    <div>
+                        <label for="autoAsinLimit" data-i18n="auto_asin_limit">Total ASINs to Collect:</label>
+                        <input type="number" id="autoAsinLimit" min="1" placeholder="E.g., 100">
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>
+                <span class="summary-icon">+</span>
+                <span data-i18n="tab_filter">Normal Filters</span>
+            </summary>
+            <div>
+                <label for="ratingFilter" data-i18n="feedback_stars">Feedback Stars:</label>
+                <select id="ratingFilter">
+                    <option value="" selected disabled>Select...</option>
+                    <option value="1" data-i18n="stars_1">1 Star and above</option>
+                    <option value="2" data-i18n="stars_2">2 Stars and above</option>
+                    <option value="3" data-i18n="stars_3">3 Stars and above</option>
+                    <option value="4" data-i18n="stars_4">4 Stars and above</option>
+                    <option value="4.1" data-i18n="stars_4_1">4.1 Stars and above</option>
+                    <option value="4.2" data-i18n="stars_4_2">4.2 Stars and above</option>
+                    <option value="4.3" data-i18n="stars_4_3">4.3 Stars and above</option>
+                    <option value="4.4" data-i18n="stars_4_4">4.4 Stars and above</option>
+                    <option value="4.5" data-i18n="stars_4_5">4.5 Stars and above</option>
+                    <option value="4.6" data-i18n="stars_4_6">4.6 Stars and above</option>
+                    <option value="4.7" data-i18n="stars_4_7">4.7 Stars and above</option>
+                    <option value="4.8" data-i18n="stars_4_8">4.8 Stars and above</option>
+                    <option value="4.9" data-i18n="stars_4_9">4.9 Stars and above</option>
+                    <option value="5" data-i18n="stars_5">5 Stars and above</option>
+                </select>
+
+                <label data-i18n="banned_words">Banned Words:</label>
+                <div class="banned-words-controls">
+                    <div class="banned-words-add-container">
+                        <input type="text" id="bannedWordInput" placeholder="Add word(s)...">
+                        <button id="addBannedWordBtn">Add</button>
+                    </div>
+                    <div>
+                        <input type="text" id="searchBannedWordInput" placeholder="Search word...">
+                    </div>
+                </div>
+                <div id="bannedWordsContainer"></div>
+                <div class="banned-words-footer">
+                    <button id="copyBannedWordsBtn">Copy Words</button>
+                    <span id="bannedWordCount">0 words</span>
+                </div>
+
+                <label data-i18n="feedback_score">Feedback Score:</label>
+                <div class="flex-container">
+                    <input type="number" id="feedbackFilter" min="0" placeholder="Min">
+                    <input type="number" id="maxFeedbackFilter" min="0" placeholder="Max">
+                </div>
+
+                <label data-i18n="price_range">Price Range:</label>
+                <div class="flex-container">
+                    <input type="number" id="minPriceFilter" min="0" placeholder="Min">
+                    <input type="number" id="maxPriceFilter" min="0" placeholder="Max">
+                </div>
+
+                <label data-i18n="max_bsr">Max Deep BSR:</label>
+                <div class="flex-container">
+                    <input type="number" id="maxBsrFilter" min="1" placeholder="Max BSR">
+                </div>
+
+                <div class="flex-container-inline">
+                    <div>
+                        <label for="asinCount" data-i18n="asin_count">Number of ASINs to Fetch:</label>
+                        <input type="number" id="asinCount" min="1" placeholder="E.g., 10">
+                    </div>
+                    <div>
+                        <label for="shippingFilter" data-i18n="shipping_selection">Shipping Selection:</label>
+                        <select id="shippingFilter">
+                            <option value="" selected disabled>Select...</option>
+                            <option value="all" data-i18n="shipping_all">All Products</option>
+                            <option value="prime" data-i18n="shipping_prime">Prime Only</option>
+                            <option value="1-day" data-i18n="shipping_1day">1-Day Shipping</option>
+                            <option value="2-day" data-i18n="shipping_2day">2-Day Shipping</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex-container-inline">
+                    <div>
+                        <label for="stockFilter" data-i18n="min_stock_count">Minimum Stock Count:</label>
+                        <select id="stockFilter">
+                            <option value="" selected disabled>Select...</option>
+                            <option value="ignore" data-i18n="stock_ignore">Ignore Stock Filter</option>
+                            <option value="exclude_warning" data-i18n="stock_exclude_warning">Exclude Stock Warning</option>
+                            <option value="1" data-i18n="stock_1">At least 1 stock</option>
+                            <option value="2" data-i18n="stock_2">At least 2 stock</option>
+                            <option value="3" data-i18n="stock_3">At least 3 stock</option>
+                            <option value="4" data-i18n="stock_4">At least 4 stock</option>
+                            <option value="5" data-i18n="stock_5">At least 5 stock</option>
+                            <option value="6" data-i18n="stock_6">At least 6 stock</option>
+                            <option value="7" data-i18n="stock_7">At least 7 stock</option>
+                            <option value="8" data-i18n="stock_8">At least 8 stock</option>
+                            <option value="9" data-i18n="stock_9">At least 9 stock</option>
+                            <option value="10" data-i18n="stock_10">At least 10 stock</option>
+                            <option value="11" data-i18n="stock_11">At least 11 stock</option>
+                            <option value="12" data-i18n="stock_12">At least 12 stock</option>
+                            <option value="13" data-i18n="stock_13">At least 13 stock</option>
+                            <option value="14" data-i18n="stock_14">At least 14 stock</option>
+                            <option value="15" data-i18n="stock_15">At least 15 stock</option>
+                            <option value="16" data-i18n="stock_16">At least 16 stock</option>
+                            <option value="17" data-i18n="stock_17">At least 17 stock</option>
+                            <option value="18" data-i18n="stock_18">At least 18 stock</option>
+                            <option value="19" data-i18n="stock_19">At least 19 stock</option>
+                            <option value="20" data-i18n="stock_20">At least 20 stock</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sortFilter" data-i18n="sort_order">Sort Order:</label>
+                        <select id="sortFilter">
+                            <option value="" selected disabled>Select...</option>
+                            <option value="random" data-i18n="sort_random">Random</option>
+                            <option value="priceLowToHigh" data-i18n="sort_price_low_to_high">Price: Low to High</option>
+                            <option value="priceHighToLow" data-i18n="sort_price_high_to_low">Price: High to Low</option>
+                            <option value="feedbackLowToHigh" data-i18n="sort_feedback_low_to_high">Feedback Score: Low to High</option>
+                            <option value="feedbackHighToLow" data-i18n="sort_feedback_high_to_low">Feedback Score: High to Low</option>
+                            <option value="bsrLowToHigh" data-i18n="sort_bsr_low_to_high">BSR: Best to Worst (1...)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details> <summary>
+                <span class="summary-icon">+</span>
+                <span data-i18n="feature_toggles">Amazon Features</span>
+            </summary>
+            <div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleStock" checked>
+                        <label for="toggleStock" data-i18n="toggle_stock">Stock Quantity</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="togglePrime" checked>
+                        <label for="togglePrime" data-i18n="toggle_prime">Prime Indicator</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleRating" checked>
+                        <label for="toggleRating" data-i18n="toggle_rating">Rating/Feedback</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleBannedWarning" checked>
+                        <label for="toggleBannedWarning" data-i18n="toggle_banned_warning">Banned Word Warning</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleCopyIcon" checked>
+                        <label for="toggleCopyIcon" data-i18n="toggle_copy_icon">Copy Icon</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleSaveIcon" checked>
+                        <label for="toggleSaveIcon" data-i18n="toggle_save_icon">Save Icon</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="toggleEbayIcon" checked>
+                        <label for="toggleEbayIcon" data-i18n="toggle_ebay_icon">eBay Search Icon</label>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="bsrDisplayMode" data-i18n="toggle_bsr_display">BSR Display Mode</label>
+                    <select id="bsrDisplayMode">
+                        <option value="general" data-i18n="bsr_general">General</option>
+                        <option value="deep" data-i18n="bsr_deep">Deep</option>
+                    </select>
+                </div>
+                </div>
+        </details>
+        
+        <details>
+            <summary>
+                <span class="summary-icon">+</span>
+                <span data-i18n="ebay_features">eBay Features</span>
+            </summary>
+            <div>
+                <h4 data-i18n="ebay_chart_settings">Chart Settings (/itm/)</h4>
+                <label for="ebayChartDefaultDays" data-i18n="ebay_default_range">Default Date Range:</label>
+                <select id="ebayChartDefaultDays">
+                    <option value="7" data-i18n="ebay_days_7">Last 7 Days</option>
+                    <option value="14" data-i18n="ebay_days_14">Last 14 Days</option>
+                    <option value="30" data-i18n="ebay_days_30">Last 30 Days</option>
+                </select>
+        
+                <label for="ebayChartDisplay" data-i18n="ebay_data_display">Data to Display:</label>
+                <select id="ebayChartDisplay">
+                    <option value="both" data-i18n="ebay_display_both">Quantity & Customers</option>
+                    <option value="quantity" data-i18n="ebay_display_quantity">Quantity Only</option>
+                    <option value="customers" data-i18n="ebay_display_customers">Customers Only</option>
+                </select>
+                
+                <hr>
+        
+                <h4 data-i18n="ebay_sch_settings">Search Page Settings (/sch/)</h4>
+                
+                <label for="schDisplayMode" data-i18n="ebay_sch_display_mode">Data Display Mode:</label>
+                <select id="schDisplayMode" style="margin-bottom: 12px;">
+                    <option value="standard" data-i18n="ebay_sch_mode_standard">Standard (Info + Breakdown Button)</option>
+                    <option value="direct" data-i18n="ebay_sch_mode_direct">Direct Sales Breakdown</option>
+                </select>
+
+                <label for="schSellerSaleDays" data-i18n="ebay_sch_seller_sale_days_label">Last Sale Date Filter (Days):</label>
+                <input type="number" id="schSellerSaleDays" min="1" data-i18n-placeholder="ebay_sch_seller_sale_days_placeholder" placeholder="e.g., 7 (for last 7 days)">
+
+                <label data-i18n="ebay_sch_range">Date Ranges to Show:</label>
+                <div style="margin-bottom: 8px;">
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplay7Days">
+                        <label for="schDisplay7Days" data-i18n="ebay_days_7">Last 7 Days</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplay14Days">
+                        <label for="schDisplay14Days" data-i18n="ebay_days_14">Last 14 Days</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplay30Days">
+                        <label for="schDisplay30Days" data-i18n="ebay_days_30">Last 30 Days</label>
+                    </div>
+                </div>
+        
+                <label for="schDataDisplay" data-i18n="ebay_data_display">Data to Display:</label>
+                <select id="schDataDisplay" style="margin-bottom: 12px;">
+                    <option value="both" data-i18n="ebay_display_both">Quantity & Customers</option>
+                    <option value="quantity" data-i18n="ebay_display_quantity">Quantity Only</option>
+                    <option value="customers" data-i18n="ebay_display_customers">Customers Only</option>
+                </select>
+
+                <label data-i18n="ebay_sch_info">Info to Show:</label>
+                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplaySold">
+                        <label for="schDisplaySold" data-i18n="ebay_sch_sold">Sold</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplayWatchers">
+                        <label for="schDisplayWatchers" data-i18n="ebay_sch_watchers">Watchers</label>
+                    </div>
+                    <div class="feature-toggle">
+                        <input type="checkbox" id="schDisplayAvailable">
+                        <label for="schDisplayAvailable" data-i18n="ebay_sch_available">Available</label>
+                    </div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div id="memory" class="tab-content">
+        <p data-i18n="memory_limit">Memory Limit: 20000 ASIN</p>
+        <div id="memoryOutput" class="asin-list"></div>
+        <div id="memoryPagination" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;"></div>
+        
+        <div class="memory-buttons">
+            <button id="copyAllBtn" data-i18n="copy_all">Copy All (0 ASIN)</button>
+            <button id="mixMemoryBtn" data-i18n="shuffle">Shuffle</button>
+        </div>
+        <div class="memory-buttons">
+            <button id="exportCsvBtn" data-i18n="export_csv">Export as CSV</button>
+            <button id="exportJsonBtn" data-i18n="export_json">Export as JSON</button>
+        </div>
+        
+        <button id="sendToBlacklistBtn" style="background-color: #34495e; color: white; margin-bottom: 5px;" data-i18n="send_to_blacklist">Send to Blacklist</button>
+        
+        <button id="clearMemoryBtn" data-i18n="clear_memory">Clear Memory</button>
+
+        <div class="export-history">
+            <h3 data-i18n="export_history">Export History</h3>
+            <ul id="exportHistoryList"></ul>
+        </div>
+    </div>
+            </div>
+        </section>
     </div>
     <script src="theme.js"></script>
     <script src="research.js"></script>
+    <script src="popup.js"></script>
 </body>
 </html>

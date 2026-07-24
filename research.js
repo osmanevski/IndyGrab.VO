@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('section-products'),
         document.getElementById('section-queue'),
         document.getElementById('section-blacklist'),
-        document.getElementById('section-forbidden-cats')
+        document.getElementById('section-forbidden-cats'),
+        document.getElementById('section-amazon')
     ];
 
     navButtons.forEach(btn => {
