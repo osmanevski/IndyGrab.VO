@@ -515,7 +515,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             feedback: parseInt(feedbackFilter.value) || 0,
             maxFeedback: parseInt(maxFeedbackFilter.value) || 0,
             minPrice: parseFloat(minPriceFilter.value) || 0,
-            maxPrice: parseFloat(maxPriceFilter.value) || Infinity,
+            // Infinity YAZMA: chrome.storage JSON serileştirmesi bunu null'a çeviriyor ve
+            // filtrede "price > null" her fiyatlı ürünü eliyordu. 0 = üst sınır yok.
+            maxPrice: parseFloat(maxPriceFilter.value) || 0,
             maxBsr: parseInt(maxBsrFilter.value) || 0,
             bannedWords: bannedWordsList.join(','),
             shipping: shippingFilter.value,

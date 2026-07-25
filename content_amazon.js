@@ -492,13 +492,21 @@
         try {
             const { rating, feedback, maxFeedback, shipping, minPrice, maxPrice, stock: stockFilter, bannedWords } = filters;
 
+            // KRİTİK: "Max Price" boşken eskiden storage'a Infinity yazılıyordu; chrome.storage
+            // JSON serileştirmesi Infinity'yi null'a çeviriyor ve "price > null" her fiyatlı
+            // ürünü eliyordu (yalnızca fiyatı okunamayan ürünler geçiyordu). Bu yüzden aramalar
+            // neredeyse hiç ASIN döndürmüyordu. null/undefined/0/"" artık "üst sınır yok" demek.
+            const noMaxPrice = maxPrice === null || maxPrice === undefined || maxPrice === '' || Number(maxPrice) === 0;
+            const effectiveMaxPrice = noMaxPrice ? Infinity : Number(maxPrice);
+            const effectiveMinPrice = Number(minPrice) || 0;
+
             if (rating && productInfo.rating !== null && productInfo.rating < rating) return false;
             if (productInfo.feedback < feedback) return false;
             if (maxFeedback && productInfo.feedback > maxFeedback) return false;
             if (shipping === "prime" && !productInfo.isPrime) return false;
             if (shipping === "1-day" && productInfo.deliveryTime !== 1) return false;
             if (shipping === "2-day" && productInfo.deliveryTime > 2) return false;
-            if (productInfo.price !== null && (productInfo.price < minPrice || productInfo.price > maxPrice)) return false;
+            if (productInfo.price !== null && (productInfo.price < effectiveMinPrice || productInfo.price > effectiveMaxPrice)) return false;
             if (stockFilter === "exclude_warning" && productInfo.hasStockWarning) return false;
             if (stockFilter !== "ignore" && stockFilter !== "exclude_warning" && productInfo.stock < stockFilter) return false;
 
