@@ -56,6 +56,41 @@
         }
         .links button:hover { transform: translateY(-1px); border-color: var(--primary); }
         .hint { margin-top: 12px; font-size: 10.5px; color: var(--muted); text-align: center; line-height: 1.5; }
+
+        .stat-clickable { cursor: pointer; transition: border-color .15s, transform .15s; }
+        .stat-clickable:hover { border-color: var(--primary); transform: translateY(-1px); }
+        .stat-clickable.open { border-color: var(--primary); }
+
+        .memory-panel { display: none; margin-bottom: 12px; }
+        .memory-panel.open { display: block; }
+        .memory-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--muted); }
+
+        .collector {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 11px;
+            padding: 11px; margin-bottom: 10px;
+        }
+        .collector-head { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; margin-bottom: 9px; }
+        .collect-hint { font-size: 9.5px; font-weight: 600; color: var(--muted); }
+        .collect-hint.warn { color: #f5ad42; }
+        .collector-actions { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px; margin-bottom: 9px; }
+        .mini-btn {
+            padding: 7px 4px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600;
+            background: var(--surface-soft); border: 1px solid var(--border); color: var(--text);
+            transition: border-color .15s, transform .15s;
+        }
+        .mini-btn:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-1px); }
+        .mini-btn:disabled { opacity: .45; cursor: not-allowed; }
+        .mini-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .asin-box {
+            max-height: 132px; overflow-y: auto; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 9px; padding: 8px; font-size: 11.5px; line-height: 1.65; color: var(--text);
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all;
+            white-space: pre-wrap; /* ASIN'ler satır satır görünsün */
+        }
+        .asin-box:empty::before { content: 'Boş'; color: var(--muted); }
+        .asin-box .empty { color: var(--muted); font-family: inherit; }
+        .primary-btn.slim { padding: 9px; font-size: 12.5px; margin: 9px 0 0; }
+        .primary-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
     </style>
 </head>
 <body>
@@ -71,17 +106,38 @@
     <div class="stats">
         <div class="stat"><b id="stat-stores">0</b><span>Mağaza</span></div>
         <div class="stat"><b id="stat-products">0</b><span>Ürün</span></div>
-        <div class="stat"><b id="stat-asins">0</b><span>ASIN</span></div>
+        <div class="stat stat-clickable" id="memory-stat" title="Hafızadaki ASIN'leri göster/gizle"><b id="stat-asins">0</b><span>ASIN ▾</span></div>
+    </div>
+
+    <div id="memory-panel" class="memory-panel">
+        <div class="memory-head">
+            <span id="memory-title">Hafıza</span>
+            <button id="memory-copy" class="mini-btn">Kopyala</button>
+        </div>
+        <div id="memory-list" class="asin-box"></div>
+    </div>
+
+    <div class="collector">
+        <div class="collector-head">
+            <span>🧲 Amazon ASIN Toplayıcı</span>
+            <span id="collect-hint" class="collect-hint"></span>
+        </div>
+        <div class="collector-actions">
+            <button id="collect-btn" class="mini-btn primary">Sayfayı Tara</button>
+            <button id="auto-start-btn" class="mini-btn">▶ Oto</button>
+            <button id="auto-stop-btn" class="mini-btn">⏹ Dur</button>
+        </div>
+        <div id="asin-box" class="asin-box">Amazon arama sayfasında “Sayfayı Tara”ya bas.</div>
+        <button id="save-memory-btn" class="primary-btn slim" disabled>Hafızaya Kaydet (0 ASIN)</button>
     </div>
 
     <button class="primary-btn" data-open="research.html">🚀 Kontrol Panelini Aç</button>
 
     <div class="links">
         <button data-open="titles.html">AI Başlık</button>
-        <button data-open="blacklist.html">Kara Liste</button>
         <button data-open="mixer.html">Mixer</button>
     </div>
 
-    <p class="hint">Toplama, filtre ve hafıza yönetimi<br>Kontrol Paneli → <b>Amazon Paneli</b> sekmesinde.</p>
+    <p class="hint">Filtre ayarları ve ASIN kara listesi<br>Kontrol Paneli → <b>Amazon Paneli</b> içinde.</p>
 </body>
 </html>
