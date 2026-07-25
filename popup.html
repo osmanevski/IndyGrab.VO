@@ -66,9 +66,12 @@
         .memory-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--muted); }
 
         .collector {
+            display: none; /* varsayılan gizli; "🧲 ASIN Topla" butonuyla açılır */
             background: var(--surface); border: 1px solid var(--border); border-radius: 11px;
-            padding: 11px; margin-bottom: 10px;
+            padding: 11px; margin-top: 10px;
         }
+        .collector.open { display: block; }
+        .links button.active { border-color: var(--primary); color: var(--primary-light); }
         .collector-head { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 700; margin-bottom: 9px; }
         .collect-hint { font-size: 9.5px; font-weight: 600; color: var(--muted); }
         .collect-hint.warn { color: #f5ad42; }
@@ -117,7 +120,15 @@
         <div id="memory-list" class="asin-box"></div>
     </div>
 
-    <div class="collector">
+    <button class="primary-btn" data-open="research.html">🚀 Kontrol Panelini Aç</button>
+
+    <div class="links">
+        <button id="toggle-collector" title="Açık Amazon sayfasından ASIN topla">🧲 ASIN Topla</button>
+        <button data-open="titles.html">AI Başlık</button>
+        <button data-open="mixer.html">Mixer</button>
+    </div>
+
+    <div id="collector" class="collector">
         <div class="collector-head">
             <span>🧲 Amazon ASIN Toplayıcı</span>
             <span id="collect-hint" class="collect-hint"></span>
@@ -129,13 +140,6 @@
         </div>
         <div id="asin-box" class="asin-box">Amazon arama sayfasında “Sayfayı Tara”ya bas.</div>
         <button id="save-memory-btn" class="primary-btn slim" disabled>Hafızaya Kaydet (0 ASIN)</button>
-    </div>
-
-    <button class="primary-btn" data-open="research.html">🚀 Kontrol Panelini Aç</button>
-
-    <div class="links">
-        <button data-open="titles.html">AI Başlık</button>
-        <button data-open="mixer.html">Mixer</button>
     </div>
 
     <p class="hint">Filtre ayarları ve ASIN kara listesi<br>Kontrol Paneli → <b>Amazon Paneli</b> içinde.</p>

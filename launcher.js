@@ -90,6 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---------- Amazon ASIN toplayıcı ----------
+    // Varsayılan gizli; popup'ta yer kaplamasın diye "🧲 ASIN Topla" butonuyla açılır.
+    const collectorPanel = $('collector');
+    const toggleCollectorBtn = $('toggle-collector');
+    if (toggleCollectorBtn && collectorPanel) {
+        toggleCollectorBtn.addEventListener('click', () => {
+            const isOpen = collectorPanel.classList.toggle('open');
+            toggleCollectorBtn.classList.toggle('active', isOpen);
+            if (isOpen) renderAsinList();
+        });
+    }
+
     const collectBtn = $('collect-btn');
     const autoStartBtn = $('auto-start-btn');
     const autoStopBtn = $('auto-stop-btn');
