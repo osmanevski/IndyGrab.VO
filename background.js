@@ -28,6 +28,11 @@ let analysisWindowId = null;
 let autoAiQueue = [];
 let isAutoAiRunning = false;
 const FETCH_ALL_CONCURRENCY = 5;
+// Bir Amazon sekmesi bu süreden uzun açık kalırsa takılmış sayılır ve zorla kapatılır.
+// (CAPTCHA yönlendirmesi, sayfanın hiç yüklenmemesi, içerik betiğinin hata alması vb.
+//  durumlarda sekme kendini kapatamıyordu ve 5 sekme dolunca kuyruk kalıcı olarak tıkanıyordu.)
+const FETCH_ALL_TAB_TIMEOUT_MS = 90000;
+const FETCH_ALL_WATCHDOG_ALARM = 'fetchAllWatchdog';
 let fetchAllState = 'stopped';
 let fetchAllQueue = [];
 let activeFetchAllTabs = [];
@@ -42,7 +47,10 @@ chrome.storage.local.get(['fetchAllState', 'fetchAllQueue', 'activeFetchAllTabs'
     if (d.fetchAllState) fetchAllState = d.fetchAllState;
     if (d.fetchAllQueue) fetchAllQueue = d.fetchAllQueue || [];
     if (d.activeFetchAllTabs) activeFetchAllTabs = d.activeFetchAllTabs || [];
-    if (fetchAllState === 'running') processFetchAllQueue();
+    if (fetchAllState === 'running') {
+        chrome.alarms.create(FETCH_ALL_WATCHDOG_ALARM, { periodInMinutes: 1 });
+        processFetchAllQueue();
+    }
 });
 
 async function validateActiveTabs() {
@@ -83,9 +91,30 @@ async function validateFetchAllTabs() {
 
 // "Tümünü Çek" için Amazon'da yığılma olmaması adına AI kuyruğuyla aynı desen:
 // aynı anda en fazla FETCH_ALL_CONCURRENCY sekme açık kalır, biri kapanınca sıradaki açılır.
+// Zaman aşımına uğramış (takılmış) sekmeleri zorla kapatır. Kapanma olayı
+// onRemoved'ı tetikler; o da kuyruk öğesini 'completed' yapıp sıradakini açar.
+// Ürün 'fetched' olarak İŞARETLENMEZ (bunu yalnızca closeSelf yapar), böylece
+// takılan ürünler bir sonraki "Tümünü Çek" çalışmasında tekrar denenir.
+async function sweepStuckFetchAllTabs() {
+    const now = Date.now();
+    const stuck = activeFetchAllTabs.filter(t => t.startedAt && (now - t.startedAt) > FETCH_ALL_TAB_TIMEOUT_MS);
+    for (const t of stuck) {
+        try {
+            await chrome.tabs.remove(t.tabId);
+        } catch (e) {
+            activeFetchAllTabs = activeFetchAllTabs.filter(x => x.tabId !== t.tabId);
+            const qi = fetchAllQueue.findIndex(item => item.itemId === t.itemId && item.status === 'active');
+            if (qi !== -1) fetchAllQueue[qi].status = 'completed';
+            await chrome.storage.local.set({ activeFetchAllTabs, fetchAllQueue });
+        }
+    }
+    return stuck.length;
+}
+
 async function processFetchAllQueue() {
     if (fetchAllState !== 'running') return;
     await validateFetchAllTabs();
+    await sweepStuckFetchAllTabs();
     while (activeFetchAllTabs.length < FETCH_ALL_CONCURRENCY) {
         const nextIndex = fetchAllQueue.findIndex(item => item.status === 'waiting');
         if (nextIndex === -1) break;
@@ -93,7 +122,7 @@ async function processFetchAllQueue() {
         try {
             const tab = await chrome.tabs.create({ url: fetchAllQueue[nextIndex].url, active: false });
             fetchingTabs[tab.id] = fetchAllQueue[nextIndex].itemId;
-            activeFetchAllTabs.push({ tabId: tab.id, itemId: fetchAllQueue[nextIndex].itemId });
+            activeFetchAllTabs.push({ tabId: tab.id, itemId: fetchAllQueue[nextIndex].itemId, startedAt: Date.now() });
             await chrome.storage.local.set({ fetchAllQueue, activeFetchAllTabs });
         } catch (e) {
             break;
@@ -104,9 +133,20 @@ async function processFetchAllQueue() {
         fetchAllState = 'stopped';
         fetchAllQueue = [];
         await chrome.storage.local.set({ fetchAllState, fetchAllQueue });
+        chrome.alarms.clear(FETCH_ALL_WATCHDOG_ALARM);
         chrome.runtime.sendMessage({ action: 'fetchAllQueueFinished' }).catch(() => {});
     }
 }
+
+// Service worker uykuya dalsa bile kuyruğun tıkalı kalmaması için periyodik denetim.
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name !== FETCH_ALL_WATCHDOG_ALARM) return;
+    if (fetchAllState !== 'running') {
+        chrome.alarms.clear(FETCH_ALL_WATCHDOG_ALARM);
+        return;
+    }
+    await processFetchAllQueue();
+});
 
 async function processQueueLoop() {
     if (analysisState !== 'running') return;
@@ -336,6 +376,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     if (fetchAllIndex !== -1) {
         const closedInfo = activeFetchAllTabs[fetchAllIndex];
         activeFetchAllTabs.splice(fetchAllIndex, 1);
+        delete fetchingTabs[tabId];
         const qIndex = fetchAllQueue.findIndex(item => item.itemId === closedInfo.itemId && item.status === 'active');
         if (qIndex !== -1) fetchAllQueue[qIndex].status = 'completed';
         await chrome.storage.local.set({ activeFetchAllTabs, fetchAllQueue });
@@ -905,6 +946,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             fetchAllState = 'running';
             activeFetchAllTabs = [];
             await chrome.storage.local.set({ fetchAllState, fetchAllQueue, activeFetchAllTabs });
+            chrome.alarms.create(FETCH_ALL_WATCHDOG_ALARM, { periodInMinutes: 1 });
             processFetchAllQueue();
             sendResponse({ status: "started", total: fetchAllQueue.length });
         })();

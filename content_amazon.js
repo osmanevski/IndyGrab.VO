@@ -4,7 +4,15 @@
     let hasFetched = false;
     let autoCollectInterval = null;
     let totalAsinsCollected = 0;
-    let isExtracting = false; 
+    let isExtracting = false;
+    // "Tümünü Çek" sekmesi yalnızca bir kez kapanma isteği göndermeli (çift istek
+    // arka planda gereksiz hataya yol açar), ama HER koşulda göndermelidir.
+    let autoCloseSent = false;
+    function closeAutoTab() {
+        if (autoCloseSent) return;
+        autoCloseSent = true;
+        chrome.runtime.sendMessage({ action: 'closeSelf' });
+    }
 
     const stockCache = {};
     const cacheExpiry = {};
@@ -34,13 +42,16 @@
         }
     }
 
-    async function fetchProductDetails(asin) {
+    async function fetchProductDetails(asin, waitedMs = 0) {
         if (stockCache[asin] && Date.now() - (cacheExpiry[asin] || 0) < CACHE_DURATION) {
             return stockCache[asin];
         }
-        if (activeRequests >= MAX_CONCURRENT_REQUESTS) {
+        // activeRequests bir hata yolunda azaltılmadan kalırsa bu kapı sonsuza kadar
+        // kapalı kalıyordu ve Promise.all hiç çözülmüyordu (sekme kapanmıyor, kuyruk
+        // tıkanıyordu). Belirli bir bekleyişten sonra kapıyı yok sayıp devam ediyoruz.
+        if (activeRequests >= MAX_CONCURRENT_REQUESTS && waitedMs < 15000) {
             await new Promise(resolve => setTimeout(resolve, 100));
-            return fetchProductDetails(asin);
+            return fetchProductDetails(asin, waitedMs + 100);
         }
         activeRequests++;
         
@@ -1292,7 +1303,7 @@
 
                 if (!items.length) {
                     if(isAutoSaveMode) {
-                        chrome.runtime.sendMessage({ action: 'closeSelf' });
+                        closeAutoTab();
                     } else {
                         hasFetched = true;
                         await new Promise(resolve => chrome.storage.local.set({ asinList: [] }, resolve));
@@ -1393,9 +1404,9 @@
                     } else {
                         chrome.runtime.sendMessage({ notification: "ebay_asins_saved", count: asinList.length });
                     }
-                    chrome.runtime.sendMessage({ action: 'closeSelf' });
+                    closeAutoTab();
                 } else {
-                    chrome.runtime.sendMessage({ action: 'closeSelf' });
+                    closeAutoTab();
                 }
             } 
             else {
@@ -1447,6 +1458,9 @@
             log('Error extracting ASINs', e);
         } finally {
             isExtracting = false;
+            // Kritik: otomatik çekim sekmesi hata durumunda da kapanmalı. Aksi halde
+            // sekme açık kalıyor, eşzamanlılık dolunca arka plan kuyruğu kalıcı tıkanıyordu.
+            if (isAutoSaveMode) closeAutoTab();
         }
     }
 
@@ -1558,14 +1572,22 @@
         }
     });
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            initialize();
-            if (isSearchPage() || isProductPage()) extractASINs(isAutoSaveMode);
-        });
-    } else {
+    // "Tümünü Çek" sekmeleri kendilerini kapatmak zorunda; aksi halde arka plandaki
+    // kuyruk tıkanır. Sayfa arama/ürün sayfası olarak tanınmazsa (CAPTCHA veya hata
+    // sayfasına yönlendirme) extractASINs hiç çalışmaz, dolayısıyla burada kapatıyoruz.
+    function startExtraction() {
         initialize();
-        if (isSearchPage() || isProductPage()) extractASINs(isAutoSaveMode);
+        if (isSearchPage() || isProductPage()) {
+            extractASINs(isAutoSaveMode);
+        } else if (isAutoSaveMode) {
+            closeAutoTab();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startExtraction);
+    } else {
+        startExtraction();
     }
 
     window.addEventListener('popstate', handleNavigation);
