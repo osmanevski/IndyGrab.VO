@@ -1311,7 +1311,12 @@
 
                 if (!items.length) {
                     if(isAutoSaveMode) {
-                        closeAutoTab();
+                        // 0 sonuç mu, yoksa bot koruması mı? Blok ise ürün yakılmasın.
+                        if (isAmazonBlockPage()) {
+                            chrome.runtime.sendMessage({ action: 'autoFetchBlocked' });
+                        } else {
+                            closeAutoTab();
+                        }
                     } else {
                         hasFetched = true;
                         await new Promise(resolve => chrome.storage.local.set({ asinList: [] }, resolve));
@@ -1583,7 +1588,25 @@
     // "Tümünü Çek" sekmeleri kendilerini kapatmak zorunda; aksi halde arka plandaki
     // kuyruk tıkanır. Sayfa arama/ürün sayfası olarak tanınmazsa (CAPTCHA veya hata
     // sayfasına yönlendirme) extractASINs hiç çalışmaz, dolayısıyla burada kapatıyoruz.
+    // Amazon bot koruması: CAPTCHA sayfası, "robot değilim" doğrulaması veya
+    // "Dogs of Amazon" hata sayfası. Bunlar 0 sonuçlu arama gibi görünür; ayırt
+    // edilmezse ürün boşuna "çekildi" işaretlenip yakılır.
+    function isAmazonBlockPage() {
+        try {
+            if (location.href.includes('/errors/validateCaptcha')) return true;
+            if (document.querySelector('form[action*="validateCaptcha"], input[name="amzn-captcha-token"], img[src*="captcha"]')) return true;
+            const text = (document.body ? document.body.innerText : '').slice(0, 3000);
+            return /not a robot|Enter the characters you see|Type the characters you see|Sorry, we just need|Dogs of Amazon|automated access/i.test(text);
+        } catch (e) {
+            return false;
+        }
+    }
+
     function startExtraction() {
+        if (isAutoSaveMode && isAmazonBlockPage()) {
+            chrome.runtime.sendMessage({ action: 'autoFetchBlocked' });
+            return;
+        }
         initialize();
         if (isSearchPage() || isProductPage()) {
             extractASINs(isAutoSaveMode);

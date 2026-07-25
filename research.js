@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     fetchAllButton.addEventListener('click', () => {
-        if (!confirm("Listede bulunan ve henüz çekilmemiş tüm ürünler için Amazon'dan çekim işlemi başlatılacaktır. Yığılma olmaması için aynı anda en fazla 20 sekme açık tutulur. Onaylıyor musunuz?")) return;
+        if (!confirm("Listede bulunan ve henüz çekilmemiş tüm ürünler için Amazon'dan çekim işlemi başlatılacaktır.\n\nAmazon bot korumasına takılmamak için aynı anda en fazla 3 sekme açılır ve aralarında bekleme uygulanır; bu yüzden işlem yavaş ilerler. Koruma tespit edilirse çekim 2 dakika duraklar ve o ürünler yakılmadan tekrar denenir.\n\nOnaylıyor musunuz?")) return;
         fetchAllButton.disabled = true;
         fetchAllButton.textContent = 'Çekiliyor...';
         chrome.runtime.sendMessage({ action: "startFetchAllQueue" }, (response) => {

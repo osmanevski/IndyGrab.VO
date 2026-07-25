@@ -27,7 +27,14 @@ let activeAnalysisTabs = [];
 let analysisWindowId = null;
 let autoAiQueue = [];
 let isAutoAiRunning = false;
-const FETCH_ALL_CONCURRENCY = 5;
+// Amazon arka arkaya açılan çok sayıda isteği bot koruması olarak değerlendirip
+// CAPTCHA/blok sayfası döndürüyordu. eBay akışlarındaki gibi sekmeler arasına
+// bekleme koyuyor ve eşzamanlılığı düşürüyoruz.
+const FETCH_ALL_CONCURRENCY = 3;
+const FETCH_ALL_TAB_SPACING_MS = 2000;
+// Blok tespit edilirse bu süre boyunca yeni sekme açılmaz (watchdog alarmı yeniden dener).
+const FETCH_ALL_COOLDOWN_MS = 120000;
+let fetchAllBlockedUntil = 0;
 // Bir Amazon sekmesi bu süreden uzun açık kalırsa takılmış sayılır ve zorla kapatılır.
 // (CAPTCHA yönlendirmesi, sayfanın hiç yüklenmemesi, içerik betiğinin hata alması vb.
 //  durumlarda sekme kendini kapatamıyordu ve 5 sekme dolunca kuyruk kalıcı olarak tıkanıyordu.)
@@ -115,6 +122,9 @@ async function processFetchAllQueue() {
     if (fetchAllState !== 'running') return;
     await validateFetchAllTabs();
     await sweepStuckFetchAllTabs();
+    // Amazon blok verdiyse soğuma süresi dolana kadar yeni sekme açma; watchdog
+    // alarmı (1 dk) süre dolunca kuyruğu kendiliğinden devam ettirir.
+    if (fetchAllBlockedUntil && Date.now() < fetchAllBlockedUntil) return;
     while (activeFetchAllTabs.length < FETCH_ALL_CONCURRENCY) {
         const nextIndex = fetchAllQueue.findIndex(item => item.status === 'waiting');
         if (nextIndex === -1) break;
@@ -124,6 +134,9 @@ async function processFetchAllQueue() {
             fetchingTabs[tab.id] = fetchAllQueue[nextIndex].itemId;
             activeFetchAllTabs.push({ tabId: tab.id, itemId: fetchAllQueue[nextIndex].itemId, startedAt: Date.now() });
             await chrome.storage.local.set({ fetchAllQueue, activeFetchAllTabs });
+            if (activeFetchAllTabs.length < FETCH_ALL_CONCURRENCY) {
+                await new Promise(r => setTimeout(r, FETCH_ALL_TAB_SPACING_MS));
+            }
         } catch (e) {
             break;
         }
@@ -959,6 +972,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             remaining: fetchAllQueue.filter(i => i.status !== 'completed').length,
             active: activeFetchAllTabs.length
         });
+        return true;
+    }
+    // Amazon bot koruması (CAPTCHA / "robot değilim" / hata sayfası) tespit edildi.
+    // Ürünü 'fetched' İŞARETLEME — kuyruğa geri koy ve bir süre yeni sekme açma.
+    if (message.action === 'autoFetchBlocked') {
+        (async () => {
+            const tabId = sender.tab && sender.tab.id;
+            fetchAllBlockedUntil = Date.now() + FETCH_ALL_COOLDOWN_MS;
+            if (tabId) {
+                const info = activeFetchAllTabs.find(t => t.tabId === tabId);
+                if (info) {
+                    // 'active' -> 'waiting': sekme kapanınca onRemoved bunu 'completed'
+                    // yapmasın diye SIRALAMA ÖNEMLİ (önce durum, sonra kapatma).
+                    const qi = fetchAllQueue.findIndex(i => i.itemId === info.itemId && i.status === 'active');
+                    if (qi !== -1) fetchAllQueue[qi].status = 'waiting';
+                    await chrome.storage.local.set({ fetchAllQueue });
+                }
+                delete fetchingTabs[tabId];
+                try { await chrome.tabs.remove(tabId); } catch (e) {}
+            }
+            sendResponse({ status: "cooldown", until: fetchAllBlockedUntil });
+        })();
         return true;
     }
     if (message.action === 'closeSelf') {
