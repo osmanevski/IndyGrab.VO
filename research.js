@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const productList = document.getElementById('product-list');
     const clearAllProductsButton = document.getElementById('clear-all-btn');
     const clearFetchedButton = document.getElementById('clear-fetched-btn');
+    const resetFetchedButton = document.getElementById('reset-fetched-btn');
     const fetchAllButton = document.getElementById('fetch-all-btn');
     const noProductsMessage = document.getElementById('no-products');
     const sortSelect = document.getElementById('sort-products');
@@ -518,6 +519,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             await chrome.storage.local.set({ potentialProducts: remaining });
         }
     });
+
+    // Ürünleri SİLMEDEN 'Çekildi' işaretini kaldırır; hepsi yeniden çekilebilir hale gelir.
+    // (Bozuk maxPrice filtresiyle boşa harcanan çekimleri tekrar denemek için gerekli.)
+    if (resetFetchedButton) {
+        resetFetchedButton.addEventListener('click', async () => {
+            const { potentialProducts = [] } = await chrome.storage.local.get("potentialProducts");
+            const fetchedCount = potentialProducts.filter(p => p.fetched).length;
+            if (fetchedCount === 0) {
+                return alert("'Çekildi' işaretli ürün bulunmuyor.");
+            }
+            if (!confirm(`${fetchedCount} üründeki 'Çekildi' işareti kaldırılacak.\n\nÜrünler listede KALIR, sadece yeniden çekilebilir hale gelir. Onaylıyor musunuz?`)) return;
+            potentialProducts.forEach(p => { delete p.fetched; });
+            await chrome.storage.local.set({ potentialProducts });
+            updateFetchAllButton();
+        });
+    }
 
     clearAllProductsButton.addEventListener('click', () => {
         if (confirm('Emin misiniz? Tüm potansiyel ürünler kalıcı olarak silinecektir.')) {
