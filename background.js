@@ -1228,21 +1228,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // LOCAL MODE: "forceSyncBlacklist" handler'ı kaldırıldı (global sunucu senkronu yok).
 });
 
-function updateBadge() {
-    chrome.storage.local.get("memoryAsins", (data) => {
-        let memoryAsins = data.memoryAsins || [];
-        chrome.action.setBadgeText({ text: memoryAsins.length > 0 ? memoryAsins.length.toString() : '' });
-        chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
-    });
-}
-
-updateBadge();
-
-chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.memoryAsins) {
-        updateBadge();
-    }
-});
+// Eklenti simgesindeki kırmızı ASIN sayacı rozeti kaldırıldı.
+// Önceki oturumdan kalmış bir rozet varsa temizlenir (rozet metni oturum boyunca kalıcıdır).
+chrome.action.setBadgeText({ text: '' });
 
 chrome.runtime.onInstalled.addListener(() => {
     cleanUpBlacklist();
