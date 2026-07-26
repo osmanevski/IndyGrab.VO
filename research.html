@@ -702,6 +702,57 @@
             border-color: var(--border) !important;
             color: #8d97a6 !important;
         }
+
+        /* Nav: .nav-btn.active ve :hover sabit "#fff" metin kullanıyordu; aydınlık
+           temada açık mavi zemin üstünde okunmuyordu. */
+        :root[data-theme="light"] .nav-btn { color: #2b3038; }
+        :root[data-theme="light"] .nav-btn:hover {
+            background: rgba(37, 99, 235, .08); border-color: rgba(37, 99, 235, .25); color: #1d4ed8;
+        }
+        :root[data-theme="light"] .nav-btn.active {
+            background: rgba(37, 99, 235, .12);
+            border-color: rgba(37, 99, 235, .38);
+            color: #1d4ed8;
+            box-shadow: none;
+        }
+        :root[data-theme="light"] .nav-badge {
+            background: rgba(20, 24, 33, .07); color: #4b5563; border-color: rgba(20, 24, 33, .12);
+        }
+        :root[data-theme="light"] .nav-btn.active .nav-badge {
+            background: var(--primary); color: #fff; border-color: transparent;
+        }
+
+        /* Kalan sabit açık metin renkleri (input/select, toggle-chip, kategori butonları) */
+        :root[data-theme="light"] #store-link-input,
+        :root[data-theme="light"] #blacklist-input,
+        :root[data-theme="light"] #main-cat-input,
+        :root[data-theme="light"] #sub-cat-input,
+        :root[data-theme="light"] #sort-products,
+        :root[data-theme="light"] .key-textarea {
+            background: #ffffff !important;
+            color: #16181d !important;
+            border-color: rgba(20, 24, 33, .18) !important;
+        }
+        :root[data-theme="light"] #store-link-input::placeholder,
+        :root[data-theme="light"] #blacklist-input::placeholder,
+        :root[data-theme="light"] .key-textarea::placeholder { color: #6b7280 !important; }
+        :root[data-theme="light"] .toggle-chip,
+        :root[data-theme="light"] .concurrency-picker,
+        :root[data-theme="light"] .scan-mode-picker,
+        :root[data-theme="light"] .catch-sensitivity-picker {
+            background: rgba(20, 24, 33, .05) !important;
+            color: #16181d !important;
+            border-color: rgba(20, 24, 33, .14) !important;
+        }
+        :root[data-theme="light"] .category-panel #add-main-cat-btn,
+        :root[data-theme="light"] .category-panel #add-sub-cat-btn {
+            background: rgba(192, 57, 43, .10) !important;
+            border-color: rgba(192, 57, 43, .30) !important;
+            color: #b3261e !important;
+        }
+        :root[data-theme="light"] #section-amazon #clearMemoryBtn {
+            background: rgba(192, 57, 43, .10); color: #b3261e; border-color: rgba(192, 57, 43, .30);
+        }
     </style>
 </head>
 <body>
@@ -783,9 +834,9 @@
                         <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Potansiyel Ürünler (C4+)</h1></div>
                     </div>
                 </div>
-                <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: space-between;">
+                <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: flex-start;">
                     <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center;">
-                        <span id="key-count-label" style="font-size:12px; font-weight:600; color:#bbb;">0 Key</span>
+                        <span id="key-count-label" style="font-size:12px; font-weight:600; color:var(--muted);">0 Key</span>
                         <button id="manage-keys-btn" class="action-btn" style="background-color: #34495e;">🔑 Key</button>
                         <button id="analyze-risk-btn" class="action-btn" style="background-color: #8e44ad;">Risk Analizi (AI)</button>
                     </div>
@@ -802,7 +853,7 @@
                         </select>
                     </div>
 
-                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
+                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px; margin-left: auto;">
                         <button id="fetch-all-btn" class="action-btn">Tümünü Çek</button>
                         <button id="reset-fetched-btn" class="secondary-btn" title="Ürünleri silmeden 'Çekildi' işaretini kaldırır; hepsi yeniden çekilebilir hale gelir.">Çekildi'yi Sıfırla</button>
                         <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">Çekilenleri Sil</button>
