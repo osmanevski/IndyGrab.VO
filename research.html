@@ -636,6 +636,72 @@
             #section-amazon .amazon-panel > .tab-content#filtering { column-count:2; column-gap:18px; }
             #section-amazon .amazon-panel > .tab-content#filtering > details { break-inside:avoid; display:inline-block; width:100%; }
         }
+
+        /* ===== Aydınlık mod buton düzeltmeleri =====
+           Yeniden tasarımda butonlara SABİT açık metin renkleri verilmişti
+           (#d8e0ec, #ff8997, #b7d4ff, #e6e1e2) + yarı saydam zeminler. Koyu temada
+           doğru görünüyor ama aydınlık temada beyaz üstünde okunmuyordu.
+           Ayrıca pasif butonlardaki opacity:.5 metni iyice siliyordu. */
+        :root[data-theme="light"] .danger-btn,
+        :root[data-theme="light"] .control-btn.stop {
+            background: rgba(192, 57, 43, .10) !important;
+            border-color: rgba(192, 57, 43, .32) !important;
+            color: #b3261e !important;
+        }
+        :root[data-theme="light"] .danger-btn:hover:not(:disabled),
+        :root[data-theme="light"] .control-btn.stop:hover:not(:disabled) {
+            background: rgba(192, 57, 43, .18) !important;
+        }
+        :root[data-theme="light"] .secondary-btn,
+        :root[data-theme="light"] .control-btn.pause {
+            background: rgba(20, 24, 33, .06) !important;
+            border-color: rgba(20, 24, 33, .16) !important;
+            color: #2b3038 !important;
+        }
+        :root[data-theme="light"] .secondary-btn:hover:not(:disabled),
+        :root[data-theme="light"] .control-btn.pause:hover:not(:disabled) {
+            background: rgba(20, 24, 33, .12) !important;
+        }
+        :root[data-theme="light"] #manage-keys-btn {
+            background: rgba(37, 99, 235, .10) !important;
+            border-color: rgba(37, 99, 235, .30) !important;
+            color: #1d4ed8 !important;
+        }
+        :root[data-theme="light"] #analyze-risk-btn {
+            background: rgba(20, 24, 33, .05) !important;
+            border-color: rgba(20, 24, 33, .14) !important;
+            color: #2b3038 !important;
+        }
+        :root[data-theme="light"] .counter,
+        :root[data-theme="light"] .status-strip,
+        :root[data-theme="light"] #queue-status { color: #2b3038 !important; }
+        /* Pasif butonlar: silik değil, okunur ama belirgin şekilde pasif */
+        :root[data-theme="light"] .action-btn:disabled,
+        :root[data-theme="light"] .secondary-btn:disabled,
+        :root[data-theme="light"] .danger-btn:disabled,
+        :root[data-theme="light"] .control-btn:disabled,
+        :root[data-theme="light"] .fetch-btn:disabled,
+        :root[data-theme="light"] button:disabled {
+            opacity: 1 !important;
+            background: #e9edf2 !important;
+            border-color: rgba(20, 24, 33, .14) !important;
+            color: #6b7280 !important;
+        }
+        :root[data-theme="light"] .toggle-chip { color: #16181d !important; }
+
+        /* Koyu modda da pasif butonlar opacity:.5 yüzünden neredeyse görünmezdi;
+           okunur ama net biçimde pasif bir görünüm veriyoruz. */
+        :root:not([data-theme="light"]) .action-btn:disabled,
+        :root:not([data-theme="light"]) .secondary-btn:disabled,
+        :root:not([data-theme="light"]) .danger-btn:disabled,
+        :root:not([data-theme="light"]) .control-btn:disabled,
+        :root:not([data-theme="light"]) .fetch-btn:disabled,
+        :root:not([data-theme="light"]) button:disabled {
+            opacity: 1 !important;
+            background: rgba(148, 163, 184, .09) !important;
+            border-color: var(--border) !important;
+            color: #8d97a6 !important;
+        }
     </style>
 </head>
 <body>
@@ -662,7 +728,7 @@
                     <label class="toggle-chip" style="cursor: pointer; color: var(--text); font-size: 13px; display: flex; align-items: center; margin-right: 10px; font-weight: bold; background: rgba(46, 204, 113, 0.14); padding: 5px 8px; border-radius: 5px;">
                         <input type="checkbox" id="auto-queue-checkbox" style="margin-right: 5px; accent-color: #2ecc71;"> Oto AI Kuyruk
                     </label>
-                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="scan_mode" value="live" checked> Canlı
                         </label>
@@ -670,7 +736,7 @@
                             <input type="radio" name="scan_mode" value="sold"> Satılmış
                         </label>
                     </div>
-                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="catch_sensitivity" value="wide"> Geniş
                         </label>
@@ -681,7 +747,7 @@
                             <input type="radio" name="catch_sensitivity" value="strict"> Sıkı
                         </label>
                     </div>
-                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; gap: 8px;">
+                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="auto_concurrency" value="1" checked> 1 Sekme
                         </label>
