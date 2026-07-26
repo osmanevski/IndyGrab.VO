@@ -3,7 +3,16 @@
   "name": "IndyGrab.VO",
   "version": "1881",
   "description": "Yerel çalışan, AI destekli Amazon & eBay ürün araştırma ve başlık üretme aracı.",
-  "permissions": ["storage", "activeTab", "cookies", "bookmarks", "tabs", "scripting", "alarms", "unlimitedStorage"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "cookies",
+    "bookmarks",
+    "tabs",
+    "scripting",
+    "alarms",
+    "unlimitedStorage"
+  ],
   "host_permissions": [
     "*://*.amazon.com/*",
     "*://*.amazon.co.uk/*",
@@ -24,14 +33,22 @@
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
+      "20": "icons/icon20.png",
+      "24": "icons/icon24.png",
+      "32": "icons/icon32.png",
       "48": "icons/icon48.png",
+      "64": "icons/icon64.png",
       "128": "icons/icon128.png"
     }
   },
   "options_page": "options.html",
   "icons": {
     "16": "icons/icon16.png",
+    "20": "icons/icon20.png",
+    "24": "icons/icon24.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
+    "64": "icons/icon64.png",
     "128": "icons/icon128.png"
   },
   "content_scripts": [
@@ -43,16 +60,30 @@
         "*://*.amazon.ca/*",
         "*://*.amazon.com.au/*"
       ],
-      "js": ["content_amazon.js", "content_amazon_paste.js"]
+      "js": [
+        "content_amazon.js",
+        "content_amazon_paste.js"
+      ]
     },
     {
-      "matches": ["https://www.ebay.com/itm/*","https://www.ebay.com/sch/*"],
-      "js": ["content_ebay.js"]
+      "matches": [
+        "https://www.ebay.com/itm/*",
+        "https://www.ebay.com/sch/*"
+      ],
+      "js": [
+        "content_ebay.js"
+      ]
     },
     {
-      "matches": ["https://my.easync.io/stores/*/orders/*"],
-      "js": ["content_easync.js"],
-      "css": ["custom_styles.css"]
+      "matches": [
+        "https://my.easync.io/stores/*/orders/*"
+      ],
+      "js": [
+        "content_easync.js"
+      ],
+      "css": [
+        "custom_styles.css"
+      ]
     }
   ],
   "web_accessible_resources": [
@@ -70,7 +101,9 @@
         "titles.html",
         "titles.js"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
