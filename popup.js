@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const translations = {
         en: {
+            add_words: "Add words…", search_words: "Search words…", add_word: "Add", copy_words: "Copy words", select_value: "Select…",
             title: "IndyGrab.VO", tab_collect: "Collect", tab_filter: "Filter", tab_memory: "Memory", blacklist: "Blacklist",
             save_to_memory: "Save to Memory", feedback_stars: "Feedback Stars", stars_1: "1 Star and above",
             stars_2: "2 Stars and above", stars_3: "3 Stars and above", stars_4: "4 Stars and above",
@@ -43,14 +44,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             auto_collect: "Auto Collect Settings", auto_page_limit: "Number of Pages to Navigate:", auto_asin_limit: "Total ASINs to Collect:"
         },
         tr: {
-            title: "IndyGrab.VO", tab_collect: "Topla", tab_filter: "Filtre", tab_memory: "Hafıza", blacklist: "Kara Liste",
-            save_to_memory: "Hafızaya Kaydet", feedback_stars: "Feedback Yıldızı", stars_1: "1 Yıldız ve üstü",
+            add_words: "Kelime ekle…", search_words: "Kelime ara…", add_word: "Ekle", copy_words: "Kelimeleri kopyala", select_value: "Seç…",
+            title: "IndyGrab.VO", tab_collect: "Topla", tab_filter: "Filtre", tab_memory: "Havuz", blacklist: "Kara Liste",
+            save_to_memory: "Hafızaya Kaydet", feedback_stars: "Ürün puanı", stars_1: "1 Yıldız ve üstü",
             stars_2: "2 Yıldız ve üstü", stars_3: "3 Yıldız ve üstü", stars_4: "4 Yıldız ve üstü", stars_4_1: "4.1 Yıldız ve üstü",
             stars_4_2: "4.2 Yıldız ve üstü", stars_4_3: "4.3 Yıldız ve üstü", stars_4_4: "4.4 Yıldız ve üstü",
             stars_4_5: "4.5 Yıldız ve üstü", stars_4_6: "4.6 Yıldız ve üstü", stars_4_7: "4.7 Yıldız ve üstü",
             stars_4_8: "4.8 Yıldız ve üstü", stars_4_9: "4.9 Yıldız ve üstü", stars_5: "5 Yıldız ve üstü",
-            banned_words: "Yasaklı Kelimeler", feedback_score: "Feedback Skoru", price_range: "Fiyat Aralığı", max_bsr: "Maks Derin BSR",
-            asin_count: "Çekilecek ASIN Sayısı", shipping_selection: "Kargo Seçimi", shipping_all: "Tüm Ürünler",
+            banned_words: "Yasaklı Kelimeler", feedback_score: "Yorum sayısı", price_range: "Fiyat Aralığı", max_bsr: "Maks Derin BSR",
+            asin_count: "Arama başına ASIN sayısı", shipping_selection: "Kargo Seçimi", shipping_all: "Tüm Ürünler",
             shipping_prime: "Sadece Prime", shipping_1day: "1 Günlük Kargo", shipping_2day: "2 Günlük Kargo",
             min_stock_count: "Minimum Stok Sayısı", stock_ignore: "Stok Filtresini Önemseme", stock_exclude_warning: "Stok Uyarısı Olanları Hariç Tut",
             stock_1: "En az 1 stok", stock_2: "En az 2 stok", stock_3: "En az 3 stok", stock_4: "En az 4 stok",
@@ -103,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let maxBsrFilter = document.getElementById("maxBsrFilter");
     let stockFilter = document.getElementById("stockFilter");
     let sortFilter = document.getElementById("sortFilter");
-    
+
     let bannedWordInput = document.getElementById("bannedWordInput");
     let addBannedWordBtn = document.getElementById("addBannedWordBtn");
     let bannedWordsContainer = document.getElementById("bannedWordsContainer");
@@ -132,6 +134,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let toggleSaveIcon = document.getElementById("toggleSaveIcon");
     let toggleEbayIcon = document.getElementById("toggleEbayIcon");
     let bsrDisplayMode = document.getElementById("bsrDisplayMode");
+    const amazonTarget = window.IndyGrabAmazonTarget;
 
     let ebayChartDefaultDays = document.getElementById("ebayChartDefaultDays");
     let ebayChartDisplay = document.getElementById("ebayChartDisplay");
@@ -145,12 +148,35 @@ document.addEventListener("DOMContentLoaded", async function () {
     let schDisplayMode = document.getElementById("schDisplayMode");
     let schSellerSaleDays = document.getElementById("schSellerSaleDays");
 
-    let currentLang = "en";
+    let currentLang = "tr";
     let currentMemoryPage = 1;
     const MEMORY_ITEMS_PER_PAGE = 100;
 
+    if (amazonTarget) void amazonTarget.initialize().catch(() => {
+        amazonTarget.setStatus("Amazon sekmeleri okunamadı. Yenile düğmesiyle tekrar deneyin.", "error");
+    });
+
+    async function sendAmazonMessage(message, showErrors = false, knownTab = null) {
+        if (!amazonTarget) {
+            if (showErrors) showNotification("Amazon hedef seçicisi yüklenemedi. Paneli yenileyin.", 3000);
+            return false;
+        }
+        try {
+            await amazonTarget.sendMessage(message, knownTab);
+            return true;
+        } catch (error) {
+            const noTarget = error && error.code === "AMAZON_TARGET_UNAVAILABLE";
+            const guidance = noTarget
+                ? "Desteklenen bir Amazon sekmesi açın veya hedef seçin."
+                : "Amazon sekmesine ulaşılamadı. Sekmeyi yenileyip tekrar deneyin.";
+            if (showErrors || !noTarget) amazonTarget.setStatus(guidance, "error");
+            if (showErrors) showNotification(guidance, 3000);
+            return false;
+        }
+    }
+
     chrome.storage.local.get("language", (data) => {
-        currentLang = data.language || "en";
+        currentLang = data.language || "tr";
         updateLanguage();
         updateDynamicUI();
         updateFlagSelection();
@@ -319,17 +345,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             bsrDisplayMode: bsrDisplayMode.value
         };
         chrome.storage.local.set(featureToggles, () => {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs[0]) {
-                    chrome.tabs.sendMessage(tabs[0].id, { updateFeatures: featureToggles }).catch(() => {});
-                }
-            });
+            void sendAmazonMessage({ updateFeatures: featureToggles });
         });
     }
-    
+
     function loadEbaySettings() {
         chrome.storage.local.get([
-            "ebayChartDefaultDays", "ebayChartDisplay", "schDisplay7Days", 
+            "ebayChartDefaultDays", "ebayChartDisplay", "schDisplay7Days",
             "schDisplay14Days", "schDisplay30Days", "schDataDisplay",
             "schDisplaySold", "schDisplayWatchers", "schDisplayAvailable",
             "schDisplayMode", "schSellerSaleDays", "advancedCatcher"
@@ -423,16 +445,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             const initialWords = words ? words.split(',').map(w => w.trim()).filter(w => w) : [];
             bannedWordsList = [...new Set(initialWords)];
             renderBannedWords();
-            
+
             updateFilters();
         }
     );
-    
+
     function renderBannedWords() {
         bannedWordsContainer.innerHTML = "";
         const searchTerm = searchBannedWordInput.value.trim().toLowerCase();
-        
-        const listToDisplay = searchTerm 
+
+        const listToDisplay = searchTerm
             ? bannedWordsList.filter(word => word.toLowerCase().includes(searchTerm))
             : bannedWordsList;
 
@@ -450,12 +472,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 renderBannedWords();
                 updateFilters();
             };
-            
+
             tag.appendChild(removeBtn);
             bannedWordsContainer.appendChild(tag);
         });
-        
-        bannedWordCount.textContent = `${bannedWordsList.length} words`;
+
+        bannedWordCount.textContent = `${bannedWordsList.length} ${currentLang === "tr" ? "kelime" : "words"}`;
     }
 
     function addBannedWord() {
@@ -527,9 +549,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         };
 
         chrome.storage.local.set(filters, () => {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { requestASINs: true });
-            });
+            void sendAmazonMessage({ requestASINs: true });
         });
     }
 
@@ -563,25 +583,26 @@ document.addEventListener("DOMContentLoaded", async function () {
     autoAsinLimitInput.addEventListener("change", saveAutoCollectLimits);
 
     startAutoBtn.addEventListener("click", async () => {
-        await saveAutoCollectLimits();
-        await chrome.storage.local.set({ autoCollectActive: true, visitedPages: [], collectedPages: {} });
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tabs[0] || !/^https?:\/\/[^/]*amazon\./i.test(tabs[0].url || "")) {
-            await chrome.storage.local.set({ autoCollectActive: false });
-            showNotification("Önce bir Amazon arama sayfası açın.", 2500);
+        const targetTab = amazonTarget ? await amazonTarget.getTab() : null;
+        if (!targetTab) {
+            showNotification("Desteklenen bir Amazon sekmesi açın veya hedef seçin.", 3000);
             return;
         }
-        chrome.tabs.sendMessage(tabs[0].id, { startAutoCollect: true }).catch(() => {
-            chrome.storage.local.set({ autoCollectActive: false });
-        });
+
+        await saveAutoCollectLimits();
+        await chrome.storage.local.set({ autoCollectActive: true, visitedPages: [], collectedPages: {} });
+        const started = await sendAmazonMessage({ startAutoCollect: true }, true, targetTab);
+        if (!started) {
+            await chrome.storage.local.set({ autoCollectActive: false });
+            return;
+        }
         startAutoBtn.disabled = true;
         stopAutoBtn.disabled = false;
     });
 
     stopAutoBtn.addEventListener("click", async () => {
         await chrome.storage.local.set({ autoCollectActive: false, visitedPages: [] });
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { stopAutoCollect: true }).catch(() => {});
+        await sendAmazonMessage({ stopAutoCollect: true }, true);
         startAutoBtn.disabled = false;
         stopAutoBtn.disabled = true;
     });
@@ -754,12 +775,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 showNotification(translations[currentLang].export_failed, 1000);
                 return;
             }
-            
+
             let csv = "ASIN,eBay Title\n";
             memoryAsins.forEach(asin => {
                 let titleData = generatedTitles[asin];
                 let title = titleData ? (typeof titleData === 'string' ? titleData : (titleData.aiTitle || "")) : "";
-                title = title.replace(/"/g, '""'); 
+                title = title.replace(/"/g, '""');
                 csv += `${asin},"${title}"\n`;
             });
             const blob = new Blob([csv], { type: "text/csv" });
@@ -953,16 +974,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    updateBtn.addEventListener("click", () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-            if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { refreshASINs: true });
-        });
-        showNotification(translations[currentLang].asins_refreshed, 1000);
+    updateBtn.addEventListener("click", async () => {
+        if (await sendAmazonMessage({ refreshASINs: true }, true)) {
+            showNotification(translations[currentLang].asins_refreshed, 1000);
+        }
     });
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, { requestASINs: true });
-    });
+    void sendAmazonMessage({ requestASINs: true });
 });
 
 const style = document.createElement("style");

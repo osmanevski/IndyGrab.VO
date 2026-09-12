@@ -4,782 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IndyGrab.VO — AI Araştırma</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--t-121212);
-            color: var(--t-e0e0e0);
-            margin: 0;
-            width: 850px;
-            min-height: 500px;
-        }
-        
-        .top-nav {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(var(--rgbs1), 0.70);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 12px 15px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .nav-btn {
-            background-color: rgba(var(--rgbs6), 0.8);
-            color: var(--t-ecf0f1);
-            border: 1px solid rgba(var(--rgbs7), 0.5);
-            padding: 8px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-        }
-        .nav-btn:hover {
-            background-color: rgba(var(--rgbs7), 1);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .nav-btn.active {
-            background-color: rgba(46, 204, 113, 0.9);
-            color: var(--t-121212);
-            border-color: #27ae60;
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
-        }
-        .nav-badge {
-            background-color: #c0392b;
-            color: white;
-            padding: 2px 7px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-left: 8px;
-            font-weight: 700;
-            display: inline-block;
-            transition: all 0.3s;
-        }
-        .nav-btn.active .nav-badge {
-            background-color: var(--t-121212);
-            color: #2ecc71;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .skeleton-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, rgba(var(--rgbs8),0.85) 4%, rgba(var(--rgbs9),0.85) 25%, rgba(var(--rgbs8),0.85) 36%);
-            background-size: 1000px 1000px;
-            animation: shimmer 2s infinite linear;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #2ecc71;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-        }
-
-        .container { padding: 15px; }
-        header, .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--t-333);
-            padding-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        h1, h2 { color: #ffffff; margin: 0; }
-        h1 { font-size: 20px; }
-        h2 { font-size: 18px; }
-        .action-btn, .danger-btn, .info-btn, .secondary-btn {
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s, opacity 0.2s;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        .danger-btn { background-color: #c0392b; color: white; }
-        .danger-btn:hover { background-color: #e74c3c; }
-        .action-btn { background-color: #27ae60; color: white; }
-        .action-btn:hover { background-color: #2ecc71; }
-        .action-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-aaa); }
-        .info-btn { background-color: #d35400; color: white; }
-        .info-btn:hover { background-color: #e67e22; }
-        .secondary-btn { background-color: #7f8c8d; color: white; }
-        .secondary-btn:hover { background-color: var(--t-95a5a6); }
-        .secondary-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-777); }
-
-        #sort-products {
-            padding: 8px;
-            border: 1px solid var(--t-444);
-            border-radius: 5px;
-            background-color: var(--t-2c2c2c);
-            color: var(--t-e0e0e0);
-            font-size: 14px;
-            cursor: pointer;
-            outline: none;
-        }
-        .counter {
-            font-size: 14px;
-            font-weight: 600;
-            background-color: var(--t-333);
-            color: var(--t-ccc);
-            padding: 5px 10px;
-            border-radius: 15px;
-        }
-        .store-links-section, .blacklist-section, .analysis-queue-section {
-            background-color: var(--t-1e1e1e);
-            padding: 15px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
-            margin-bottom: 25px;
-            border: 1px solid var(--t-333);
-        }
-        .store-links-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        #automation-controls { display: flex; gap: 8px; margin-left: auto; margin-right: 15px; align-items: center; }
-        .control-btn {
-            padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer;
-            font-weight: bold; color: white; transition: background-color 0.2s, opacity 0.2s;
-        }
-        .control-btn.start { background-color: #27ae60; }
-        .control-btn.start:hover { background-color: #2ecc71; }
-        .control-btn.pause { background-color: #f39c12; color: #212529;}
-        .control-btn.pause:hover { background-color: #f1c40f; }
-        .control-btn.stop { background-color: #c0392b; }
-        .control-btn.stop:hover { background-color: #e74c3c; }
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; background-color: var(--t-444); }
-        
-        .add-link-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        #store-link-input {
-            padding: 8px 12px; border: 1px solid var(--t-444); border-radius: 5px;
-            font-size: 14px; resize: vertical; min-height: 60px;
-            background-color: var(--t-2c2c2c); color: var(--t-e0e0e0);
-        }
-        #add-link-btn {
-            background-color: #2980b9; color: white; border: none; padding: 10px;
-            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
-        }
-        #add-link-btn:hover { background-color: #3498db; }
-        
-        .add-blacklist-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        #blacklist-input {
-            flex-grow: 1;
-            padding: 8px 12px;
-            border: 1px solid var(--t-444);
-            border-radius: 5px;
-            font-size: 14px;
-            background-color: var(--t-2c2c2c); color: var(--t-e0e0e0);
-        }
-        #add-blacklist-btn {
-            background-color: #34495e;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        #add-blacklist-btn:hover { background-color: #2c3e50; }
-        
-        #store-links-list, #blacklist-list, #analysis-queue-list {
-            list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;
-        }
-        .store-link-item, .blacklist-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 10px; 
-            border-bottom: 1px solid var(--t-333);
-        }
-        .store-link-item:last-child, .blacklist-item:last-child { border-bottom: none; }
-        
-        .store-link-item a { text-decoration: none; color: #5dade2; font-weight: 500; font-size: 15px; }
-        .store-link-item.visited a { color: #a569bd; }
-        
-        .store-link-item .store-name { font-weight: 600; }
-        .store-link-item.visited .store-name { text-decoration: line-through; color: var(--t-777); }
-        .store-link-item .controls { display: flex; align-items: center; gap: 15px; }
-        .visited-icon { display: none; color: #27ae60; font-weight: bold; }
-        .store-link-item.visited .visited-icon { display: inline; }
-        .delete-link-btn { background: transparent; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 14px; }
-        
-        .blacklist-item .store-info { flex-grow: 1; font-size: 14px; color: var(--t-e0e0e0); }
-        .blacklist-item .store-info .store-name-blacklisted { font-weight: 600; color: #fff; }
-        .blacklist-item .time-remaining { font-size: 13px; color: #999; font-style: italic; margin-right: 15px; }
-        .remove-from-blacklist-btn { background: transparent; border: none; color: #e74c3c; cursor: pointer; font-weight: bold; font-size: 14px; }
-        
-        #product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-        .product-card {
-            background-color: var(--t-1e1e1e);
-            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            border: 1px solid var(--t-333);
-            overflow: hidden; display: flex; flex-direction: column; position: relative;
-        }
-        .remove-product-btn {
-            position: absolute; top: 5px; right: 5px; width: 24px; height: 24px;
-            background-color: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%;
-            cursor: pointer; font-size: 16px; line-height: 24px; text-align: center;
-            opacity: 0.6; transition: opacity 0.2s, background-color 0.2s; z-index: 10;
-        }
-        .product-card:hover .remove-product-btn { opacity: 1; }
-        .remove-product-btn:hover { background-color: #c0392b; }
-        
-        .product-image-container { width: 100%; padding-top: 100%; position: relative; background-color: var(--t-2c2c2c); }
-        .product-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; padding: 10px; box-sizing: border-box; }
-        
-        .product-info { padding: 15px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
-        .product-title {
-            font-size: 14px; font-weight: 600; color: #f0f0f0; margin: 0 0 15px 0;
-            line-height: 1.4; height: 58px; overflow: hidden; text-overflow: ellipsis;
-            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-        }
-        .fetch-btn {
-            background-color: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px;
-            cursor: pointer; font-size: 14px; font-weight: bold; text-align: center;
-            transition: background-color 0.2s;
-        }
-        .fetch-btn:hover { background-color: #219150; }
-        .fetch-btn:disabled { background-color: var(--t-4a4a4a); cursor: not-allowed; color: var(--t-aaa); }
-        
-        .fetched-label {
-            position: absolute; bottom: 10px; left: 10px; background-color: rgba(39, 174, 96, 0.9);
-            color: white; padding: 4px 8px; font-size: 12px; font-weight: bold;
-            border-radius: 4px; z-index: 5;
-        }
-        #no-products, #no-links, #no-blacklist-items { text-align: center; padding: 20px; color: var(--t-777); font-size: 16px; }
-        .hidden { display: none !important; }
-        
-        .product-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px 10px 15px;
-            margin-top: -10px;
-        }
-        .product-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 13px;
-        }
-        .product-meta span { display: block; color: var(--t-bbb); }
-        .product-price { font-weight: bold; color: #2ecc71; }
-        .product-seller, .product-customers { color: var(--t-aaa); font-weight: 500; }
-        .product-seller .label, .product-customers .label { font-weight: normal; color: var(--t-777); }
-
-        #progress-wrapper {
-            width: 100%;
-            background-color: var(--t-2c2c2c);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            height: 26px;
-            overflow: hidden;
-            display: none; 
-            border: 1px solid var(--t-444);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        #progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: #8e44ad;
-            background-image: linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.15) 25%,
-                transparent 25%,
-                transparent 50%,
-                rgba(255, 255, 255, 0.15) 50%,
-                rgba(255, 255, 255, 0.15) 75%,
-                transparent 75%,
-                transparent
-            );
-            background-size: 40px 40px;
-            animation: progress-animation 2s linear infinite;
-            transition: width 0.4s ease, background-color 0.4s ease;
-        }
-        @keyframes progress-animation {
-            0% { background-position: 40px 0; }
-            100% { background-position: 0 0; }
-        }
-        #progress-text {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            pointer-events: none;
-        }
-
-        .pagination-controls {
-            display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px;
-        }
-        .pagination-controls button {
-            background-color: #34495e; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;
-        }
-        .pagination-controls button:hover:not(:disabled) { background-color: #2c3e50; }
-        .pagination-controls button:disabled { background-color: var(--t-1e1e1e); color: var(--t-555); cursor: not-allowed; border: 1px solid var(--t-333); }
-        .pagination-info { font-size: 14px; color: var(--t-bbb); font-weight: bold; }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--t-121212); }
-        ::-webkit-scrollbar-thumb { background: var(--t-444); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--t-555); }
-
-        /* IndyGrab.VO dashboard refresh */
-        :root {
-            color-scheme: dark;
-            --bg: #0a0b0d;
-            --surface: rgba(24, 24, 27, 0.92);
-            --surface-strong: #1b1b1f;
-            --surface-soft: #27272b;
-            --border: rgba(210, 190, 192, 0.16);
-            --border-strong: rgba(96, 165, 250, 0.46);
-            --text: #f4eeee;
-            --muted: #afa3a5;
-            --primary: #2563eb;
-            --primary-light: #60a5fa;
-            --success: #22c983;
-            --warning: #f5ad42;
-            --danger: #cc6570;
-            --violet: #2563eb;
-            --radius: 16px;
-            --shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
-        }
-        :root { --rgbs0: 7,11,20; --rgbs1: 26,26,26; --rgbs2: 30,29,32; --rgbs3: 20,20,23; --rgbs4: 39,37,40; --rgbs5: 22,22,25; --rgbs6: 44,62,80; --rgbs7: 52,73,94; --rgbs8: 30,30,30; --rgbs9: 60,60,60; }
-        :root[data-theme="light"] { --rgbs0: 255,255,255; --rgbs1: 248,250,252; --rgbs2: 255,255,255; --rgbs3: 241,244,248; --rgbs4: 255,255,255; --rgbs5: 241,244,248; --rgbs6: 226,232,240; --rgbs7: 203,213,225; --rgbs8: 255,255,255; --rgbs9: 226,232,240; }
-        :root[data-theme="light"] .store-links-section, :root[data-theme="light"] .blacklist-section, :root[data-theme="light"] .analysis-queue-section, :root[data-theme="light"] #product-list, :root[data-theme="light"] #store-link-input, :root[data-theme="light"] #blacklist-input, :root[data-theme="light"] .store-link-item, :root[data-theme="light"] .blacklist-item { color: #1c1f26; }
-        :root { --t-121212: #121212; --t-e0e0e0: #e0e0e0; --t-ecf0f1: #ecf0f1; --t-333: #333; --t-4a4a4a: #4a4a4a; --t-aaa: #aaa; --t-95a5a6: #95a5a6; --t-777: #777; --t-444: #444; --t-2c2c2c: #2c2c2c; --t-ccc: #ccc; --t-1e1e1e: #1e1e1e; --t-bbb: #bbb; --t-555: #555; --t-0a0b0d: #0a0b0d; --t-cbd5e1: #cbd5e1; }
-        :root[data-theme="light"] { --t-121212: #f4f6f9; --t-e0e0e0: #1c1f26; --t-ecf0f1: #1c1f26; --t-333: #dfe3ea; --t-4a4a4a: #d5dae2; --t-aaa: #6b7280; --t-95a5a6: #6b7280; --t-777: #6b7280; --t-444: #d5dae2; --t-2c2c2c: #eef1f6; --t-ccc: #5c6470; --t-1e1e1e: #ffffff; --t-bbb: #5c6470; --t-555: #c7cdd6; --t-0a0b0d: #f4f6f9; --t-cbd5e1: #6b7280; }
-        :root[data-theme="light"] h1, :root[data-theme="light"] h2 { color: #14161b; }
-        :root[data-theme="light"] {
-            color-scheme: light;
-            --bg: #f4f6f9;
-            --surface: rgba(255, 255, 255, 0.96);
-            --surface-strong: #ffffff;
-            --surface-soft: #eef1f6;
-            --border: rgba(20, 24, 33, 0.12);
-            --border-strong: rgba(37, 99, 235, 0.45);
-            --text: #16181d;
-            --muted: #5c6470;
-            --primary: #2563eb;
-            --primary-light: #1d4ed8;
-            --success: #15935f;
-            --warning: #b7791f;
-            --danger: #c0392b;
-            --violet: #2563eb;
-            --shadow: 0 18px 42px rgba(20, 24, 33, 0.12);
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            width: 100%;
-            min-width: 720px;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 10% -10%, rgba(37, 99, 235, 0.13), transparent 34%),
-                radial-gradient(circle at 95% 4%, rgba(141, 43, 53, 0.07), transparent 28%),
-                var(--bg);
-            color: var(--text);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        button, input, textarea, select { font: inherit; }
-        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-            outline: 3px solid rgba(96, 165, 250, 0.26);
-            outline-offset: 2px;
-        }
-
-        .top-nav {
-            justify-content: space-between;
-            align-items: center;
-            gap: 24px;
-            padding: 14px clamp(20px, 3vw, 42px);
-            background: rgba(var(--rgbs0), 0.82);
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
-        }
-        .brand-lockup { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
-        .brand-wordmark { height: 26px; width: auto; display: block; }
-        .nav-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .nav-btn {
-            gap: 2px; padding: 9px 12px; border-radius: 11px;
-            background: transparent; color: var(--t-cbd5e1); border: 1px solid transparent;
-            font-size: 12px; box-shadow: none;
-        }
-        .nav-btn:hover {
-            background: rgba(96, 165, 250, 0.10); border-color: rgba(96, 165, 250, 0.28);
-            color: white; transform: translateY(-1px); box-shadow: none;
-        }
-        .nav-btn.active {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(37, 99, 235, 0.10));
-            color: #fff; border-color: rgba(96, 165, 250, 0.40); box-shadow: inset 0 1px rgba(255,255,255,.05);
-        }
-        .nav-badge, .nav-btn.active .nav-badge {
-            min-width: 22px; margin-left: 5px; padding: 2px 6px; text-align: center;
-            background: rgba(148, 163, 184, 0.16); color: var(--t-cbd5e1); border: 1px solid var(--border);
-        }
-        .nav-btn.active .nav-badge { background: var(--primary); color: white; border-color: transparent; }
-
-        .container { width: min(1440px, 100%); margin: 0 auto; padding: 28px clamp(20px, 3vw, 42px) 48px; }
-        .store-links-section, .blacklist-section, .analysis-queue-section, #section-products {
-            position: relative; margin: 0 0 24px !important; padding: 22px;
-            background: linear-gradient(145deg, rgba(var(--rgbs2), .96), rgba(var(--rgbs3), .95));
-            border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
-        }
-        #section-products { padding-bottom: 24px; }
-        .store-links-header, header, .section-header {
-            gap: 16px; margin-bottom: 18px; padding-bottom: 17px;
-            border-bottom: 1px solid var(--border);
-        }
-        .section-title-group { display: flex; flex-direction: column; gap: 3px; }
-        .section-kicker { color: var(--primary-light); font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
-        h1, h2 { color: var(--text); font-size: 19px; line-height: 1.25; letter-spacing: -.25px; }
-        h3 { color: var(--text); }
-
-        .action-btn, .danger-btn, .info-btn, .secondary-btn, .control-btn, #add-link-btn, #add-blacklist-btn,
-        #add-main-cat-btn, #add-sub-cat-btn, .fetch-btn, .pagination-controls button {
-            min-height: 36px; padding: 8px 13px; border: 1px solid transparent; border-radius: 10px;
-            font-size: 12px; font-weight: 700; transition: transform .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
-        }
-        .action-btn, #add-link-btn, .fetch-btn, .control-btn.start {
-            background: linear-gradient(135deg, var(--primary), #1747b5); color: white;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
-        }
-        .action-btn:hover, #add-link-btn:hover, .fetch-btn:hover, .control-btn.start:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .danger-btn, .control-btn.stop { background: rgba(240, 93, 111, .13) !important; border-color: rgba(240, 93, 111, .26); color: #ff8997; }
-        .danger-btn:hover, .control-btn.stop:hover { background: rgba(240, 93, 111, .22) !important; transform: translateY(-1px); }
-        .secondary-btn, .control-btn.pause { background: rgba(148, 163, 184, .10) !important; border-color: var(--border); color: #d8e0ec; }
-        .secondary-btn:hover, .control-btn.pause:hover { background: rgba(148, 163, 184, .17) !important; transform: translateY(-1px); }
-        button:disabled { opacity: .42 !important; filter: grayscale(.35); transform: none !important; cursor: not-allowed !important; }
-
-        #automation-controls { margin: 0; flex-wrap: wrap; }
-        .toggle-chip, .concurrency-picker {
-            min-height: 36px; display: flex; align-items: center; gap: 8px;
-            padding: 7px 11px !important; border: 1px solid var(--border) !important; border-radius: 10px !important;
-            background: rgba(148, 163, 184, .07) !important; color: #dbe5f2 !important; font-size: 12px !important;
-        }
-        .toggle-chip input, .concurrency-picker input { accent-color: var(--primary); }
-        .toolbar-actions, .header-buttons, .section-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-        .add-link-form, .add-blacklist-form { gap: 10px; margin-bottom: 14px; }
-        .add-link-form { display: grid; grid-template-columns: 1fr auto; align-items: stretch; }
-        #store-link-input, #blacklist-input, #main-cat-input, #sub-cat-input, #sort-products, .key-textarea {
-            background: rgba(var(--rgbs0), .58) !important; color: #e5edf7 !important;
-            border: 1px solid var(--border) !important; border-radius: 10px !important;
-            padding: 9px 12px !important; outline: none;
-        }
-        #store-link-input { min-height: 72px; }
-        #store-link-input:focus, #blacklist-input:focus, #main-cat-input:focus, #sub-cat-input:focus, #sort-products:focus {
-            border-color: var(--border-strong) !important; box-shadow: 0 0 0 3px rgba(37, 99, 235, .14);
-        }
-        #add-link-btn { min-width: 100px; }
-        #add-blacklist-btn { background: var(--surface-soft); border: 1px solid var(--border); color: white; }
-
-        #store-links-list, #blacklist-list, #analysis-queue-list {
-            max-height: 280px; border: 1px solid var(--border); border-radius: 12px; background: rgba(var(--rgbs0), .28);
-        }
-        .store-link-item, .blacklist-item, #analysis-queue-list > li {
-            min-height: 48px; padding: 10px 13px; border-bottom: 1px solid var(--border) !important;
-        }
-        .store-link-item:hover, .blacklist-item:hover, #analysis-queue-list > li:hover { background: rgba(255, 255, 255, .035); }
-        .store-link-item a { color: #8bb9ff; }
-        .delete-link-btn, .remove-from-blacklist-btn, .remove-queue-item { color: var(--danger) !important; }
-        .counter { background: rgba(148, 163, 184, .1) !important; color: var(--t-cbd5e1); border: 1px solid var(--border); }
-
-        .product-toolbar {
-            display: flex !important; gap: 10px !important; align-items: center !important; flex-wrap: wrap !important;
-            width: 100% !important; margin-bottom: 18px !important; padding: 12px !important;
-            background: rgba(var(--rgbs0), .30) !important; border: 1px solid var(--border) !important; border-radius: 12px !important;
-            justify-content: space-between !important;
-        }
-        .toolbar-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .toolbar-group + .toolbar-group { border-left: 1px solid var(--border) !important; padding-left: 12px !important; }
-        #key-count-label { color: var(--muted) !important; }
-        #manage-keys-btn { background: rgba(96, 165, 250, .12); border-color: rgba(96, 165, 250, .28); color: #b7d4ff; box-shadow: none; }
-        #analyze-risk-btn { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .12); color: #e6e1e2; box-shadow: none; }
-
-        #product-list { grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); gap: 16px; }
-        .product-card {
-            background: linear-gradient(160deg, rgba(var(--rgbs4), .96), rgba(var(--rgbs5), .98));
-            border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.18);
-            transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-        }
-        .product-card:hover { transform: translateY(-3px); border-color: var(--border-strong); box-shadow: 0 18px 34px rgba(0,0,0,.27); }
-        .product-image-container { padding-top: 74%; background: #f5f7fb; border-bottom: 1px solid var(--border); }
-        .product-image { padding: 16px; }
-        .product-info { padding: 15px; }
-        .product-title { height: 43px; margin-bottom: 12px; -webkit-line-clamp: 2; }
-        .product-details { margin-top: 0; padding: 0 15px 14px; }
-        .product-price { color: #5ce0a4; }
-        .remove-product-btn { top: 9px; right: 9px; width: 28px; height: 28px; line-height: 28px; background: rgba(var(--rgbs0),.76); }
-        .fetched-label { border-radius: 8px; background: rgba(34, 201, 131, .92); }
-
-        #progress-wrapper { height: 30px; margin-bottom: 18px; background: rgba(var(--rgbs0),.55); border-color: var(--border); border-radius: 10px; }
-        #progress-bar { background-color: var(--violet); }
-        .status-strip { padding: 11px 13px !important; margin-bottom: 12px !important; background: rgba(96, 165, 250, .07) !important; border: 1px solid rgba(96, 165, 250, .17) !important; border-radius: 10px !important; }
-        #queue-status { color: #ead7d9 !important; }
-
-        #no-products, #no-links, #no-blacklist-items, #no-main-cats, #no-sub-cats {
-            color: var(--muted) !important; padding: 28px 16px !important; border-radius: 12px;
-        }
-        .pagination-controls { gap: 10px; }
-        .pagination-controls button { background: var(--surface-soft); border: 1px solid var(--border); }
-        .pagination-controls button:hover:not(:disabled) { background: #35363b; }
-
-        .section-description { max-width: 880px; color: var(--muted) !important; font-size: 13px !important; line-height: 1.65; }
-        .category-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px !important; }
-        .category-panel { padding: 16px !important; background: rgba(var(--rgbs0),.30) !important; border: 1px solid var(--border) !important; border-radius: 13px !important; }
-        .category-panel p { color: var(--muted) !important; }
-        .category-panel ul { border-top: 1px solid var(--border); }
-        .category-panel #add-main-cat-btn, .category-panel #add-sub-cat-btn { background: rgba(240, 93, 111, .15) !important; border: 1px solid rgba(240, 93, 111, .25) !important; color: #ff8997 !important; }
-
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #424349; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #5a5b62; }
-
-        @media (max-width: 1100px) {
-            .top-nav { align-items: flex-start; }
-            .store-links-header { align-items: flex-start; }
-            #automation-controls { width: 100%; order: 3; }
-            .toolbar-group + .toolbar-group { border-left: 0 !important; padding-left: 0 !important; }
-        }
-        @media (max-width: 800px) {
-            body { min-width: 0; }
-            .top-nav { position: static; flex-direction: column; gap: 12px; padding: 14px 16px; }
-            .nav-actions { justify-content: flex-start; width: 100%; }
-            .container { padding: 18px 12px 32px; }
-            .store-links-section, .blacklist-section, .analysis-queue-section, #section-products { padding: 16px; border-radius: 14px; }
-            .add-link-form { grid-template-columns: 1fr; }
-            #add-link-btn { width: 100%; }
-            .category-grid { grid-template-columns: 1fr; }
-            #product-list { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-        }
-
-        /* ===== Amazon Paneli (popup'tan taşındı) ===== */
-        #section-amazon .flag-container { display:flex; gap:8px; }
-        #section-amazon .lang-flag { width:26px; height:26px; border-radius:5px; cursor:pointer; opacity:.45; transition:opacity .2s, transform .2s; }
-        #section-amazon .lang-flag.selected { opacity:1; transform:scale(1.08); outline:2px solid var(--primary); }
-        #section-amazon .tab-container { display:flex; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--border); padding-bottom:10px; }
-        #section-amazon .tab { padding:9px 20px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); background:var(--surface-soft); border:1px solid var(--border); transition:all .18s; }
-        #section-amazon .tab:hover { color:var(--text); transform:translateY(-1px); }
-        #section-amazon .tab.active { background:var(--primary); border-color:var(--primary); color:#fff; }
-        #section-amazon .tab-content { display:none; }
-        #section-amazon .tab-content.active { display:block; }
-        #section-amazon details { border:1px solid var(--border); border-radius:12px; background:var(--surface-soft); margin-bottom:12px; overflow:hidden; }
-        #section-amazon summary { padding:12px 14px; cursor:pointer; font-weight:600; font-size:13px; color:var(--text); list-style:none; display:flex; align-items:center; gap:10px; }
-        #section-amazon summary::-webkit-details-marker { display:none; }
-        #section-amazon summary:hover { background:rgba(96,165,250,.08); }
-        #section-amazon .summary-icon { display:inline-flex; width:18px; height:18px; align-items:center; justify-content:center; border-radius:6px; background:var(--primary); color:#fff; font-size:12px; transition:transform .2s; }
-        #section-amazon details[open] .summary-icon { transform:rotate(45deg); }
-        #section-amazon details > div { padding:14px; border-top:1px solid var(--border); }
-        #section-amazon label { display:block; font-size:12px; font-weight:600; color:var(--muted); margin:0 0 6px; }
-        #section-amazon select, #section-amazon input[type="text"], #section-amazon input[type="number"] {
-            width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--border);
-            background:var(--surface-strong); color:var(--text); font-size:13px; margin-bottom:12px; outline:none;
-        }
-        #section-amazon select:focus, #section-amazon input:focus { border-color:var(--border-strong); }
-        #section-amazon .flex-container { display:flex; gap:10px; }
-        #section-amazon .flex-container-inline { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-        #section-amazon .feature-toggle { display:flex; align-items:center; gap:8px; padding:7px 9px; border-radius:9px; background:var(--surface-strong); border:1px solid var(--border); }
-        #section-amazon .feature-toggle input { width:auto; margin:0; }
-        #section-amazon .feature-toggle label { margin:0; font-size:12px; color:var(--text); font-weight:500; }
-        #section-amazon .banned-words-controls { display:grid; grid-template-columns:2fr 1fr; gap:10px; margin-bottom:10px; }
-        #section-amazon .banned-words-add-container { display:flex; gap:8px; }
-        #section-amazon .banned-words-add-container input { margin-bottom:0; }
-        #section-amazon #bannedWordsContainer { display:flex; flex-wrap:wrap; gap:6px; max-height:140px; overflow-y:auto; padding:8px; border:1px solid var(--border); border-radius:10px; background:var(--surface-strong); min-height:44px; }
-        #section-amazon .banned-words-footer { display:flex; justify-content:space-between; align-items:center; margin:10px 0 14px; font-size:12px; color:var(--muted); }
-        #section-amazon .asin-list { max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface-strong); padding:10px; margin-bottom:14px; font-size:13px; line-height:1.8; }
-        #section-amazon .update-container { display:flex; gap:12px; margin-bottom:14px; }
-        #section-amazon .update-icon { width:34px; height:34px; padding:6px; border-radius:10px; background:var(--surface-soft); border:1px solid var(--border); cursor:pointer; transition:all .18s; }
-        #section-amazon .update-icon:hover { transform:translateY(-2px); border-color:var(--border-strong); }
-        #section-amazon button { padding:10px 16px; border:none; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; background:linear-gradient(135deg, var(--primary), #1747b5); color:#fff; transition:transform .15s, opacity .2s; }
-        #section-amazon button:hover { transform:translateY(-1px); }
-        #section-amazon button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-        #section-amazon #saveToMemoryBtn, #section-amazon #clearMemoryBtn { width:100%; margin-bottom:10px; }
-        #section-amazon #clearMemoryBtn { background:rgba(240,93,111,.16); color:#ff8997; border:1px solid rgba(240,93,111,.3); }
-        #section-amazon .memory-buttons { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-        #section-amazon .export-history { margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
-        #section-amazon .export-history h3 { font-size:14px; margin:0 0 10px; color:var(--text); }
-        #section-amazon .export-history ul { list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto; }
-        #section-amazon .export-history li { padding:9px 11px; border:1px solid var(--border); border-radius:9px; background:var(--surface-strong); margin-bottom:7px; font-size:12px; }
-        #section-amazon h4 { font-size:13px; color:var(--primary-light); margin:14px 0 10px; }
-        #section-amazon hr { border:none; border-top:1px solid var(--border); margin:16px 0; }
-        #section-amazon p { font-size:12px; color:var(--muted); margin:0 0 10px; }
-        #section-amazon #notification { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; padding:11px 20px; border-radius:10px; font-size:13px; font-weight:600; display:none; z-index:99999; box-shadow:var(--shadow); }
-        #section-amazon #notification.show { display:block; }
-        @media (min-width: 1100px) {
-            #section-amazon .amazon-panel > .tab-content#filtering { column-count:2; column-gap:18px; }
-            #section-amazon .amazon-panel > .tab-content#filtering > details { break-inside:avoid; display:inline-block; width:100%; }
-        }
-
-        /* ===== Aydınlık mod buton düzeltmeleri =====
-           Yeniden tasarımda butonlara SABİT açık metin renkleri verilmişti
-           (#d8e0ec, #ff8997, #b7d4ff, #e6e1e2) + yarı saydam zeminler. Koyu temada
-           doğru görünüyor ama aydınlık temada beyaz üstünde okunmuyordu.
-           Ayrıca pasif butonlardaki opacity:.5 metni iyice siliyordu. */
-        :root[data-theme="light"] .danger-btn,
-        :root[data-theme="light"] .control-btn.stop {
-            background: rgba(192, 57, 43, .10) !important;
-            border-color: rgba(192, 57, 43, .32) !important;
-            color: #b3261e !important;
-        }
-        :root[data-theme="light"] .danger-btn:hover:not(:disabled),
-        :root[data-theme="light"] .control-btn.stop:hover:not(:disabled) {
-            background: rgba(192, 57, 43, .18) !important;
-        }
-        :root[data-theme="light"] .secondary-btn,
-        :root[data-theme="light"] .control-btn.pause {
-            background: rgba(20, 24, 33, .06) !important;
-            border-color: rgba(20, 24, 33, .16) !important;
-            color: #2b3038 !important;
-        }
-        :root[data-theme="light"] .secondary-btn:hover:not(:disabled),
-        :root[data-theme="light"] .control-btn.pause:hover:not(:disabled) {
-            background: rgba(20, 24, 33, .12) !important;
-        }
-        :root[data-theme="light"] #manage-keys-btn {
-            background: rgba(37, 99, 235, .10) !important;
-            border-color: rgba(37, 99, 235, .30) !important;
-            color: #1d4ed8 !important;
-        }
-        :root[data-theme="light"] #analyze-risk-btn {
-            background: rgba(20, 24, 33, .05) !important;
-            border-color: rgba(20, 24, 33, .14) !important;
-            color: #2b3038 !important;
-        }
-        :root[data-theme="light"] .counter,
-        :root[data-theme="light"] .status-strip,
-        :root[data-theme="light"] #queue-status { color: #2b3038 !important; }
-        /* Pasif butonlar: silik değil, okunur ama belirgin şekilde pasif */
-        :root[data-theme="light"] .action-btn:disabled,
-        :root[data-theme="light"] .secondary-btn:disabled,
-        :root[data-theme="light"] .danger-btn:disabled,
-        :root[data-theme="light"] .control-btn:disabled,
-        :root[data-theme="light"] .fetch-btn:disabled,
-        :root[data-theme="light"] button:disabled {
-            opacity: 1 !important;
-            background: #e9edf2 !important;
-            border-color: rgba(20, 24, 33, .14) !important;
-            color: #6b7280 !important;
-        }
-        :root[data-theme="light"] .toggle-chip { color: #16181d !important; }
-
-        /* Koyu modda da pasif butonlar opacity:.5 yüzünden neredeyse görünmezdi;
-           okunur ama net biçimde pasif bir görünüm veriyoruz. */
-        :root:not([data-theme="light"]) .action-btn:disabled,
-        :root:not([data-theme="light"]) .secondary-btn:disabled,
-        :root:not([data-theme="light"]) .danger-btn:disabled,
-        :root:not([data-theme="light"]) .control-btn:disabled,
-        :root:not([data-theme="light"]) .fetch-btn:disabled,
-        :root:not([data-theme="light"]) button:disabled {
-            opacity: 1 !important;
-            background: rgba(148, 163, 184, .09) !important;
-            border-color: var(--border) !important;
-            color: #8d97a6 !important;
-        }
-
-        /* Nav: .nav-btn.active ve :hover sabit "#fff" metin kullanıyordu; aydınlık
-           temada açık mavi zemin üstünde okunmuyordu. */
-        :root[data-theme="light"] .nav-btn { color: #2b3038; }
-        :root[data-theme="light"] .nav-btn:hover {
-            background: rgba(37, 99, 235, .08); border-color: rgba(37, 99, 235, .25); color: #1d4ed8;
-        }
-        :root[data-theme="light"] .nav-btn.active {
-            background: rgba(37, 99, 235, .12);
-            border-color: rgba(37, 99, 235, .38);
-            color: #1d4ed8;
-            box-shadow: none;
-        }
-        :root[data-theme="light"] .nav-badge {
-            background: rgba(20, 24, 33, .07); color: #4b5563; border-color: rgba(20, 24, 33, .12);
-        }
-        :root[data-theme="light"] .nav-btn.active .nav-badge {
-            background: var(--primary); color: #fff; border-color: transparent;
-        }
-
-        /* Kalan sabit açık metin renkleri (input/select, toggle-chip, kategori butonları) */
-        :root[data-theme="light"] #store-link-input,
-        :root[data-theme="light"] #blacklist-input,
-        :root[data-theme="light"] #main-cat-input,
-        :root[data-theme="light"] #sub-cat-input,
-        :root[data-theme="light"] #sort-products,
-        :root[data-theme="light"] .key-textarea {
-            background: #ffffff !important;
-            color: #16181d !important;
-            border-color: rgba(20, 24, 33, .18) !important;
-        }
-        :root[data-theme="light"] #store-link-input::placeholder,
-        :root[data-theme="light"] #blacklist-input::placeholder,
-        :root[data-theme="light"] .key-textarea::placeholder { color: #6b7280 !important; }
-        :root[data-theme="light"] .toggle-chip,
-        :root[data-theme="light"] .concurrency-picker,
-        :root[data-theme="light"] .scan-mode-picker,
-        :root[data-theme="light"] .catch-sensitivity-picker {
-            background: rgba(20, 24, 33, .05) !important;
-            color: #16181d !important;
-            border-color: rgba(20, 24, 33, .14) !important;
-        }
-        :root[data-theme="light"] .category-panel #add-main-cat-btn,
-        :root[data-theme="light"] .category-panel #add-sub-cat-btn {
-            background: rgba(192, 57, 43, .10) !important;
-            border-color: rgba(192, 57, 43, .30) !important;
-            color: #b3261e !important;
-        }
-        :root[data-theme="light"] #section-amazon #clearMemoryBtn {
-            background: rgba(192, 57, 43, .10); color: #b3261e; border-color: rgba(192, 57, 43, .30);
-        }
-    </style>
+    <link rel="stylesheet" href="workspace-legacy.css">
+    <link rel="stylesheet" href="workspace.css">
 </head>
 <body>
-    <nav class="top-nav">
+    <nav class="top-nav" aria-label="Çalışma alanları">
         <div class="brand-lockup" aria-label="IndyGrab.VO">
-            <img class="brand-wordmark" src="assets/wordmark-indygrabvo.png" alt="IndyGrab.VO">
-            <button id="theme-toggle" title="Aydınlık moda geç" style="margin-left:14px; background:var(--surface-soft); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:15px; line-height:1;">☀️</button>
+            <span class="brand-symbol" aria-hidden="true">iG</span><span class="brand-name">IndyGrab<span>RESEARCH WORKSPACE</span></span>
         </div>
         <div class="nav-actions">
-            <button class="nav-btn" data-target="section-stores">🏪 Mağazalar <span id="badge-stores" class="nav-badge">0</span></button>
-            <button class="nav-btn" data-target="section-products">📦 Ürünler <span id="badge-products" class="nav-badge">0</span></button>
-            <button class="nav-btn" data-target="section-queue">⚡ AI Kuyruğu <span id="badge-queue" class="nav-badge">0</span></button>
-            <button class="nav-btn" data-target="section-blacklist">⛔ Kara Liste <span id="badge-blacklist" class="nav-badge">0</span></button>
-            <button class="nav-btn" data-target="section-forbidden-cats">🚫 Yasaklı Kategoriler</button>
-            <button class="nav-btn" data-target="section-amazon">🧲 Amazon Paneli</button>
+            <span class="nav-group-label">ARAŞTIRMA</span>
+            <button class="nav-btn" data-target="section-stores"><span>Mağazalar</span><span id="badge-stores" class="nav-badge">0</span></button>
+            <button class="nav-btn" data-target="section-products"><span>Keşfedilen ürünler</span><span id="badge-products" class="nav-badge">0</span></button>
+            <button class="nav-btn" data-target="section-queue"><span>Analiz kuyruğu</span><span id="badge-queue" class="nav-badge">0</span></button>
+            <span class="nav-group-label">TOPLAMA & HAZIRLAMA</span>
+            <button class="nav-btn" data-target="section-amazon" data-amazon-tab="collect"><span>Amazon toplama</span></button>
+            <button class="nav-btn" data-target="section-amazon" data-amazon-tab="memory"><span>ASIN havuzu</span></button>
+            <a class="nav-link" href="titles.html" target="_blank">Başlık hazırlama <span aria-hidden="true">↗</span></a>
+            <span class="nav-group-label">KURALLAR & ARAÇLAR</span>
+            <button class="nav-btn" data-target="section-blacklist"><span>Satıcı kara listesi</span><span id="badge-blacklist" class="nav-badge">0</span></button>
+            <button class="nav-btn" data-target="section-forbidden-cats"><span>Yasaklı kategoriler</span></button>
+            <a class="nav-link" href="blacklist.html" target="_blank">ASIN kara listesi <span aria-hidden="true">↗</span></a>
+            <button class="nav-btn" data-target="section-settings"><span>Görünüm ayarları</span></button>
+            <a class="nav-link" href="mixer.html" target="_blank">Liste karıştırıcı <span aria-hidden="true">↗</span></a>
         </div>
+        <div class="sidebar-footer"><span>Senin araştırma alanın</span><button id="theme-toggle" aria-label="Temayı değiştir" title="Temayı değiştir">◐</button></div>
     </nav>
 
-    <div class="container">
+    <main class="container">
+        <div class="workspace-heading"><div><span class="workspace-eyebrow">INDYGRAB / ÇALIŞMA ALANI</span><h1 id="workspace-title" tabindex="-1">Mağaza araştırması</h1><p id="workspace-description">Kaynaklarını ekle, tarama kapsamını belirle ve ürün keşfini başlat.</p></div><span class="workspace-mode">Yerel çalışma alanı</span></div>
         <section class="store-links-section" id="section-stores">
             <div class="store-links-header">
-                <div class="section-title-group"><span class="section-kicker">Kaynak Yönetimi</span><h2>Kaydedilen Mağaza Linkleri</h2></div>
+                <div class="section-title-group"><span class="section-kicker">Kaynak Yönetimi</span><h2>Araştırma kaynakları</h2></div>
                 <div id="automation-controls">
                     <label class="toggle-chip" style="cursor: pointer; color: var(--text); font-size: 13px; display: flex; align-items: center; margin-right: 10px; font-weight: bold; background: rgba(46, 204, 113, 0.14); padding: 5px 8px; border-radius: 5px;">
                         <input type="checkbox" id="auto-queue-checkbox" style="margin-right: 5px; accent-color: #2ecc71;"> Oto AI Kuyruk
                     </label>
-                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
+                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Tarama kapsamı</span>
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="scan_mode" value="live" checked> Canlı
                         </label>
@@ -787,7 +48,7 @@
                             <input type="radio" name="scan_mode" value="sold"> Satılmış
                         </label>
                     </div>
-                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
+                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Yakalama hassasiyeti</span>
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="catch_sensitivity" value="wide"> Geniş
                         </label>
@@ -798,7 +59,7 @@
                             <input type="radio" name="catch_sensitivity" value="strict"> Sıkı
                         </label>
                     </div>
-                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;">
+                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Eşzamanlılık</span>
                         <label style="cursor: pointer; color: var(--text); font-size: 13px;">
                             <input type="radio" name="auto_concurrency" value="1" checked> 1 Sekme
                         </label>
@@ -806,9 +67,11 @@
                             <input type="radio" name="auto_concurrency" value="2"> 2 Sekme
                         </label>
                     </div>
-                    <button id="start-automation-btn" class="control-btn start">Start</button>
-                    <button id="pause-automation-btn" class="control-btn pause">Pause</button>
-                    <button id="stop-automation-btn" class="control-btn stop">Stop</button>
+                    <div class="sale-window-picker">                <label for="schSellerSaleDays" data-i18n="ebay_sch_seller_sale_days_label">Son satış aralığı (gün)</label>
+                <input type="number" id="schSellerSaleDays" min="1" data-i18n-placeholder="ebay_sch_seller_sale_days_placeholder" placeholder="Örn. 7"><small>İlgili eBay satıcı keşfi adımında uygulanır.</small></div>
+                    <button id="start-automation-btn" class="control-btn start">Taramayı başlat</button>
+                    <button id="pause-automation-btn" class="control-btn pause">Duraklat</button>
+                    <button id="stop-automation-btn" class="control-btn stop">Durdur</button>
                 </div>
                 <div class="toolbar-actions" style="display: flex; gap: 5px; align-items: center;">
                     <button id="clear-visited-btn" class="secondary-btn">Tarananları Sil (0)</button>
@@ -831,16 +94,16 @@
             <header style="display: block; border-bottom: none; padding-bottom: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Potansiyel Ürünler (C4+)</h1></div>
+                        <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Keşfedilen ürünler</h1></div>
                     </div>
                 </div>
                 <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: flex-start;">
                     <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center;">
                         <span id="key-count-label" style="font-size:12px; font-weight:600; color:var(--muted);">0 Key</span>
-                        <button id="manage-keys-btn" class="action-btn" style="background-color: #34495e;">🔑 Key</button>
+                        <button id="manage-keys-btn" class="action-btn" style="background-color: #34495e;">API anahtarları</button>
                         <button id="analyze-risk-btn" class="action-btn" style="background-color: #8e44ad;">Risk Analizi (AI)</button>
                     </div>
-                    
+
                     <div id="header-middle-controls" class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
                         <select id="sort-products">
                             <option value="newest">En Yeniler</option>
@@ -854,9 +117,9 @@
                     </div>
 
                     <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px; margin-left: auto;">
-                        <button id="fetch-all-btn" class="action-btn">Tümünü Çek</button>
-                        <button id="reset-fetched-btn" class="secondary-btn" title="Ürünleri silmeden 'Çekildi' işaretini kaldırır; hepsi yeniden çekilebilir hale gelir.">Çekildi'yi Sıfırla</button>
-                        <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">Çekilenleri Sil</button>
+                        <button id="fetch-all-btn" class="action-btn" title="Arama filtresinden bağımsız, tüm çekilmemiş ürünleri Amazon’da arar">Tümünü Çek</button>
+                        <button id="reset-fetched-btn" class="secondary-btn" title="Ürünleri silmeden 'Çekildi' işaretini kaldırır; hepsi yeniden çekilebilir hale gelir.">İşlem işaretlerini sıfırla</button>
+                        <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">İşlenenleri sil</button>
                         <button id="clear-all-btn" class="danger-btn">Temizle</button>
                     </div>
                 </div>
@@ -869,15 +132,15 @@
             <div id="products-pagination" class="pagination-controls hidden" style="margin-top: 5px; margin-bottom: 20px;"></div>
 
             <main id="product-list"></main>
-            
+
             <div id="no-products" class="hidden">
                 <p>Henüz potansiyel ürün bulunamadı.</p>
             </div>
         </section>
-        
+
         <section class="analysis-queue-section" id="section-queue" style="margin-top: 30px;">
             <div class="section-header">
-                <div class="section-title-group"><span class="section-kicker">Akıllı İşleme</span><h2>AI Analiz Kuyruğu (Hızlı Tarama)</h2></div>
+                <div class="section-title-group"><span class="section-kicker">Akıllı İşleme</span><h2>Mağaza analiz kuyruğu</h2></div>
                 <div class="header-buttons">
                     <button id="start-queue-btn" class="action-btn" style="background-color: #2ecc71;">Kuyruğu Başlat</button>
                     <button id="stop-queue-btn" class="danger-btn" style="background-color: #e74c3c;" disabled>Durdur</button>
@@ -958,7 +221,7 @@
 
         <section class="store-links-section" id="section-amazon" style="display:none;">
             <div class="section-header">
-                <div class="section-title-group"><span class="section-kicker">Amazon</span><h2>Toplama · Filtre · Hafıza</h2></div>
+                <div class="section-title-group"><span class="section-kicker">Amazon</span><h2>Amazon çalışma alanı</h2></div>
                 <div style="display:flex; align-items:center; gap:12px;">
                     <a href="blacklist.html" target="_blank" class="action-btn" style="text-decoration:none; background-color:#34495e;" title="Toplamada yok sayılacak ASIN'ler">⛔ ASIN Kara Listesi</a>
                     <div class="flag-container" title="Arayüz dili">
@@ -967,26 +230,32 @@
                     </div>
                 </div>
             </div>
+            <div class="source-picker">
+                <div><label for="amazon-target-select">Toplama yapılacak Amazon sekmesi</label><p>Sayfa toplama komutları seçtiğin sekmeye gider. eBay ürünlerinden toplu çekim ayrı çalışır.</p></div>
+                <div class="source-picker-controls"><select id="amazon-target-select" aria-describedby="amazon-target-status"><option value="">Amazon sekmeleri aranıyor…</option></select><button id="amazon-target-refresh" type="button">Yenile</button></div>
+                <p id="amazon-target-status" role="status" aria-live="polite"></p>
+            </div>
             <div class="amazon-panel">
 <div class="tab-container">
-        <div class="tab active" data-tab="collect" data-i18n="tab_collect">Collect</div>
-        <div class="tab" data-tab="filtering" data-i18n="tab_filter">Filter</div>
-        <div class="tab" data-tab="memory" data-i18n="tab_memory">Memory</div>
+        <button type="button" class="tab active" data-tab="collect" data-i18n="tab_collect">Topla</button>
+        <button type="button" class="tab" data-tab="filtering" data-i18n="tab_filter">Filtre</button>
+        <button type="button" class="tab" data-tab="memory" data-i18n="tab_memory">Havuz</button>
     </div>
 
     <div id="notification" class="notification"></div>
 
     <div id="collect" class="tab-content active">
         <div class="update-container">
-            <img src="images/update-icon.png" alt="Refresh ASINs" class="update-icon" id="updateBtn" title="Refresh ASINs">
-            <img src="images/start-auto-icon.png" alt="Start Auto Collect" class="update-icon" id="startAutoBtn" title="Start Auto Collect">
-            <img src="images/stop-auto-icon.png" alt="Stop Auto Collect" class="update-icon" id="stopAutoBtn" title="Stop Auto Collect">
+            <button type="button" id="updateBtn" class="collection-action">Sayfayı tara</button>
+            <button type="button" id="startAutoBtn" class="collection-action">Otomatik toplamayı başlat</button>
+            <button type="button" id="stopAutoBtn" class="collection-action">Toplamayı durdur</button>
         </div>
         <div id="asinOutput" class="asin-list"></div>
         <button id="saveToMemoryBtn" data-i18n="save_to_memory">Save to Memory (0 ASIN)</button>
     </div>
 
     <div id="filtering" class="tab-content">
+        <div class="filter-intro"><strong>Amazon ürün filtreleri</strong><p>Bu kurallar hem sayfa toplamada hem eBay ürünlerinden Amazon çekiminde uygulanır. Değişiklikler otomatik kaydedilir; eBay ürün keşfini filtrelemez.</p><div id="active-filter-summary" aria-live="polite"></div></div>
         <details>
             <summary>
                 <span class="summary-icon">+</span>
@@ -1014,7 +283,7 @@
             <div>
                 <label for="ratingFilter" data-i18n="feedback_stars">Feedback Stars:</label>
                 <select id="ratingFilter">
-                    <option value="" selected disabled>Select...</option>
+                    <option value="" selected disabled data-i18n="select_value">Seç…</option>
                     <option value="1" data-i18n="stars_1">1 Star and above</option>
                     <option value="2" data-i18n="stars_2">2 Stars and above</option>
                     <option value="3" data-i18n="stars_3">3 Stars and above</option>
@@ -1034,16 +303,16 @@
                 <label data-i18n="banned_words">Banned Words:</label>
                 <div class="banned-words-controls">
                     <div class="banned-words-add-container">
-                        <input type="text" id="bannedWordInput" placeholder="Add word(s)...">
-                        <button id="addBannedWordBtn">Add</button>
+                        <input type="text" id="bannedWordInput" data-i18n-placeholder="add_words" placeholder="Kelime ekle…">
+                        <button id="addBannedWordBtn" data-i18n="add_word">Ekle</button>
                     </div>
                     <div>
-                        <input type="text" id="searchBannedWordInput" placeholder="Search word...">
+                        <input type="text" id="searchBannedWordInput" data-i18n-placeholder="search_words" placeholder="Kelime ara…">
                     </div>
                 </div>
                 <div id="bannedWordsContainer"></div>
                 <div class="banned-words-footer">
-                    <button id="copyBannedWordsBtn">Copy Words</button>
+                    <button id="copyBannedWordsBtn" data-i18n="copy_words">Kelimeleri kopyala</button>
                     <span id="bannedWordCount">0 words</span>
                 </div>
 
@@ -1072,7 +341,7 @@
                     <div>
                         <label for="shippingFilter" data-i18n="shipping_selection">Shipping Selection:</label>
                         <select id="shippingFilter">
-                            <option value="" selected disabled>Select...</option>
+                            <option value="" selected disabled data-i18n="select_value">Seç…</option>
                             <option value="all" data-i18n="shipping_all">All Products</option>
                             <option value="prime" data-i18n="shipping_prime">Prime Only</option>
                             <option value="1-day" data-i18n="shipping_1day">1-Day Shipping</option>
@@ -1085,7 +354,7 @@
                     <div>
                         <label for="stockFilter" data-i18n="min_stock_count">Minimum Stock Count:</label>
                         <select id="stockFilter">
-                            <option value="" selected disabled>Select...</option>
+                            <option value="" selected disabled data-i18n="select_value">Seç…</option>
                             <option value="ignore" data-i18n="stock_ignore">Ignore Stock Filter</option>
                             <option value="exclude_warning" data-i18n="stock_exclude_warning">Exclude Stock Warning</option>
                             <option value="1" data-i18n="stock_1">At least 1 stock</option>
@@ -1113,7 +382,7 @@
                     <div>
                         <label for="sortFilter" data-i18n="sort_order">Sort Order:</label>
                         <select id="sortFilter">
-                            <option value="" selected disabled>Select...</option>
+                            <option value="" selected disabled data-i18n="select_value">Seç…</option>
                             <option value="random" data-i18n="sort_random">Random</option>
                             <option value="priceLowToHigh" data-i18n="sort_price_low_to_high">Price: Low to High</option>
                             <option value="priceHighToLow" data-i18n="sort_price_high_to_low">Price: High to Low</option>
@@ -1126,7 +395,35 @@
             </div>
         </details>
 
-        <details> <summary>
+        </div>
+
+    <div id="memory" class="tab-content">
+        <p data-i18n="memory_limit">Memory Limit: 20000 ASIN</p>
+        <div id="memoryOutput" class="asin-list"></div>
+        <div id="memoryPagination" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;"></div>
+
+        <div class="memory-buttons">
+            <button id="copyAllBtn" data-i18n="copy_all">Copy All (0 ASIN)</button>
+            <button id="mixMemoryBtn" data-i18n="shuffle">Shuffle</button>
+        </div>
+        <div class="memory-buttons">
+            <button id="exportCsvBtn" data-i18n="export_csv">Export as CSV</button>
+            <button id="exportJsonBtn" data-i18n="export_json">Export as JSON</button>
+        </div>
+
+        <button id="sendToBlacklistBtn" style="background-color: #34495e; color: white; margin-bottom: 5px;" data-i18n="send_to_blacklist">Send to Blacklist</button>
+
+        <button id="clearMemoryBtn" data-i18n="clear_memory">Clear Memory</button>
+
+        <div class="export-history">
+            <h3 data-i18n="export_history">Export History</h3>
+            <ul id="exportHistoryList"></ul>
+        </div>
+    </div>
+            </div>
+        </section>
+
+        <section id="section-settings" class="settings-section"><div class="section-header"><div class="section-title-group"><span class="section-kicker">SAYFA ÜZERİNDE</span><h2>Görünüm ayarları</h2></div></div><p class="section-help">Amazon ve eBay sayfalarında hangi bilgilerin görüneceğini seç. Ürün eleme kuralları Amazon toplama → Filtre bölümünde.</p><details> <summary>
                 <span class="summary-icon">+</span>
                 <span data-i18n="feature_toggles">Amazon Features</span>
             </summary>
@@ -1170,7 +467,7 @@
                 </div>
                 </div>
         </details>
-        
+
         <details>
             <summary>
                 <span class="summary-icon">+</span>
@@ -1184,26 +481,25 @@
                     <option value="14" data-i18n="ebay_days_14">Last 14 Days</option>
                     <option value="30" data-i18n="ebay_days_30">Last 30 Days</option>
                 </select>
-        
+
                 <label for="ebayChartDisplay" data-i18n="ebay_data_display">Data to Display:</label>
                 <select id="ebayChartDisplay">
                     <option value="both" data-i18n="ebay_display_both">Quantity & Customers</option>
                     <option value="quantity" data-i18n="ebay_display_quantity">Quantity Only</option>
                     <option value="customers" data-i18n="ebay_display_customers">Customers Only</option>
                 </select>
-                
+
                 <hr>
-        
+
                 <h4 data-i18n="ebay_sch_settings">Search Page Settings (/sch/)</h4>
-                
+
                 <label for="schDisplayMode" data-i18n="ebay_sch_display_mode">Data Display Mode:</label>
                 <select id="schDisplayMode" style="margin-bottom: 12px;">
                     <option value="standard" data-i18n="ebay_sch_mode_standard">Standard (Info + Breakdown Button)</option>
                     <option value="direct" data-i18n="ebay_sch_mode_direct">Direct Sales Breakdown</option>
                 </select>
 
-                <label for="schSellerSaleDays" data-i18n="ebay_sch_seller_sale_days_label">Last Sale Date Filter (Days):</label>
-                <input type="number" id="schSellerSaleDays" min="1" data-i18n-placeholder="ebay_sch_seller_sale_days_placeholder" placeholder="e.g., 7 (for last 7 days)">
+
 
                 <label data-i18n="ebay_sch_range">Date Ranges to Show:</label>
                 <div style="margin-bottom: 8px;">
@@ -1220,7 +516,7 @@
                         <label for="schDisplay30Days" data-i18n="ebay_days_30">Last 30 Days</label>
                     </div>
                 </div>
-        
+
                 <label for="schDataDisplay" data-i18n="ebay_data_display">Data to Display:</label>
                 <select id="schDataDisplay" style="margin-bottom: 12px;">
                     <option value="both" data-i18n="ebay_display_both">Quantity & Customers</option>
@@ -1244,37 +540,12 @@
                     </div>
                 </div>
             </div>
-        </details>
-    </div>
-
-    <div id="memory" class="tab-content">
-        <p data-i18n="memory_limit">Memory Limit: 20000 ASIN</p>
-        <div id="memoryOutput" class="asin-list"></div>
-        <div id="memoryPagination" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;"></div>
-        
-        <div class="memory-buttons">
-            <button id="copyAllBtn" data-i18n="copy_all">Copy All (0 ASIN)</button>
-            <button id="mixMemoryBtn" data-i18n="shuffle">Shuffle</button>
-        </div>
-        <div class="memory-buttons">
-            <button id="exportCsvBtn" data-i18n="export_csv">Export as CSV</button>
-            <button id="exportJsonBtn" data-i18n="export_json">Export as JSON</button>
-        </div>
-        
-        <button id="sendToBlacklistBtn" style="background-color: #34495e; color: white; margin-bottom: 5px;" data-i18n="send_to_blacklist">Send to Blacklist</button>
-        
-        <button id="clearMemoryBtn" data-i18n="clear_memory">Clear Memory</button>
-
-        <div class="export-history">
-            <h3 data-i18n="export_history">Export History</h3>
-            <ul id="exportHistoryList"></ul>
-        </div>
-    </div>
-            </div>
-        </section>
-    </div>
+        </details></section>
+    </main>
     <script src="theme.js"></script>
     <script src="research.js"></script>
+    <script src="amazon-target.js"></script>
     <script src="popup.js"></script>
+    <script src="workspace.js"></script>
 </body>
 </html>

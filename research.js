@@ -6,37 +6,44 @@ function escapeHTML(str) {
 document.addEventListener('DOMContentLoaded', async () => {
     // LOCAL MODE: Lisans kontrolü kaldırıldı. AI ürün araştırma sayfası doğrudan açılır.
 
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const allSections = [
-        document.getElementById('section-stores'),
-        document.getElementById('section-products'),
-        document.getElementById('section-queue'),
-        document.getElementById('section-blacklist'),
-        document.getElementById('section-forbidden-cats'),
-        document.getElementById('section-amazon')
-    ];
-
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target');
-            const isActive = btn.classList.contains('active');
-
-            navButtons.forEach(b => b.classList.remove('active'));
-
-            if (isActive) {
-                allSections.forEach(sec => {
-                    if (sec) sec.style.display = 'block';
-                });
-            } else {
-                btn.classList.add('active');
-                allSections.forEach(sec => {
-                    if (sec) {
-                        sec.style.display = (sec.id === targetId) ? 'block' : 'none';
-                    }
-                });
-            }
+    const navButtons = [...document.querySelectorAll('.nav-btn')];
+    const allSections = [...document.querySelectorAll('.container > section')];
+    const workspaceLabels = {
+        'section-stores': ['Mağaza araştırması', 'Kaynaklarını ekle, tarama kapsamını belirle ve ürün keşfini başlat.'],
+        'section-products': ['Keşfedilen ürünler', 'Satış verilerini incele, riskleri değerlendir ve Amazon aramasına geç.'],
+        'section-queue': ['Mağaza analiz kuyruğu', 'Bekleyen mağazaları ve analiz ilerlemesini takip et.'],
+        'section-blacklist': ['Satıcı kuralları', 'Taramadan çıkarılan mağazaları ve engel sürelerini yönet.'],
+        'section-forbidden-cats': ['Kategori kuralları', 'eBay araştırmasında hariç tutulacak ana ve alt kategorileri belirle.'],
+        'section-amazon': ['Amazon toplama', 'Kaynağını seç, ürün filtrelerini belirle ve ASIN havuzunu oluştur.'],
+        'section-settings': ['Görünüm ayarları', 'Amazon ve eBay sayfalarındaki bilgi ve araçları düzenle.']
+    };
+    function selectWorkspace(button, writeHash = true) {
+        if (!button) return;
+        const targetId = button.dataset.target;
+        navButtons.forEach(b => {
+            const selected = b === button;
+            b.classList.toggle('active', selected);
+            if (selected) b.setAttribute('aria-current', 'page');
+            else b.removeAttribute('aria-current');
         });
-    });
+        allSections.forEach(sec => { sec.style.display = sec.id === targetId ? 'block' : 'none'; });
+        const tabName = button.dataset.amazonTab;
+        if (tabName) document.querySelector('.tab[data-tab="' + tabName + '"]')?.click();
+        const [title, description] = tabName === 'memory'
+            ? ['ASIN havuzu', 'Toplanan ASIN’leri düzenle, başlık hazırlamaya veya dışa aktarmaya geç.']
+            : workspaceLabels[targetId];
+        document.getElementById('workspace-title').textContent = title;
+        document.getElementById('workspace-description').textContent = description;
+        if (writeHash) history.replaceState(null, '', '#' + targetId + (tabName ? '/' + tabName : ''));
+    }
+    function restoreWorkspace() {
+        const [section, tab] = location.hash.slice(1).split('/');
+        selectWorkspace(navButtons.find(b => b.dataset.target === section && (!tab || b.dataset.amazonTab === tab)) || navButtons[0], false);
+    }
+    navButtons.forEach(btn => btn.addEventListener('click', () => selectWorkspace(btn)));
+    window.addEventListener('hashchange', restoreWorkspace);
+    // popup.js installs its inner-tab listeners during DOMContentLoaded as well.
+    setTimeout(restoreWorkspace, 0);
 
     const ITEMS_PER_PAGE = 20;
     let currentPageProducts = 1;
@@ -129,19 +136,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         showRiskyBtn.style.color = 'white';
         showRiskyBtn.innerHTML = '⚠️ Riskli Gözat';
         headerMiddleControls.insertBefore(showRiskyBtn, sortSelect);
-        
+
         const searchInput = document.createElement('input');
         searchInput.id = 'live-search';
         searchInput.type = 'text';
         searchInput.placeholder = 'Arama...';
         headerMiddleControls.insertBefore(searchInput, sortSelect);
-        
+
         searchInput.addEventListener('input', (e) => {
             currentSearchTerm = e.target.value.toLowerCase();
             currentPageProducts = 1;
-            renderProducts(); 
+            renderProducts();
         });
-        
+
         showRiskyBtn.addEventListener('click', () => {
             const riskyProducts = allProducts.filter(p => p.riskScore !== undefined && p.riskScore >= 5);
             if (riskyProducts.length === 0) {
@@ -227,21 +234,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateButtonStates(state) {
         if (state === 'running') {
-            startBtn.textContent = 'Start';
+            startBtn.textContent = 'Taramayı başlat';
             startBtn.disabled = true;
-            pauseBtn.textContent = 'Pause';
+            pauseBtn.textContent = 'Duraklat';
             pauseBtn.disabled = false;
             stopBtn.disabled = false;
         } else if (state === 'paused') {
-            startBtn.textContent = 'Resume';
+            startBtn.textContent = 'Devam et';
             startBtn.disabled = false;
-            pauseBtn.textContent = 'Pause';
+            pauseBtn.textContent = 'Duraklat';
             pauseBtn.disabled = true;
             stopBtn.disabled = false;
         } else {
-            startBtn.textContent = 'Start';
+            startBtn.textContent = 'Taramayı başlat';
             startBtn.disabled = false;
-            pauseBtn.textContent = 'Pause';
+            pauseBtn.textContent = 'Duraklat';
             pauseBtn.disabled = true;
             stopBtn.disabled = true;
         }
@@ -265,10 +272,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function sortProducts(products, criteria) {
-        const sorted = [...products]; 
+        const sorted = [...products];
         switch (criteria) {
-            case 'newest': return sorted.reverse(); 
-            case 'oldest': return sorted; 
+            case 'newest': return sorted.reverse();
+            case 'oldest': return sorted;
             case 'customers_high': return sorted.sort((a, b) => (b.customerCount || 0) - (a.customerCount || 0));
             case 'customers_low': return sorted.sort((a, b) => (a.customerCount || 0) - (b.customerCount || 0));
             case 'price_high': return sorted.sort((a, b) => parsePrice(b.ebayPrice) - parsePrice(a.ebayPrice));
@@ -282,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (products) {
             allProducts = products;
         }
-        
+
         const badgeProducts = document.getElementById('badge-products');
         if (badgeProducts) badgeProducts.textContent = allProducts.length;
 
@@ -316,10 +323,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (product.riskScore !== undefined) {
                     let bgColor = product.riskScore >= 5 ? "#450a0a" : "#064e3b";
                     let textColor = product.riskScore >= 5 ? "#fca5a5" : "#86efac";
-                    let riskText = product.riskScore >= 5 ? "⛔ RİSKLİ" : "✅ YÜKLENEBİLİR";
+                    let riskText = product.riskScore >= 5 ? "⛔ RİSKLİ" : "DÜŞÜK RİSK TAHMİNİ";
                     riskAnalysisHtml = `<div class="risk-analysis-result" style="display:block; padding: 8px 15px; border-top: 1px solid #333; font-size: 12px; background-color:${bgColor}; color:${textColor}; font-weight: bold;">Puan: ${product.riskScore}/10 - ${riskText}</div>`;
                     aiBtnText = 'Tekrar';
-                    aiBtnStyle = 'background-color: #34495e;'; 
+                    aiBtnStyle = 'background-color: #34495e;';
                 } else {
                     riskAnalysisHtml = `<div class="risk-analysis-result" style="display:none; padding: 8px 15px; border-top: 1px solid #333; font-size: 12px;"></div>`;
                 }
@@ -347,7 +354,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 const fetchBtn = card.querySelector('.fetch-btn');
                 if (product.fetched) {
-                    fetchBtn.textContent = 'Çekildi';
+                    fetchBtn.textContent = 'İşlendi';
+                    fetchBtn.title = 'Amazon araması işlendi; bu işaret ASIN bulunduğunu garanti etmez.';
                     fetchBtn.disabled = true;
                 }
                 fragment.appendChild(card);
@@ -366,7 +374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     sortSelect.addEventListener('change', () => {
         currentPageProducts = 1;
-        renderProducts(); 
+        renderProducts();
     });
 
     productList.addEventListener('click', async (event) => {
@@ -402,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!product) return;
             if (product.riskScore !== undefined) {
                 if (!confirm(`Bu ürün zaten analiz edildi (Puan: ${product.riskScore}). Tekrar analiz etmek istiyor musunuz?`)) {
-                    return; 
+                    return;
                 }
             }
             const { geminiApiKeys } = await chrome.storage.local.get(['geminiApiKeys']);
@@ -411,14 +419,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             btn.disabled = true;
             btn.textContent = '...';
-            
+
             const skeleton = document.createElement('div');
             skeleton.className = 'skeleton-overlay';
             skeleton.innerHTML = '🤖 AI İnceliyor...<br><span style="font-size:11px; color:#ddd; margin-top:5px; font-weight:normal;" class="skeleton-text">Lütfen bekleyin</span>';
             card.appendChild(skeleton);
 
             let retryCount = 0;
-            const maxRetries = 2; 
+            const maxRetries = 2;
             let result = { error: true };
             let success = false;
             while (!success && retryCount <= maxRetries) {
@@ -439,9 +447,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!result.error) success = true;
                 else retryCount++;
             }
-            
+
             skeleton.remove();
-            
+
             const resDiv = card.querySelector('.risk-analysis-result');
             resDiv.style.display = 'block';
 
@@ -464,13 +472,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 isBulkAnalyzing = false;
                 product.riskScore = score;
                 product.riskReason = result.reason;
-                let riskText = score >= 5 ? "⛔ RİSKLİ" : "✅ YÜKLENEBİLİR";
+                let riskText = score >= 5 ? "⛔ RİSKLİ" : "DÜŞÜK RİSK TAHMİNİ";
                 resDiv.innerHTML = `Puan: ${score}/10 - ${riskText}`;
                 resDiv.style.fontWeight = "bold";
                 btn.disabled = false;
                 btn.textContent = "Tekrar";
                 btn.style.backgroundColor = "#34495e";
-                if (score >= 5) { 
+                if (score >= 5) {
                     resDiv.style.backgroundColor = "#450a0a";
                     resDiv.style.color = "#fca5a5";
                 } else {
@@ -480,7 +488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
-    
+
     function updateFetchAllButton() {
         chrome.runtime.sendMessage({ action: "getFetchAllQueueStatus" }, (status) => {
             if (!status) return;
@@ -488,7 +496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fetchAllButton.disabled = true;
                 fetchAllButton.textContent = `Çekiliyor... (${status.remaining} kaldı, ${status.active} aktif)`;
             } else {
-                fetchAllButton.textContent = 'Tümünü Çek';
+                fetchAllButton.textContent = 'Çekilmemişleri Amazon’da ara';
                 fetchAllButton.disabled = allProducts.every(p => p.fetched);
             }
         });
@@ -500,7 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetchAllButton.textContent = 'Çekiliyor...';
         chrome.runtime.sendMessage({ action: "startFetchAllQueue" }, (response) => {
             if (!response || response.status === 'empty') {
-                fetchAllButton.textContent = 'Tümünü Çek';
+                fetchAllButton.textContent = 'Çekilmemişleri Amazon’da ara';
                 fetchAllButton.disabled = allProducts.every(p => p.fetched);
                 return;
             }
@@ -612,7 +620,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('links-pagination').classList.add('hidden');
         }
     }
-    
+
     // Yapıştırılan herhangi bir girdiyi (düz mağaza adı, /str/ linki, /usr/ linki,
     // veya /sch/?_ssn= linki) taranabilir bir eBay satıcı arama URL'sine çevirir.
     // eBay mağaza vitrini slug'ı (ör. "endlesstreasuresus") çoğu zaman gerçek satıcı
@@ -728,7 +736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
-    
+
     storeLinksList.addEventListener('click', (event) => {
         const target = event.target;
         const linkElement = target.closest('a');
@@ -843,12 +851,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isPermanent) permanentCount++;
             validEntries.push({ url, expirationTime, storeName, isPermanent, daysRemaining });
         });
-        
+
         const badgeBlacklist = document.getElementById('badge-blacklist');
         if (badgeBlacklist) badgeBlacklist.textContent = validEntries.length;
 
         if(permanentBanCounter) permanentBanCounter.textContent = `Kalıcı: ${permanentCount}`;
-        
+
         if (validEntries.length > 0) {
             noBlacklistMessage.classList.add('hidden');
             const startIndex = (currentPageBlacklist - 1) * ITEMS_PER_PAGE;
@@ -857,8 +865,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             paginatedBlacklist.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'blacklist-item';
-                let daysDisplayHtml = item.isPermanent ? 
-                    `<div style="background-color:#c0392b; color:white; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">⛔ YASAKLI KATEGORİ</div>` : 
+                let daysDisplayHtml = item.isPermanent ?
+                    `<div style="background-color:#c0392b; color:white; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">⛔ YASAKLI KATEGORİ</div>` :
                     `<input type="number" class="blacklist-days-input" data-url="${item.url}" value="${item.daysRemaining}" min="1" style="width:50px; padding:3px; border:1px solid #444; background:#2c2c2c; color:#fff; border-radius:4px; text-align:center;"><span style="font-size:12px; color:#999;">gün</span>`;
                 li.innerHTML = `
                     <div class="store-info" style="display:flex; align-items:center; gap:5px;">
@@ -920,7 +928,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     });
-    
+
     // LOCAL MODE: Global kara liste sunucu senkronu kaldırıldı ("🔄 Eşitle" butonu ve
     // forceSyncBlacklist çağrıları silindi). Kara liste tamamen yereldir.
 
@@ -955,7 +963,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     blacklistList.addEventListener('click', (event) => {
         if (event.target.classList.contains('remove-from-blacklist-btn')) {
             const urlToRemove = event.target.dataset.url;
-            const storeName = getStoreNameFromUrl(urlToRemove); 
+            const storeName = getStoreNameFromUrl(urlToRemove);
             if (confirm(`'${storeName}' mağazasını kara listeden kaldırmak istediğinize emin misiniz?`)) {
                 chrome.storage.local.get('sellerBlacklist', (data) => {
                     const blacklist = data.sellerBlacklist || {};
@@ -1027,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (changes.sellerBlacklist) {
                 renderBlacklist(changes.sellerBlacklist.newValue || {});
-                loadSellerLinks(); 
+                loadSellerLinks();
             }
             if (changes.geminiApiKeys) {
                 updateKeyLabel(changes.geminiApiKeys.newValue || []);
@@ -1040,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
-    
+
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'automationStateUpdate') {
             updateButtonStates(message.state);
@@ -1235,12 +1243,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         progressWrapper.style.display = 'block';
         progressBar.style.width = '0%';
         progressBar.style.backgroundColor = '#8e44ad';
-        
+
         let collectedRiskyItems = [];
         const productsToAnalyze = allProducts.filter(p => p.riskScore === undefined);
         const totalItems = productsToAnalyze.length;
         let processedCount = 0;
-        
+
         if (totalItems === 0) {
              alert("Listede analiz edilecek yeni ürün yok.");
              analyzeRiskBtn.disabled = false;
@@ -1261,9 +1269,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 skeleton.innerHTML = '🤖 AI İnceliyor...<br><span style="font-size:11px; color:#ddd; margin-top:5px; font-weight:normal;" class="skeleton-text">Sırada...</span>';
                 card.appendChild(skeleton);
             }
-            
+
             let retryCount = 0;
-            const maxRetries = 2; 
+            const maxRetries = 2;
             let result = { error: true };
             let success = false;
 
@@ -1273,7 +1281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if(skelText) skelText.innerHTML = `⚠️ Takıldı, Tekrar... (${retryCount})`;
                 }
                 if (retryCount > 0) await new Promise(r => setTimeout(r, 2000));
-                
+
                 result = await new Promise(resolve => {
                     chrome.runtime.sendMessage({
                         action: "analyzeProductRisk",
@@ -1292,7 +1300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (skeleton) skeleton.remove();
-            
+
             if (!result.error) {
                 const score = result.riskScore;
                 product.riskScore = score;
@@ -1301,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (card) {
                     const resDiv = card.querySelector('.risk-analysis-result');
                     resDiv.style.display = 'block';
-                    let riskText = score >= 5 ? "⛔ RİSKLİ" : "✅ YÜKLENEBİLİR";
+                    let riskText = score >= 5 ? "⛔ RİSKLİ" : "DÜŞÜK RİSK TAHMİNİ";
                     resDiv.innerHTML = `Puan: ${score}/10 - ${riskText}`;
                     resDiv.style.fontWeight = "bold";
                     const singleAiBtn = card.querySelector('.analyze-single-btn');
@@ -1309,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         singleAiBtn.textContent = 'Tekrar';
                         singleAiBtn.style.backgroundColor = "#34495e";
                     }
-                    if (score >= 5) { 
+                    if (score >= 5) {
                         resDiv.style.backgroundColor = "#450a0a";
                         resDiv.style.color = "#fca5a5";
                     } else {
@@ -1340,7 +1348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const percent = Math.round((processedCount / totalItems) * 100);
             progressBar.style.width = `${percent}%`;
             progressText.textContent = `%${percent} (${processedCount} / ${totalItems} Analiz Edildi)`;
-            
+
             await new Promise(r => setTimeout(r, 2000));
         }
 
@@ -1359,7 +1367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         isBulkAnalyzing = false;
         renderProducts(allProducts);
 
-        progressBar.style.backgroundColor = '#27ae60'; 
+        progressBar.style.backgroundColor = '#27ae60';
         progressText.textContent = `Tamamlandı! (${totalItems} Ürün İncelendi)`;
         analyzeRiskBtn.disabled = false;
         analyzeRiskBtn.textContent = "Risk Analizi (AI)";
@@ -1378,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearRiskScoresBtn = document.createElement('button');
     clearRiskScoresBtn.id = 'clear-risk-scores-btn';
     clearRiskScoresBtn.className = 'secondary-btn';
-    clearRiskScoresBtn.style.backgroundColor = '#7f8c8d'; 
+    clearRiskScoresBtn.style.backgroundColor = '#7f8c8d';
     clearRiskScoresBtn.style.color = 'white';
     clearRiskScoresBtn.style.marginRight = '5px';
     clearRiskScoresBtn.innerHTML = '🧹 Risk Puanlarını Temizle';
@@ -1390,20 +1398,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearRiskScoresBtn.addEventListener('click', async () => {
         const { potentialProducts = [] } = await chrome.storage.local.get("potentialProducts");
         let hasScores = potentialProducts.some(p => p.riskScore !== undefined);
-        
+
         if (!hasScores) {
             return alert("Listede puanı silinecek ürün bulunmuyor.");
         }
-        
+
         if (!confirm(`Tüm ürünlerin analiz puanları silinecek. Onaylıyor musunuz?`)) return;
-        
+
         for (let i = 0; i < potentialProducts.length; i++) {
             if (potentialProducts[i].riskScore !== undefined) {
                 delete potentialProducts[i].riskScore;
                 delete potentialProducts[i].riskReason;
             }
         }
-        
+
         await chrome.storage.local.set({ potentialProducts });
         alert("Risk puanları başarıyla temizlendi!");
     });
@@ -1414,10 +1422,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             queue = queue.map(item => typeof item === 'string' ? { url: item, status: 'waiting' } : item);
             const state = data.analysisState || 'stopped';
             const activeCount = (data.activeAnalysisTabs || []).length;
-            
+
             const badgeQueue = document.getElementById('badge-queue');
             if (badgeQueue) badgeQueue.textContent = queue.length;
-            
+
             renderAnalysisQueue(queue);
             updateQueueStatus(state, queue.filter(i => i.status === 'waiting').length, activeCount);
         });
@@ -1439,10 +1447,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let rowStyle = '';
             if (item.status === 'active') {
                 statusIcon = '<span style="color:#f39c12; font-weight:bold;">⚡ Çalışıyor</span>';
-                rowStyle = 'background-color: #422006;'; 
+                rowStyle = 'background-color: #422006;';
             } else if (item.status === 'completed') {
                 statusIcon = '<span style="color:#27ae60; font-weight:bold;">✅ Bitti</span>';
-                rowStyle = 'background-color: #064e3b; opacity: 0.7;'; 
+                rowStyle = 'background-color: #064e3b; opacity: 0.7;';
             } else {
                 statusIcon = '<span style="color:#95a5a6;">⏳ Bekliyor</span>';
                 actionBtn = `<button class="force-start-item-btn" data-index="${index}" title="Sıra beklemeden hemen aç (Yer varsa)" style="background:none; border:1px solid #2ecc71; color:#2ecc71; border-radius:50%; width:24px; height:24px; cursor:pointer; margin-right:5px; display:flex; align-items:center; justify-content:center;">▶</button>`;
@@ -1482,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let queue = data.analysisQueue;
                 queue = queue.map(item => typeof item === 'string' ? { url: item, status: 'waiting' } : item);
                 const existingIndex = queue.findIndex(item => item.url === url);
-                
+
                 if (existingIndex === -1) {
                     queue.push({ url: url, status: 'waiting' });
                     chrome.storage.local.set({ analysisQueue: queue }, loadAnalysisQueue);
@@ -1523,7 +1531,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.storage.local.get({ analysisQueue: [] }, (data) => {
             let queue = data.analysisQueue;
             let hasCompleted = queue.some(item => item.status === 'completed');
-            
+
             if (hasCompleted) {
                 if (confirm("Kuyruktaki daha önce tamamlanan (✅ Bitti) mağazalar tekrar taransın mı?")) {
                     queue.forEach(item => {
@@ -1535,10 +1543,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         loadAnalysisQueue();
                         chrome.runtime.sendMessage({ action: "controlAnalysisQueue", command: "start" });
                     });
-                    return; 
+                    return;
                 }
             }
-            
+
             chrome.runtime.sendMessage({ action: "controlAnalysisQueue", command: "start" });
         });
     });
