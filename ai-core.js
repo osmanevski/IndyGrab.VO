@@ -5,8 +5,9 @@
     'use strict';
 
     const PROVIDERS = {
-        gemini: { label: 'Gemini', model: 'gemini-3.1-flash-lite' },
-        deepseek: { label: 'DeepSeek', model: 'deepseek-flash' }
+        gemini: { label: 'Gemini', model: 'gemini-3.8-flash', note: 'Gemini 3.8 Flash' },
+        // DeepSeek keeps one alias for its newest Flash release (DeepSeek-V4.1-Flash as of 2026-09-13).
+        deepseek: { label: 'DeepSeek', model: 'deepseek-flash', note: "DeepSeek'in en yeni Flash modeline yönlenir" }
     };
 
     const DEFAULT_AI_SETTINGS = {
@@ -217,11 +218,12 @@ Return ONLY a JSON object: {"analysis": "one short sentence", "isMatch": true}`;
                 contents: [{ parts: [{ text: prompt }, ...images.map(i => ({ inline_data: { mime_type: i.mimeType, data: i.data } }))] }],
                 safetySettings: ['HARASSMENT', 'HATE_SPEECH', 'SEXUALLY_EXPLICIT', 'DANGEROUS_CONTENT']
                     .map(c => ({ category: `HARM_CATEGORY_${c}`, threshold: 'BLOCK_NONE' })),
+                // Gemini 3.8 Flash deprecates sampling parameters and rejects "minimal" thinking;
+                // thinking tokens share the output budget, so leave room beyond the JSON answer.
                 generationConfig: {
                     responseMimeType: 'application/json',
                     thinkingConfig: { thinkingLevel: 'LOW' },
-                    temperature: 0,
-                    maxOutputTokens: maxTokens
+                    maxOutputTokens: Math.max(1024, maxTokens * 4)
                 }
             })
         });
@@ -229,7 +231,7 @@ Return ONLY a JSON object: {"analysis": "one short sentence", "isMatch": true}`;
         const data = await res.json();
         const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('');
         if (!text) return { retry: false, reason: 'Gemini: ' + (data?.promptFeedback?.blockReason || 'boş yanıt') };
-        return { text };
+        return { text, model: data?.modelVersion || PROVIDERS.gemini.model };
     }
 
     async function callDeepSeek({ key, prompt, images, maxTokens, fetchImpl }) {
@@ -257,7 +259,7 @@ Return ONLY a JSON object: {"analysis": "one short sentence", "isMatch": true}`;
         const data = await res.json();
         const text = data?.choices?.[0]?.message?.content;
         if (!text) return { retry: false, reason: 'DeepSeek: boş yanıt' };
-        return { text };
+        return { text, model: data?.model || PROVIDERS.deepseek.model };
     }
 
     const CALLERS = { gemini: callGemini, deepseek: callDeepSeek };
@@ -276,7 +278,7 @@ Return ONLY a JSON object: {"analysis": "one short sentence", "isMatch": true}`;
                 }
                 const json = result.text !== undefined ? parseJsonLoose(result.text) : null;
                 if (onAttempt) onAttempt({ task, provider, ok: !!json, status: result.status || (json ? 200 : 0) });
-                if (json) return { ok: true, json, provider };
+                if (json) return { ok: true, json, provider, model: result.model };
                 lastReason = result.text !== undefined ? `${PROVIDERS[provider].label}: yanıt çözülemedi` : (result.reason || lastReason);
                 if (result.text === undefined && result.retry === false) break;
             }

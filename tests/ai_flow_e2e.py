@@ -96,7 +96,7 @@ def main() -> int:
             answer = ({"matches": ["B0MATCH001"]} if "verify dropshipping product matches" in prompt
                       else {"riskScore": 2, "reason": "Generic storage item", "amazonQuery": "woven storage basket"})
             return route.fulfill(status=200, content_type="application/json",
-                                 body=json.dumps({"choices": [{"message": {"content": json.dumps(answer)}}]}))
+                                 body=json.dumps({"model": "DeepSeek-V4.1-Flash", "choices": [{"message": {"content": json.dumps(answer)}}]}))
         if url.startswith("https://www.amazon.com/s?"):
             amazon_queries.append(parse_qs(urlparse(url).query).get("k", [""])[0])
             return route.fulfill(status=200, content_type="text/html", body=AMAZON_HTML)
@@ -188,6 +188,11 @@ def main() -> int:
             stats = state.get("aiStats") or {}
             for key in ("rule.hit", "fetch.skippedRisk", "task.triage", "task.match", "match.verified", "hash.same", "deepseek.ok"):
                 check(stats.get(key, 0) >= 1, f"aiStats missing {key}: {stats}")
+            last = storage(["aiLastModels"]).get("aiLastModels") or {}
+            check((last.get("deepseek") or {}).get("model") == "DeepSeek-V4.1-Flash", f"answering model not recorded: {last}")
+            page.locator('.nav-btn[data-target="section-ai"]').click()
+            wait_js(page, "() => document.getElementById('ai-model-deepseek').textContent.includes('Son yanıt: DeepSeek-V4.1-Flash')")
+            check("gemini-3.8-flash" in page.locator("#ai-model-gemini").inner_text(), "Gemini model label")
 
             # 4) No keys: previous behavior — original query, filter result saved, marked unverified.
             deepseek_calls.clear()

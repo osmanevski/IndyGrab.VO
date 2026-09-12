@@ -656,6 +656,14 @@ async function flushAiStats() {
     await chrome.storage.local.set({ aiStats });
 }
 
+// The AI page shows the model that actually answered, not only the configured name.
+async function rememberAiModel(provider, model, task) {
+    if (!model) return;
+    const { aiLastModels = {} } = await chrome.storage.local.get('aiLastModels');
+    aiLastModels[provider] = { model, task, at: Date.now() };
+    await chrome.storage.local.set({ aiLastModels });
+}
+
 async function runAi(task, prompt, images, maxTokens) {
     const { keys, settings } = await loadAiContext();
     const result = await IndyAI.runAiTask({
@@ -663,7 +671,10 @@ async function runAi(task, prompt, images, maxTokens) {
         fetchImpl: (url, init) => fetch(url, init),
         onAttempt: a => countAi(`${a.provider}.${a.ok ? 'ok' : 'fail'}`)
     });
-    if (result.ok) countAi(`task.${task}`);
+    if (result.ok) {
+        countAi(`task.${task}`);
+        rememberAiModel(result.provider, result.model, task);
+    }
     else countAi(result.noKeys ? `task.${task}.noKeys` : `task.${task}.error`);
     return result;
 }

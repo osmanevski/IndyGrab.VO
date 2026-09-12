@@ -66,8 +66,8 @@ Claude %4 / %5. Bunlar hesap genelidir; görev veya oturum bazında maliyet ayr�
 
 # AI katmanı (13 Eylül)
 
-- `ai-core.js`: sağlayıcı-bağımsız katman. Gemini (`gemini-3.1-flash-lite`) ve DeepSeek
-  (`deepseek-flash`, düşünme modu kapalı, JSON modu) anahtar kuyrukları: 401/402/403/408/429/5xx
+- `ai-core.js`: sağlayıcı-bağımsız katman. Gemini (`gemini-3.8-flash`, sampling parametresi yok, düşünme LOW) ve DeepSeek
+  (`deepseek-flash` = en yeni Flash, 13 Eylül itibarıyla V4.1; düşünme modu kapalı, JSON modu) anahtar kuyrukları: 401/402/403/408/429/5xx
   sıradaki anahtara, 400 ve boş yanıt diğer sağlayıcıya geçer. Kural riski, dHash, istemler.
 - Ö2/Ö3/Ö5: yeni keşfedilen üründe otomatik AI yok. Amazon çekiminden hemen önce kural,
   kuraldan geçerse tek AI isteği risk + temiz Amazon sorgusu üretir; eşik (varsayılan 7)
@@ -77,7 +77,7 @@ Claude %4 / %5. Bunlar hesap genelidir; görev veya oturum bazında maliyet ayr�
   ürün `aiMatch: unverified` işaretlenir.
 - Ö1: satıcı görsel karşılaştırması önce dHash (≤10 aynı, ≥22 farklı), arası AI.
 - AI ayarları sayfası: iki sağlayıcının anahtarları, iş başına sağlayıcı (diğeri yedek),
-  risk eşiği, eşleşme doğrulaması, `aiStats` sayaçları. Anahtar/toplu analiz kimlikleri korundu.
+  risk eşiği, eşleşme doğrulaması, `aiStats` sayaçları, ayarlı ve son yanıt veren model (`aiLastModels`). Anahtar/toplu analiz kimlikleri korundu.
 - Doğrulama: `node --test tests/ai-core.test.cjs tests/amazon-target.test.cjs` (12),
   `tests/extension_smoke.py` (22), `tests/ai_flow_e2e.py` (ağ kapalı, sahte DeepSeek/Amazon).
   Test notu: `wait_for_function` async yüklemi beklemez — storage beklemeleri `wait_js` ile

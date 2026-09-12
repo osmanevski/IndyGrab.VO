@@ -339,6 +339,8 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                     " return d.geminiApiKeys?.length === 1 && d.deepseekApiKeys?.length === 1; }"
                 )
                 assert "Gemini 1" in page.locator("#key-count-label").inner_text()
+                assert "gemini-3.8-flash" in page.locator("#ai-model-gemini").inner_text()
+                assert "deepseek-flash" in page.locator("#ai-model-deepseek").inner_text()
                 page.locator("#ai-provider-match").select_option("gemini")
                 page.locator("#ai-risk-threshold").select_option("5")
                 page.locator("#ai-match-verification").uncheck()

@@ -28,6 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
         label.classList.toggle('empty', gemini.length + deepseek.length === 0);
     }
 
+    // Configured model plus the model the provider reported in its last successful answer.
+    function renderModels(lastModels = {}) {
+        for (const [provider, info] of Object.entries(IndyAI.PROVIDERS)) {
+            const el = $(`ai-model-${provider}`);
+            if (!el) continue;
+            const seen = lastModels[provider];
+            const configured = `Model: ${info.model}${info.note ? ` (${info.note})` : ''}`;
+            el.textContent = seen
+                ? `${configured} · Son yanıt: ${seen.model}, ${new Date(seen.at).toLocaleString('tr-TR')}`
+                : `${configured} · Henüz yanıt alınmadı`;
+        }
+    }
+
     function renderStats(stats = {}) {
         const box = $('ai-stats');
         const rows = STAT_LABELS.filter(([key]) => stats[key]);
@@ -47,12 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     }
 
-    chrome.storage.local.get(['geminiApiKeys', 'deepseekApiKeys', 'aiSettings', 'aiStats'], data => {
+    chrome.storage.local.get(['geminiApiKeys', 'deepseekApiKeys', 'aiSettings', 'aiStats', 'aiLastModels'], data => {
         const gemini = IndyAI.normalizeKeyList(data.geminiApiKeys || []);
         const deepseek = IndyAI.normalizeKeyList(data.deepseekApiKeys || []);
         $('gemini-keys-input').value = gemini.join('\n');
         $('deepseek-keys-input').value = deepseek.join('\n');
         renderKeyCount(gemini, deepseek);
+        renderModels(data.aiLastModels);
         const settings = IndyAI.mergeSettings(data.aiSettings);
         TASKS.forEach(task => { $(`ai-provider-${task}`).value = settings.taskProviders[task]; });
         $('ai-risk-threshold').value = String(settings.riskBlockThreshold);
@@ -88,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
         if (changes.aiStats) renderStats(changes.aiStats.newValue || {});
+        if (changes.aiLastModels) renderModels(changes.aiLastModels.newValue || {});
         if (changes.geminiApiKeys || changes.deepseekApiKeys) {
             chrome.storage.local.get(['geminiApiKeys', 'deepseekApiKeys'], d => renderKeyCount(d.geminiApiKeys || [], d.deepseekApiKeys || []));
         }

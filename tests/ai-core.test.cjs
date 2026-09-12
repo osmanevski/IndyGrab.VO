@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const AI = require('../ai-core.js');
 
 const jsonResponse = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
-const deepseekOk = content => jsonResponse(200, { choices: [{ message: { content } }] });
-const geminiOk = text => jsonResponse(200, { candidates: [{ content: { parts: [{ text }] } }] });
+const deepseekOk = content => jsonResponse(200, { model: 'DeepSeek-V4.1-Flash', choices: [{ message: { content } }] });
+const geminiOk = text => jsonResponse(200, { modelVersion: 'gemini-3.8-flash', candidates: [{ content: { parts: [{ text }] } }] });
 
 test('rule risk flags VeRO brands and hazards but not aftermarket or generic titles', () => {
     assert.equal(AI.ruleRisk("Nike Air Max 90 Men's Running Shoes").riskScore, 9);
@@ -54,6 +54,7 @@ test('DeepSeek request uses deepseek-flash, JSON mode and data-URL images; 429 m
     });
     assert.equal(r.ok, true);
     assert.equal(r.provider, 'deepseek');
+    assert.equal(r.model, 'DeepSeek-V4.1-Flash', 'answering model comes from the response');
     assert.equal(calls.length, 2);
     assert.equal(calls[1].url, 'https://api.deepseek.com/chat/completions');
     assert.equal(calls[1].init.headers.Authorization, 'Bearer sk-second-key-00');
@@ -80,7 +81,7 @@ test('exhausted preferred provider falls back to the other provider; 400 skips r
     });
     assert.equal(r.provider, 'gemini');
     assert.equal(urls.filter(u => u.includes('deepseek')).length, 1, '400 must not burn the second DeepSeek key');
-    assert.match(urls[1], /gemini-3\.1-flash-lite:generateContent/);
+    assert.match(urls[1], /gemini-3\.8-flash:generateContent/);
     assert.deepEqual(AI.normalizeMatch(r.json, candidates), ['B0AAAAAAA1']);
     assert.deepEqual(attempts.map(a => [a.provider, a.ok]), [['deepseek', false], ['gemini', true]]);
 });
@@ -102,4 +103,20 @@ test('cleaned query replaces only the k parameter of the Amazon search URL', () 
     assert.equal(parsed.searchParams.get('k'), 'bamboo cutting board');
     assert.equal(parsed.searchParams.get('ref'), 'nb');
     assert.equal(AI.amazonSearchUrlFor('https://www.amazon.com/s?k=x', null), 'https://www.amazon.com/s?k=x');
+});
+
+test('Gemini request targets gemini-3.8-flash without deprecated sampling parameters', async () => {
+    let seen;
+    const r = await AI.runAiTask({
+        task: 'imageCompare', prompt: 'x', images: [{ mimeType: 'image/jpeg', data: 'BBBB' }],
+        keys: { gemini: ['AIza-key-00000'] }, settings: {},
+        fetchImpl: async (url, init) => { seen = { url, body: JSON.parse(init.body) }; return geminiOk('{"isMatch": true}'); }
+    });
+    assert.equal(AI.PROVIDERS.gemini.model, 'gemini-3.8-flash');
+    assert.match(seen.url, /models\/gemini-3\.8-flash:generateContent/);
+    assert.equal('temperature' in seen.body.generationConfig, false, 'sampling parameters are deprecated on 3.8 Flash');
+    assert.equal(seen.body.generationConfig.thinkingConfig.thinkingLevel, 'LOW');
+    assert.ok(seen.body.generationConfig.maxOutputTokens >= 1024, 'thinking shares the output budget');
+    assert.equal(seen.body.contents[0].parts[1].inline_data.data, 'BBBB');
+    assert.equal(r.model, 'gemini-3.8-flash');
 });
