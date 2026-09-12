@@ -263,6 +263,28 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
 
             result.check("stores page: segmented settings still save and the list is not clipped", stores_layout)
 
+            def products_layout() -> None:
+                assert_workspace(page, '.nav-btn[data-target="section-products"]', "section-products")
+                controls = page.locator("#header-middle-controls")
+                for control in ("#show-risky-btn", "#live-search", "#sort-products"):
+                    assert controls.locator(control).count() == 1, control
+                assert page.locator("#product-list .product-card").count() == 3
+                rows = page.evaluate(
+                    "() => { const rows = {}; document.querySelectorAll('#product-list .product-card').forEach(card => {"
+                    " const top = Math.round(card.getBoundingClientRect().top);"
+                    " (rows[top] ||= []).push(Math.round(card.querySelector('.fetch-btn').getBoundingClientRect().bottom)); });"
+                    " return Object.values(rows); }"
+                )
+                assert all(max(row) - min(row) <= 1 for row in rows), f"fetch buttons misaligned within a row: {rows}"
+                customers = page.locator("#product-list .product-card .product-customers").first
+                assert customers.evaluate("e => e.getBoundingClientRect().height < 24"), "customer label and value should share one line"
+                page.locator("#live-search").fill("Mutfak")
+                wait_js(page, "() => document.querySelectorAll('#product-list .product-card').length === 1")
+                page.locator("#live-search").fill("")
+                wait_js(page, "() => document.querySelectorAll('#product-list .product-card').length === 3")
+
+            result.check("products page: toolbar controls stay wired, cards align and search still filters", products_layout)
+
             nav_cases = [
                 ('.nav-btn[data-target="section-stores"]', "section-stores"),
                 ('.nav-btn[data-target="section-products"]', "section-products"),

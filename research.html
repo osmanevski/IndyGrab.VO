@@ -106,15 +106,13 @@
         </section>
 
         <section id="section-products">
-            <header style="display: block; border-bottom: none; padding-bottom: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Keşfedilen ürünler</h1></div>
-                    </div>
-                </div>
-                <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: flex-start;">
-                    <div id="header-middle-controls" class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
-                        <select id="sort-products">
+            <div class="products-head">
+                <div class="section-title-group"><span class="section-kicker">Ürün Keşfi</span><h1>Ürün listesi</h1></div>
+            </div>
+
+            <div class="header-buttons product-toolbar">
+                <div id="header-middle-controls" class="toolbar-group products-filters">
+                    <select id="sort-products">
                             <option value="newest">En Yeniler</option>
                             <option value="oldest">En Eskiler</option>
                             <option value="unanalyzed">Analiz Edilmeyenler</option>
@@ -123,18 +121,18 @@
                             <option value="price_high">Fiyat (Pahalı)</option>
                             <option value="price_low">Fiyat (Ucuz)</option>
                         </select>
-                    </div>
-
-                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px; margin-left: auto;">
-                        <button id="fetch-all-btn" class="action-btn" title="Arama filtresinden bağımsız, tüm çekilmemiş ürünleri Amazon’da arar">Tümünü Çek</button>
+                </div>
+                <div class="toolbar-group products-actions">
+                    <button id="fetch-all-btn" class="action-btn" title="Arama filtresinden bağımsız, tüm çekilmemiş ürünleri Amazon’da arar">Tümünü Çek</button>
+                    <div class="products-maintenance">
                         <button id="reset-fetched-btn" class="secondary-btn" title="Ürünleri silmeden 'Çekildi' işaretini kaldırır; hepsi yeniden çekilebilir hale gelir.">İşlem işaretlerini sıfırla</button>
-                        <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">İşlenenleri sil</button>
+                        <button id="clear-fetched-btn" class="danger-btn">İşlenenleri sil</button>
                         <button id="clear-all-btn" class="danger-btn">Temizle</button>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            <div id="products-pagination" class="pagination-controls hidden" style="margin-top: 5px; margin-bottom: 20px;"></div>
+            <div id="products-pagination" class="pagination-controls hidden"></div>
 
             <main id="product-list"></main>
 
