@@ -1,0 +1,292 @@
+{
+  "commit": "a52a947ee881c275eed7dba08cf29ed7445855a9",
+  "note": "Başlangıç envanteri; canlı çalışma garantisi değildir. DOM kimlikleri ve mesaj adları tasarım sırasında bağlantı kontrolü içindir.",
+  "pages": {
+    "blacklist.html": {
+      "ids": [
+        "blacklistAsinInput",
+        "addBlacklistBtn",
+        "blacklistFileInput",
+        "uploadBlacklistBtn",
+        "selectAllCheckbox",
+        "deleteSelectedBtn",
+        "blacklistOutput",
+        "paginationControls",
+        "prevPageBtn",
+        "pageInfo",
+        "nextPageBtn",
+        "notification"
+      ],
+      "scripts": [
+        "theme.js",
+        "blacklist.js"
+      ]
+    },
+    "mixer.html": {
+      "ids": [
+        "inputAsins",
+        "mixButton",
+        "outputAsins",
+        "copyButton",
+        "downloadButton",
+        "duplicatesButton",
+        "duplicatesList",
+        "duplicatesContent",
+        "notification"
+      ],
+      "scripts": [
+        "theme.js",
+        "mixer.js"
+      ]
+    },
+    "options.html": {
+      "ids": [
+        "status"
+      ],
+      "scripts": [
+        "theme.js",
+        "options.js"
+      ]
+    },
+    "popup.html": {
+      "ids": [
+        "theme-toggle",
+        "auto-dot",
+        "auto-state",
+        "stat-stores",
+        "stat-products",
+        "memory-stat",
+        "stat-asins",
+        "memory-panel",
+        "memory-title",
+        "memory-copy",
+        "memory-list",
+        "toggle-collector",
+        "collector",
+        "collect-hint",
+        "collect-btn",
+        "auto-start-btn",
+        "auto-stop-btn",
+        "asin-box",
+        "save-memory-btn"
+      ],
+      "scripts": [
+        "theme.js",
+        "launcher.js"
+      ]
+    },
+    "research.html": {
+      "ids": [
+        "theme-toggle",
+        "badge-stores",
+        "badge-products",
+        "badge-queue",
+        "badge-blacklist",
+        "section-stores",
+        "automation-controls",
+        "auto-queue-checkbox",
+        "start-automation-btn",
+        "pause-automation-btn",
+        "stop-automation-btn",
+        "clear-visited-btn",
+        "clear-banned-links-btn",
+        "clear-links-btn",
+        "store-link-input",
+        "add-link-btn",
+        "store-links-list",
+        "links-pagination",
+        "no-links",
+        "section-products",
+        "key-count-label",
+        "manage-keys-btn",
+        "analyze-risk-btn",
+        "header-middle-controls",
+        "sort-products",
+        "fetch-all-btn",
+        "reset-fetched-btn",
+        "clear-fetched-btn",
+        "clear-all-btn",
+        "progress-wrapper",
+        "progress-bar",
+        "progress-text",
+        "products-pagination",
+        "product-list",
+        "no-products",
+        "section-queue",
+        "start-queue-btn",
+        "stop-queue-btn",
+        "clear-completed-queue-btn",
+        "clear-blacklisted-queue-btn",
+        "clear-queue-btn",
+        "queue-status",
+        "analysis-queue-list",
+        "section-blacklist",
+        "permanent-ban-counter",
+        "clear-blacklist-btn",
+        "blacklist-input",
+        "add-blacklist-btn",
+        "blacklist-list",
+        "blacklist-pagination",
+        "no-blacklist-items",
+        "section-forbidden-cats",
+        "forbidden-cats-counter",
+        "main-cats-counter",
+        "clear-main-cats-btn",
+        "main-cat-input",
+        "add-main-cat-btn",
+        "main-cats-list",
+        "no-main-cats",
+        "sub-cats-counter",
+        "clear-sub-cats-btn",
+        "sub-cat-input",
+        "add-sub-cat-btn",
+        "sub-cats-list",
+        "no-sub-cats",
+        "section-amazon",
+        "notification",
+        "collect",
+        "updateBtn",
+        "startAutoBtn",
+        "stopAutoBtn",
+        "asinOutput",
+        "saveToMemoryBtn",
+        "filtering",
+        "autoPageLimit",
+        "autoAsinLimit",
+        "ratingFilter",
+        "bannedWordInput",
+        "addBannedWordBtn",
+        "searchBannedWordInput",
+        "bannedWordsContainer",
+        "copyBannedWordsBtn",
+        "bannedWordCount",
+        "feedbackFilter",
+        "maxFeedbackFilter",
+        "minPriceFilter",
+        "maxPriceFilter",
+        "maxBsrFilter",
+        "asinCount",
+        "shippingFilter",
+        "stockFilter",
+        "sortFilter",
+        "toggleStock",
+        "togglePrime",
+        "toggleRating",
+        "toggleBannedWarning",
+        "toggleCopyIcon",
+        "toggleSaveIcon",
+        "toggleEbayIcon",
+        "bsrDisplayMode",
+        "ebayChartDefaultDays",
+        "ebayChartDisplay",
+        "schDisplayMode",
+        "schSellerSaleDays",
+        "schDisplay7Days",
+        "schDisplay14Days",
+        "schDisplay30Days",
+        "schDataDisplay",
+        "schDisplaySold",
+        "schDisplayWatchers",
+        "schDisplayAvailable",
+        "memory",
+        "memoryOutput",
+        "memoryPagination",
+        "copyAllBtn",
+        "mixMemoryBtn",
+        "exportCsvBtn",
+        "exportJsonBtn",
+        "sendToBlacklistBtn",
+        "clearMemoryBtn",
+        "exportHistoryList"
+      ],
+      "scripts": [
+        "theme.js",
+        "research.js",
+        "popup.js"
+      ]
+    },
+    "titles.html": {
+      "ids": [
+        "api-status-text",
+        "live-search",
+        "status-filter",
+        "fetch-missing-btn",
+        "generate-ai-btn",
+        "stop-ai-btn",
+        "mix-data-btn",
+        "copy-page-btn",
+        "copy-all-btn",
+        "export-csv-btn",
+        "clear-dynamic-btn",
+        "stat-total",
+        "stat-missing",
+        "stat-fetched",
+        "stat-banned",
+        "stat-completed",
+        "titles-body",
+        "titles-pagination",
+        "desc-modal",
+        "close-modal",
+        "modal-body-text"
+      ],
+      "scripts": [
+        "theme.js",
+        "titles.js"
+      ]
+    }
+  },
+  "messages": {
+    "background.js": [
+      "automationStateUpdate",
+      "captchaSolved",
+      "fetchAllQueueFinished"
+    ],
+    "blacklist.js": [],
+    "content.js": [
+      "closeSelf"
+    ],
+    "content_amazon.js": [
+      "autoFetchBlocked",
+      "closeSelf",
+      "saveToMemory"
+    ],
+    "content_amazon_paste.js": [],
+    "content_easync.js": [],
+    "content_ebay.js": [
+      "addPotentialProduct",
+      "blockStoreForever",
+      "closeSelf",
+      "compareImages",
+      "createBookmark",
+      "openTabInBackground",
+      "solveCaptcha"
+    ],
+    "launcher.js": [],
+    "mixer.js": [],
+    "options.js": [],
+    "popup.js": [],
+    "research.js": [
+      "analyzeProductRisk",
+      "automationControl",
+      "clearPotentialProducts",
+      "controlAnalysisQueue",
+      "forceProcessItem",
+      "getAutomationState",
+      "getFetchAllQueueStatus",
+      "getPotentialProducts",
+      "openTabInBackground",
+      "removePotentialProduct",
+      "startFetchAllQueue"
+    ],
+    "theme.js": [],
+    "title_generator.js": [
+      "titleGenerationUpdate"
+    ],
+    "titles.js": [
+      "getTitleQueueStatus",
+      "queueForDetails",
+      "queueForTitleGeneration",
+      "stopQueues"
+    ]
+  }
+}
