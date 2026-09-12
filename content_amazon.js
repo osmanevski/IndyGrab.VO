@@ -1338,12 +1338,14 @@
 
                     if (applyFilters(productInfo, tempFilters)) {
                         collectedASINs.add(productId);
+                        const resultImage = item.querySelector('img.s-image');
                         availableItems.push({ 
                             asin: productId, 
                             price: productInfo.price, 
                             feedback: productInfo.feedback,
                             title: productInfo.title,
-                            bsr: productInfo.bsr
+                            bsr: productInfo.bsr,
+                            imageUrl: resultImage ? resultImage.src : ''
                         });
                     }
                 });
@@ -1369,6 +1371,26 @@
                             bsr: productInfo.bsr
                         });
                     }
+                }
+            }
+
+            // Ö4: on an eBay → Amazon fetch keep only results the AI confirms as the same product.
+            // Runs before BSR lookups so rejected results cost no product-page requests.
+            // No answer (no key, quota, network) leaves the list untouched: the old behavior.
+            if (isAutoSaveMode && isSearchPage() && availableItems.length > 0) {
+                const verdict = await new Promise(resolve => {
+                    try {
+                        chrome.runtime.sendMessage({
+                            action: 'verifyAmazonMatch',
+                            candidates: availableItems.map(({ asin, title, imageUrl }) => ({ asin, title, imageUrl }))
+                        }, response => resolve(chrome.runtime.lastError ? null : response));
+                    } catch (e) {
+                        resolve(null);
+                    }
+                });
+                if (verdict && Array.isArray(verdict.matches)) {
+                    const confirmed = new Set(verdict.matches);
+                    availableItems = availableItems.filter(item => confirmed.has(item.asin));
                 }
             }
 

@@ -25,6 +25,7 @@
             <button class="nav-btn" data-target="section-forbidden-cats"><span>Yasaklı kategoriler</span></button>
             <button class="nav-btn" data-target="section-asin-blacklist"><span>ASIN kara listesi</span></button>
             <button class="nav-btn" data-target="section-settings"><span>Görünüm ayarları</span></button>
+            <button class="nav-btn" data-target="section-ai"><span>AI ayarları</span></button>
             <button class="nav-btn" data-target="section-mixer"><span>Liste karıştırıcı</span></button>
         </div>
         <div class="sidebar-footer"><span>Senin araştırma alanın</span><button id="theme-toggle" aria-label="Temayı değiştir" title="Temayı değiştir">◐</button></div>
@@ -97,12 +98,6 @@
                     </div>
                 </div>
                 <div class="header-buttons product-toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--surface-strong); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; width: 100%; justify-content: flex-start;">
-                    <div class="toolbar-group" style="display: flex; gap: 8px; align-items: center;">
-                        <span id="key-count-label" style="font-size:12px; font-weight:600; color:var(--muted);">0 Key</span>
-                        <button id="manage-keys-btn" class="action-btn" style="background-color: #34495e;">API anahtarları</button>
-                        <button id="analyze-risk-btn" class="action-btn" style="background-color: #8e44ad;">Risk Analizi (AI)</button>
-                    </div>
-
                     <div id="header-middle-controls" class="toolbar-group" style="display: flex; gap: 8px; align-items: center; border-left: 1px solid var(--border); padding-left: 10px;">
                         <select id="sort-products">
                             <option value="newest">En Yeniler</option>
@@ -121,10 +116,6 @@
                         <button id="clear-fetched-btn" class="danger-btn" style="background-color: #d35400;">İşlenenleri sil</button>
                         <button id="clear-all-btn" class="danger-btn">Temizle</button>
                     </div>
-                </div>
-                <div id="progress-wrapper">
-                    <div id="progress-bar"></div>
-                    <div id="progress-text">0% (0 / 0 Ürün)</div>
                 </div>
             </header>
 
@@ -548,6 +539,42 @@
                 </div>
             </div>
         </details></section>
+<section id="section-ai" class="ai-section">
+            <div class="section-header"><div class="section-title-group"><span class="section-kicker">YAPAY ZEKÂ</span><h2>AI ayarları</h2></div><span id="key-count-label" class="ai-key-summary">0 anahtar</span></div>
+            <p class="section-help">Anahtarlar sırayla kullanılır: biri kota ya da hata verince sıradakine, o sağlayıcının anahtarları bitince diğer sağlayıcıya geçilir.</p>
+            <div class="ai-grid">
+                <div class="ai-field"><label for="gemini-keys-input">Gemini anahtarları</label><textarea id="gemini-keys-input" class="key-textarea" rows="4" placeholder="Her satıra bir anahtar (AIza…)" spellcheck="false"></textarea><small>Model: gemini-3.1-flash-lite</small></div>
+                <div class="ai-field"><label for="deepseek-keys-input">DeepSeek anahtarları</label><textarea id="deepseek-keys-input" class="key-textarea" rows="4" placeholder="Her satıra bir anahtar (sk-…)" spellcheck="false"></textarea><small>Model: deepseek-flash</small></div>
+            </div>
+            <div class="ai-actions"><button id="manage-keys-btn" class="action-btn" type="button">Anahtarları kaydet</button><span id="ai-keys-status" role="status" aria-live="polite"></span></div>
+
+            <h3>İş başına sağlayıcı</h3>
+            <p class="section-help">Seçilen önce denenir, diğeri yedektir.</p>
+            <div class="ai-grid ai-grid-3">
+                <div class="ai-field"><label for="ai-provider-triage">Risk ve Amazon arama sorgusu</label><select id="ai-provider-triage"><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option></select></div>
+                <div class="ai-field"><label for="ai-provider-match">Amazon eşleşme doğrulaması</label><select id="ai-provider-match"><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option></select></div>
+                <div class="ai-field"><label for="ai-provider-imageCompare">Satıcı görseli (hash'in kararsız kaldıkları)</label><select id="ai-provider-imageCompare"><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option></select></div>
+            </div>
+
+            <h3>Kurallar</h3>
+            <div class="ai-grid">
+                <div class="ai-field"><label for="ai-risk-threshold">Amazon'dan çekilmeyecek risk puanı</label><select id="ai-risk-threshold"><option value="0">Kapalı — hiçbir ürünü engelleme</option><option value="9">9 ve üstü</option><option value="7">7 ve üstü</option><option value="5">5 ve üstü</option></select><small>Puan, çekimden hemen önce kural ya da tek bir AI isteğiyle belirlenir.</small></div>
+                <div class="ai-field ai-check"><input type="checkbox" id="ai-match-verification"><label for="ai-match-verification">eBay'den çekimde yalnız AI'ın aynı ürün dediği ASIN'leri kaydet</label></div>
+            </div>
+
+            <h3>Toplu risk değerlendirmesi</h3>
+            <p class="section-help">Puanı olmayan keşfedilen ürünleri sırayla değerlendirir. Normalde bu, Amazon çekiminden hemen önce kendiliğinden yapılır.</p>
+            <div class="ai-actions"><button id="analyze-risk-btn" class="action-btn" type="button">Risk Analizi (AI)</button></div>
+                <div id="progress-wrapper">
+                    <div id="progress-bar"></div>
+                    <div id="progress-text">0% (0 / 0 Ürün)</div>
+                </div>
+
+            <h3>Kullanım</h3>
+            <div id="ai-stats" class="ai-stats" aria-live="polite"></div>
+            <div class="ai-actions"><button id="ai-stats-reset" class="secondary-btn" type="button">Sayaçları sıfırla</button></div>
+        </section>
+
 <section id="section-asin-blacklist" class="embedded-tool">        <h2 data-blacklist-i18n="blacklist_title">ASIN kara listesi</h2>
         <div class="input-group">
             <input type="text" id="blacklistAsinInput" class="input" placeholder="ASIN gir (B0…)" maxlength="10">
@@ -581,6 +608,8 @@
     <script src="theme.js"></script>
     <script src="research.js"></script>
     <script src="amazon-target.js"></script>
+    <script src="ai-core.js"></script>
+    <script src="ai-page.js"></script>
     <script src="popup.js"></script>
     <script src="workspace.js"></script>
     <script src="blacklist.js"></script>

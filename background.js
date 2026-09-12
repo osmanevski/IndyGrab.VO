@@ -1,3 +1,4 @@
+importScripts('ai-core.js');
 
 let settings = { extensionCookies: {} };
 const domainId = 1;
@@ -24,8 +25,6 @@ let fetchingTabs = {};
 let analysisState = 'stopped';
 let activeAnalysisTabs = [];
 let analysisWindowId = null;
-let autoAiQueue = [];
-let isAutoAiRunning = false;
 // Amazon arka arkaya açılan çok sayıda isteği bot koruması olarak değerlendirip
 // CAPTCHA/blok sayfası döndürüyordu. eBay akışlarındaki gibi sekmeler arasına
 // bekleme koyuyor ve eşzamanlılığı düşürüyoruz.
@@ -117,7 +116,15 @@ async function sweepStuckFetchAllTabs() {
     return stuck.length;
 }
 
+let fetchAllPumping = false;
 async function processFetchAllQueue() {
+    // Preparing a product awaits an AI call; a second pumper would overshoot concurrency.
+    if (fetchAllPumping) return;
+    fetchAllPumping = true;
+    try { await pumpFetchAllQueue(); } finally { fetchAllPumping = false; }
+}
+
+async function pumpFetchAllQueue() {
     if (fetchAllState !== 'running') return;
     await validateFetchAllTabs();
     await sweepStuckFetchAllTabs();
@@ -127,11 +134,19 @@ async function processFetchAllQueue() {
     while (activeFetchAllTabs.length < FETCH_ALL_CONCURRENCY) {
         const nextIndex = fetchAllQueue.findIndex(item => item.status === 'waiting');
         if (nextIndex === -1) break;
-        fetchAllQueue[nextIndex].status = 'active';
+        const queueItem = fetchAllQueue[nextIndex];
+        queueItem.status = 'active';
         try {
-            const tab = await chrome.tabs.create({ url: fetchAllQueue[nextIndex].url, active: false });
-            fetchingTabs[tab.id] = fetchAllQueue[nextIndex].itemId;
-            activeFetchAllTabs.push({ tabId: tab.id, itemId: fetchAllQueue[nextIndex].itemId, startedAt: Date.now() });
+            await chrome.storage.local.set({ fetchAllQueue });
+            const prep = await prepareAmazonFetch(queueItem.itemId, queueItem.url);
+            if (prep.skip) {
+                queueItem.status = 'completed';
+                await chrome.storage.local.set({ fetchAllQueue });
+                continue;
+            }
+            const tab = await chrome.tabs.create({ url: prep.url, active: false });
+            fetchingTabs[tab.id] = queueItem.itemId;
+            activeFetchAllTabs.push({ tabId: tab.id, itemId: queueItem.itemId, startedAt: Date.now() });
             await chrome.storage.local.set({ fetchAllQueue, activeFetchAllTabs });
             if (activeFetchAllTabs.length < FETCH_ALL_CONCURRENCY) {
                 await new Promise(r => setTimeout(r, FETCH_ALL_TAB_SPACING_MS));
@@ -186,59 +201,27 @@ async function processQueueLoop() {
     }
 }
 
-async function processAutoAiQueue() {
-    if (isAutoAiRunning) return;
-    isAutoAiRunning = true;
-    while (autoAiQueue.length > 0) {
-        const product = autoAiQueue.shift();
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        let { geminiApiKeys } = await chrome.storage.local.get('geminiApiKeys');
-        if (!geminiApiKeys || geminiApiKeys.length === 0) {
-            const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
-            if (geminiApiKey) {
-                geminiApiKeys = [geminiApiKey];
-                await chrome.storage.local.set({ geminiApiKeys });
-            } else {
-                autoAiQueue = [];
-                break;
-            }
-        }
-        try {
-            const result = await analyzeImageWithGemini(
-                product.imageUrl,
-                product.title,
-                product.ebayPrice || "0",
-                product.sellerName || "Unknown",
-                geminiApiKeys
-            );
-            if (result && !result.error && result.riskScore !== undefined) {
-                const { potentialProducts = [] } = await chrome.storage.local.get("potentialProducts");
-                const pIndex = potentialProducts.findIndex(p => p.itemId === product.itemId);
-                if (pIndex !== -1) {
-                    potentialProducts[pIndex].riskScore = result.riskScore;
-                    potentialProducts[pIndex].riskReason = result.reason;
-                    await chrome.storage.local.set({ potentialProducts });
-                }
-            }
-        } catch (e) {}
-    }
-    isAutoAiRunning = false;
-}
-
 function broadcastAutomationState() {
     chrome.runtime.sendMessage({ action: 'automationStateUpdate', state: automationState }).catch(error => { });
 }
 
-async function markProductAsFetched(itemId) {
-    if (!itemId) return;
-    try {
+// potentialProducts is rewritten whole; several fetch tabs finish at once, so writes are serialized.
+let productWriteChain = Promise.resolve();
+function saveProductFields(itemId, fields) {
+    if (!itemId) return Promise.resolve();
+    productWriteChain = productWriteChain.then(async () => {
         const { potentialProducts = [] } = await chrome.storage.local.get("potentialProducts");
         const productIndex = potentialProducts.findIndex(p => p.itemId === itemId);
         if (productIndex > -1) {
-            potentialProducts[productIndex].fetched = true;
+            Object.assign(potentialProducts[productIndex], fields);
             await chrome.storage.local.set({ potentialProducts });
         }
-    } catch (e) {}
+    }).catch(() => {});
+    return productWriteChain;
+}
+
+async function markProductAsFetched(itemId) {
+    await saveProductFields(itemId, { fetched: true });
 }
 
 async function cleanUpBlacklist() {
@@ -642,248 +625,216 @@ async function getOrCreateFolder(folderName, parentId = '1') {
     }
 }
 
-const aiResultCache = new Map();
+// ---- AI tasks (ai-core.js does provider calls, rules, hashing and prompts) ----------------
+async function loadAiContext() {
+    const d = await chrome.storage.local.get(['geminiApiKeys', 'geminiApiKey', 'deepseekApiKeys', 'aiSettings']);
+    let gemini = IndyAI.normalizeKeyList(d.geminiApiKeys || []);
+    if (!gemini.length && d.geminiApiKey) {
+        gemini = IndyAI.normalizeKeyList([d.geminiApiKey]);
+        await chrome.storage.local.set({ geminiApiKeys: gemini });
+    }
+    return {
+        keys: { gemini, deepseek: IndyAI.normalizeKeyList(d.deepseekApiKeys || []) },
+        settings: IndyAI.mergeSettings(d.aiSettings)
+    };
+}
 
-async function analyzeImageWithGemini(imageUrl, title, price, seller, apiKeys) {
-    if (aiResultCache.has(imageUrl)) return aiResultCache.get(imageUrl);
-const prompt = `ROLE: You are an elite, highly vigilant risk assessment AI for Amazon-to-eBay dropshippers. Your absolute priority is to protect the seller's account from suspensions caused by VeRO strikes, Design Patents, dangerous goods, and compliance violations.
+// Counters for the AI page. Batched in memory: parallel tabs would otherwise lose increments.
+let pendingAiStats = {};
+let aiStatsTimer = null;
+function countAi(key, n = 1) {
+    pendingAiStats[key] = (pendingAiStats[key] || 0) + n;
+    if (!aiStatsTimer) aiStatsTimer = setTimeout(flushAiStats, 1000);
+}
+async function flushAiStats() {
+    const batch = pendingAiStats;
+    pendingAiStats = {};
+    aiStatsTimer = null;
+    const { aiStats = {} } = await chrome.storage.local.get('aiStats');
+    for (const [key, n] of Object.entries(batch)) aiStats[key] = (aiStats[key] || 0) + n;
+    aiStats.updatedAt = Date.now();
+    await chrome.storage.local.set({ aiStats });
+}
 
-PRODUCT DETAILS:
-- Title: "${title}"
-- Price: ${price}
-- Seller: ${seller}
+async function runAi(task, prompt, images, maxTokens) {
+    const { keys, settings } = await loadAiContext();
+    const result = await IndyAI.runAiTask({
+        task, prompt, images, maxTokens, keys, settings,
+        fetchImpl: (url, init) => fetch(url, init),
+        onAttempt: a => countAi(`${a.provider}.${a.ok ? 'ok' : 'fail'}`)
+    });
+    if (result.ok) countAi(`task.${task}`);
+    else countAi(result.noKeys ? `task.${task}.noKeys` : `task.${task}.error`);
+    return result;
+}
 
-STRICT SCORING RULES (1-10):
+async function imageToInline(imageUrl, maxDim) {
+    const res = await fetch(imageUrl);
+    if (!res.ok) throw new Error('Görsel indirilemedi');
+    const bitmap = await createImageBitmap(await res.blob());
+    let { width, height } = bitmap;
+    if (width > maxDim || height > maxDim) {
+        if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
+        else { width = Math.round((width * maxDim) / height); height = maxDim; }
+    }
+    const canvas = new OffscreenCanvas(width, height);
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+    const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { mimeType: 'image/jpeg', data: btoa(binary) };
+}
 
-1. TRULY SAFE (Score 1-3): 
-- Generic, unbranded utility items, plain household goods, standard unpatented accessories, clothing with generic patterns. NO complex electronics.
+const imageHashCache = new Map();
+async function imageDHash(imageUrl) {
+    if (imageHashCache.has(imageUrl)) return imageHashCache.get(imageUrl);
+    const res = await fetch(imageUrl);
+    if (!res.ok) throw new Error('Görsel indirilemedi');
+    const bitmap = await createImageBitmap(await res.blob());
+    const canvas = new OffscreenCanvas(9, 8);
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(bitmap, 0, 0, 9, 8);
+    const px = ctx.getImageData(0, 0, 9, 8).data;
+    const gray = [];
+    for (let i = 0; i < px.length; i += 4) gray.push(0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]);
+    const hash = IndyAI.dHashFromGray(gray);
+    if (imageHashCache.size > 500) imageHashCache.clear();
+    imageHashCache.set(imageUrl, hash);
+    return hash;
+}
 
-2. MODERATE RISK (Score 4-6): 
-- Simple wired electronics (basic USB cables), unbranded cosmetics/supplements, basic mechanical tools. Requires human review.
+// Ö3 rules first; otherwise one AI call returns risk and the cleaned Amazon query (Ö5).
+async function triageProduct(product) {
+    const rule = IndyAI.ruleRisk(product.title);
+    if (rule) {
+        countAi('rule.hit');
+        return { ...rule, amazonQuery: null };
+    }
+    const images = [];
+    try { if (product.imageUrl) images.push(await imageToInline(product.imageUrl, 768)); } catch (e) {}
+    const r = await runAi('triage', IndyAI.triagePrompt({ title: product.title, price: product.ebayPrice, seller: product.sellerName }), images, 200);
+    if (!r.ok) return { error: true, reason: r.reason, noKeys: r.noKeys };
+    const t = IndyAI.normalizeTriage(r.json);
+    return t ? { ...t, source: r.provider } : { error: true, reason: 'AI yanıtı eksik' };
+}
 
-3. HIGH RISK / VeRO TRAPS (Score 7-10) - FLAG IMMEDIATELY:
-- MAJOR BRANDS & VeRO: Apple, Nike, Lego, Disney, Sony, etc.
-- WIRELESS & ELECTRONICS: Items with Bluetooth, Wi-Fi, or 2.4GHz (FCC/compliance risk).
-- HAZMAT & BATTERIES: Lithium batteries, rechargeable items, flammables.
-- DESIGN PATENTS: Items with highly specific, modern, or "ergonomic" molds (e.g., vertical mice).
-- MEDICAL & WEAPONS: FDA-approved products, drugs, knives, tactical gear.
-- VISUAL COPYRIGHTS: The image contains celebrity faces, movie characters, or hidden brand logos/watermarks not mentioned in the title.
-
-CRITICAL EXCEPTION (Aftermarket Rule): 
-If the title contains 'compatible with', 'for', or 'fits' (E.g., 'Clear Case for iPhone 15') AND the original brand's logo is ABSOLUTELY NOT on the product image, consider this generic/safe (Score 1-3). However, if the target brand's logo is visible on the image, immediately score it 10.
-
-OUTPUT FORMAT:
-Return ONLY a raw, valid JSON object without markdown blocks.
-- "riskScore" must be an integer.
-- "reason" must be MAXIMUM 5 WORDS stating the main risk (e.g., "Lithium battery hazard", "VeRO brand violation", "Safe generic product").
-
-Example Output:
-{"riskScore": 9, "reason": "VeRO brand violation (Nike)"}`;
+function withAutoCollectFlag(url) {
     try {
-        const imgRes = await fetch(imageUrl);
-        if(!imgRes.ok) return { error: true, reason: "Görsel indirilemedi" };
-        const blob = await imgRes.blob();
-        const bitmap = await createImageBitmap(blob);
-        let { width, height } = bitmap;
-        const maxDim = 1024; 
-        if (width > maxDim || height > maxDim) {
-            if (width > height) { height = Math.round((height * maxDim) / width); width = maxDim; }
-            else { width = Math.round((width * maxDim) / height); height = maxDim; }
-        }
-        const canvas = new OffscreenCanvas(width, height);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(bitmap, 0, 0, width, height);
-        const compressedBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
-        const base64 = await new Promise(r => {
-            const reader = new FileReader();
-            reader.onloadend = () => r(reader.result.split(',')[1]);
-            reader.readAsDataURL(compressedBlob);
-        });
-        const targetModel = "gemini-3.1-flash-lite";
-        for (const apiKey of apiKeys) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ],
-                    generationConfig: { 
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                riskScore: { type: "INTEGER", minimum: 1, maximum: 10 },
-                                reason: { type: "STRING" }
-                            },
-                            required: ["riskScore", "reason"]
-                        },
-                        thinkingConfig: { thinkingLevel: "LOW" },
-                        temperature: 0,
-                        maxOutputTokens: 80
-                    }
-                })
-            });
-            if (res.status === 429) continue;
-            if (!res.ok) continue;
-            const data = await res.json();
-            if (!data.candidates || data.candidates.length === 0) {
-                let blockReason = data.promptFeedback?.blockReason || "Güvenlik Engeli";
-                return { error: true, reason: "API: " + blockReason };
-            }
-            const text = data.candidates[0]?.content?.parts?.[0]?.text;
-            if (text) {
-                try {
-                    let cleanText = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-                    const startIdx = cleanText.indexOf('{');
-                    const endIdx = cleanText.lastIndexOf('}');
-                    if (startIdx !== -1 && endIdx !== -1) {
-                        cleanText = cleanText.substring(startIdx, endIdx + 1);
-                    }
-                    const result = JSON.parse(cleanText);
-                    let finalScore = result.riskScore ?? result.score ?? result.risk_score ?? result.RiskScore ?? result.puan ?? 0;
-                    let finalReason = result.reason ?? result.explanation ?? result.Reason ?? result.sebep ?? "Bilinmiyor";
-                    result.riskScore = parseInt(finalScore) || 0;
-                    result.reason = finalReason;
-                    aiResultCache.set(imageUrl, result);
-                    return result;
-                } catch (parseErr) {
-                    return { error: true, reason: "Parse Hata" };
-                }
-            } else {
-                 return { error: true, reason: "Boş Yanıt" };
-            }
-        }
-        return { error: true, reason: "Çalışan API Key Yok" };
+        const u = new URL(url);
+        u.searchParams.set('indygrab_auto_collect', 'true');
+        return u.toString();
     } catch (e) {
-        return { error: true, reason: "Bağlantı Hatası" };
+        return url.includes('indygrab_auto_collect=true') ? url : url + '&indygrab_auto_collect=true';
     }
 }
 
-async function compareImagesWithGemini(mainImageUrl, targetImageUrl, apiKeys) {
-const prompt = `
-    Compare these two images strictly.
-    Image 1 is the reference product.
-    Image 2 is a candidate product.
-    CRITERIA FOR MATCH:
-    1. Identical object shape and design.
-    2. Identical camera angle and perspective.
-    3. Identical lighting and shadows.
-    4. Identical positioning of the object in the frame.
-    STEP 1: Analyze the differences in angle, lighting, background, and object details.
-    STEP 2: Conclude if they are derived from the EXACT SAME source photograph (ignoring minor resolution differences).
-    Output JSON ONLY in this format:
-    {
-      "analysis": "Brief step-by-step comparison...",
-      "isMatch": true/false
-    }
-    `;
-    try {
-        const [img1, img2] = await Promise.all([mainImageUrl, targetImageUrl].map(async (url) => {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error("Görsel indirilemedi");
-            const blob = await res.blob();
-            const data = await new Promise(r => {
-                const reader = new FileReader();
-                reader.onloadend = () => r(reader.result.split(',')[1]);
-                reader.readAsDataURL(blob);
+// Ö2: decide risk right before Amazon opens, and skip high-risk products.
+// Without a working AI the product is fetched with its original query, as before.
+async function prepareAmazonFetch(itemId, fallbackUrl) {
+    const { potentialProducts = [] } = await chrome.storage.local.get('potentialProducts');
+    const product = potentialProducts.find(p => p.itemId === itemId);
+    if (!product) return { url: withAutoCollectFlag(fallbackUrl) };
+    const { settings } = await loadAiContext();
+    let triage;
+    if (product.riskScore !== undefined && product.amazonQuery !== undefined) {
+        triage = { riskScore: product.riskScore, reason: product.riskReason, amazonQuery: product.amazonQuery };
+    } else {
+        triage = await triageProduct(product);
+        if (!triage.error) {
+            await saveProductFields(itemId, {
+                riskScore: triage.riskScore, riskReason: triage.reason,
+                riskSource: triage.source, amazonQuery: triage.amazonQuery ?? null
             });
-            return { data, mimeType: blob.type || 'image/jpeg' };
-        }));
-        const targetModel = "gemini-3.1-flash-lite";
-        for (const apiKey of apiKeys) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: img1.mimeType, data: img1.data } },
-                        { inline_data: { mime_type: img2.mimeType, data: img2.data } }
-                    ]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            analysis: { type: "STRING" },
-                            isMatch: { type: "BOOLEAN" }
-                        },
-                        required: ["analysis", "isMatch"]
-                    },
-                    thinkingConfig: { thinkingLevel: "LOW" },
-                    temperature: 0,
-                    maxOutputTokens: 200
-                }
-            };
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.status === 429) continue;
-            if (!res.ok) continue;
-            const data = await res.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-                const jsonStr = text.replace(/```json|```/g, '').trim();
-                return JSON.parse(jsonStr);
-            }
         }
-        return { error: true, reason: "API Hatası" };
-    } catch (e) {
-        return { error: true, reason: "Bağlantı/Görsel Hatası" };
     }
+    if (!triage.error && settings.riskBlockThreshold > 0 && triage.riskScore >= settings.riskBlockThreshold) {
+        await saveProductFields(itemId, { fetched: true, fetchSkipReason: `Risk ${triage.riskScore}/10 — ${triage.reason}` });
+        countAi('fetch.skippedRisk');
+        return { skip: true };
+    }
+    const base = product.amazonSearchUrl || fallbackUrl;
+    return { url: withAutoCollectFlag(IndyAI.amazonSearchUrlFor(base, triage.error ? null : triage.amazonQuery)) };
+}
+
+// Ö1: perceptual hash decides clear cases; the AI only sees borderline pairs.
+async function compareSellerImages(mainImageUrl, targetImageUrl) {
+    const { settings } = await loadAiContext();
+    try {
+        const distance = IndyAI.hammingHex(await imageDHash(mainImageUrl), await imageDHash(targetImageUrl));
+        const verdict = IndyAI.hashVerdict(distance, settings);
+        countAi(`hash.${verdict}`);
+        if (verdict !== 'unsure') return { isMatch: verdict === 'same', method: 'hash', distance };
+    } catch (e) {
+        countAi('hash.error');
+    }
+    let images;
+    try {
+        images = await Promise.all([mainImageUrl, targetImageUrl].map(u => imageToInline(u, 512)));
+    } catch (e) {
+        return { error: true, reason: 'Görsel indirilemedi' };
+    }
+    const r = await runAi('imageCompare', IndyAI.imageComparePrompt(), images, 200);
+    if (!r.ok) return { error: true, reason: r.reason };
+    return { isMatch: r.json.isMatch === true, method: r.provider, analysis: r.json.analysis };
+}
+
+// Ö4: only Amazon results the AI calls the same product are kept for an eBay fetch.
+async function verifyAmazonMatch(itemId, candidates) {
+    const { settings } = await loadAiContext();
+    if (!settings.matchVerification) return { skipped: true };
+    const { potentialProducts = [] } = await chrome.storage.local.get('potentialProducts');
+    const product = potentialProducts.find(p => p.itemId === itemId);
+    if (!product || !product.imageUrl || !candidates.length) return { skipped: true };
+    const unverified = async reason => {
+        await saveProductFields(itemId, { aiMatch: 'unverified', aiMatchReason: reason });
+        countAi('match.unverified');
+        return { error: true, reason };
+    };
+    let reference;
+    try { reference = await imageToInline(product.imageUrl, 512); } catch (e) { return unverified('eBay görseli indirilemedi'); }
+    const limited = candidates.slice(0, settings.matchCandidateLimit);
+    const loaded = await Promise.all(limited.map(c => c.imageUrl ? imageToInline(c.imageUrl, 384).catch(() => null) : null));
+    const usable = limited.filter((c, i) => loaded[i]);
+    if (!usable.length) return unverified('Amazon görselleri indirilemedi');
+    const r = await runAi('match', IndyAI.matchPrompt(product, usable), [reference, ...loaded.filter(Boolean)], 300);
+    if (!r.ok) return unverified(r.reason);
+    const matches = IndyAI.normalizeMatch(r.json, usable);
+    if (!matches) return unverified('AI yanıtı eksik');
+    await saveProductFields(itemId, { aiMatch: matches.length ? 'verified' : 'no_match', aiMatchCount: matches.length, aiMatchProvider: r.provider });
+    countAi(matches.length ? 'match.verified' : 'match.noMatch');
+    return { matches, provider: r.provider };
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "analyzeProductRisk") {
         (async () => {
-            let { geminiApiKeys } = await chrome.storage.local.get('geminiApiKeys');
-            if (!geminiApiKeys || geminiApiKeys.length === 0) {
-                const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
-                if (geminiApiKey) {
-                    geminiApiKeys = [geminiApiKey];
-                    await chrome.storage.local.set({ geminiApiKeys }); 
-                } else {
-                    sendResponse({ error: true, reason: "Key Yok" });
-                    return;
-                }
+            const result = await triageProduct({
+                itemId: message.itemId, imageUrl: message.imageUrl, title: message.title,
+                ebayPrice: message.price, sellerName: message.seller
+            });
+            if (!result.error && message.itemId) {
+                await saveProductFields(message.itemId, {
+                    riskScore: result.riskScore, riskReason: result.reason,
+                    riskSource: result.source, amazonQuery: result.amazonQuery ?? null
+                });
             }
-            const result = await analyzeImageWithGemini(
-                message.imageUrl, 
-                message.title, 
-                message.price, 
-                message.seller, 
-                geminiApiKeys
-            );
             sendResponse(result);
         })();
         return true;
     }
     if (message.action === "compareImages") {
-        (async () => {
-            let { geminiApiKeys } = await chrome.storage.local.get('geminiApiKeys');
-            if (!geminiApiKeys || geminiApiKeys.length === 0) {
-                const { geminiApiKey } = await chrome.storage.local.get('geminiApiKey');
-                if (geminiApiKey) geminiApiKeys = [geminiApiKey];
-                else {
-                    sendResponse({ error: true, reason: "Key Yok" });
-                    return;
-                }
-            }
-            const result = await compareImagesWithGemini(
-                message.mainImageUrl,
-                message.targetImageUrl,
-                geminiApiKeys
-            );
-            sendResponse(result);
-        })();
+        compareSellerImages(message.mainImageUrl, message.targetImageUrl).then(sendResponse);
+        return true;
+    }
+    if (message.action === "verifyAmazonMatch") {
+        const tabId = sender.tab && sender.tab.id;
+        const itemId = tabId ? fetchingTabs[tabId] : null;
+        if (!itemId) {
+            sendResponse({ skipped: true });
+            return true;
+        }
+        verifyAmazonMatch(itemId, message.candidates || []).then(sendResponse);
         return true;
     }
     if (message.action === "initiateSmoothScroll") {
@@ -930,8 +881,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     if (message.action === "openTabInBackground") {
         (async () => {
+            let url = message.url;
+            if (message.itemId && String(url).includes('indygrab_auto_collect=true')) {
+                const prep = await prepareAmazonFetch(message.itemId, url);
+                if (prep.skip) {
+                    sendResponse({ status: "skipped" });
+                    return;
+                }
+                url = prep.url;
+            }
             const tab = await chrome.tabs.create({ 
-                url: message.url, 
+                url, 
                 active: false,
                 windowId: sender.tab.windowId 
             });
@@ -1059,8 +1019,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (!isAlreadyAdded) {
                 potentialProducts.unshift(message.product);
                 await chrome.storage.local.set({ potentialProducts });
-                autoAiQueue.push(message.product);
-                processAutoAiQueue();
                 sendResponse({ status: "success", added: true });
             } else {
                 sendResponse({ status: "success", added: false, message: "Already exists." });

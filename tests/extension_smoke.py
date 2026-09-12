@@ -13,11 +13,27 @@ import argparse
 import json
 import sys
 import tempfile
+import time
 import traceback
 from pathlib import Path
 from typing import Any, Callable
 
 from playwright.sync_api import Page, Playwright, sync_playwright
+
+
+def wait_js(page: Any, expression: str, arg: Any = None, timeout: float = 10_000) -> None:
+    """Poll a (possibly async) JS predicate until it returns truthy.
+
+    Playwright's wait_for_function treats the Promise of an async predicate as truthy and
+    returns at once, so storage-backed waits must be polled through page.evaluate instead.
+    """
+    deadline = time.monotonic() + timeout / 1000
+    while True:
+        if page.evaluate(expression, arg) if arg is not None else page.evaluate(expression):
+            return
+        if time.monotonic() > deadline:
+            raise AssertionError(f"timed out after {timeout:.0f} ms waiting for: {expression[:160]}")
+        page.wait_for_timeout(100)
 
 
 DEFAULT_EXTENSION_DIR = Path(__file__).resolve().parents[1]
@@ -229,6 +245,7 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 ('.nav-btn[data-target="section-blacklist"]', "section-blacklist"),
                 ('.nav-btn[data-target="section-forbidden-cats"]', "section-forbidden-cats"),
                 ('.nav-btn[data-target="section-settings"]', "section-settings"),
+                ('.nav-btn[data-target="section-ai"]', "section-ai"),
             ]
             for selector, section_id in nav_cases:
                 result.check(
@@ -258,7 +275,7 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 assert page.locator("#minPriceFilter").is_visible()
                 page.locator("#minPriceFilter").fill("12.5")
                 page.locator("#maxPriceFilter").fill("0")
-                page.wait_for_function(
+                wait_js(page, 
                     "async () => { const d = await chrome.storage.local.get(['minPrice', 'maxPrice']);"
                     " return d.minPrice === 12.5 && d.maxPrice === 0; }"
                 )
@@ -271,9 +288,9 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 assert page.locator("#filtering #asinCount").count() == 1
                 assert page.locator("#filtering #sortFilter").count() == 1
                 page.locator("#maxBsrFilter").select_option("3000")
-                page.wait_for_function("async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 3000")
+                wait_js(page, "async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 3000")
                 page.locator("#maxBsrFilter").select_option("")
-                page.wait_for_function("async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 0")
+                wait_js(page, "async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 0")
                 assert page.locator("#amazon-target-select").is_disabled()
                 assert "Amazon sekmesi" in page.locator("#amazon-target-status").inner_text()
 
@@ -311,6 +328,32 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
 
             result.check("moved Amazon and eBay display settings remain present", settings_controls)
 
+            def ai_settings_page() -> None:
+                assert page.locator("#section-products #manage-keys-btn, #section-products #analyze-risk-btn").count() == 0
+                assert_workspace(page, '.nav-btn[data-target="section-ai"]', "section-ai")
+                page.locator("#gemini-keys-input").fill("AIzaFixtureGeminiKey01\n\nAIzaFixtureGeminiKey01")
+                page.locator("#deepseek-keys-input").fill("sk-fixture-deepseek-01")
+                page.locator("#manage-keys-btn").click()
+                wait_js(page, 
+                    "async () => { const d = await chrome.storage.local.get(['geminiApiKeys', 'deepseekApiKeys']);"
+                    " return d.geminiApiKeys?.length === 1 && d.deepseekApiKeys?.length === 1; }"
+                )
+                assert "Gemini 1" in page.locator("#key-count-label").inner_text()
+                page.locator("#ai-provider-match").select_option("gemini")
+                page.locator("#ai-risk-threshold").select_option("5")
+                page.locator("#ai-match-verification").uncheck()
+                wait_js(page, 
+                    "async () => { const s = (await chrome.storage.local.get('aiSettings')).aiSettings || {};"
+                    " return s.taskProviders?.match === 'gemini' && s.riskBlockThreshold === 5 && s.matchVerification === false; }"
+                )
+                page.evaluate("chrome.storage.local.set({aiStats: {'task.triage': 4, 'rule.hit': 2, 'hash.same': 7}})")
+                page.wait_for_function("document.querySelector('#ai-stats').textContent.includes('7')")
+                page.locator("#ai-stats-reset").click()
+                wait_js(page, "async () => Object.keys((await chrome.storage.local.get('aiStats')).aiStats || {}).length === 0")
+                result.screenshot(page, "ai-settings-dark-1440x1000.png")
+
+            result.check("AI settings page stores both providers' keys, task providers and rules", ai_settings_page)
+
             def embedded_tools() -> None:
                 count_before = len(context.pages)
                 assert page.locator('a[href="titles.html"]').count() == 0
@@ -326,11 +369,11 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 assert_workspace(page, '.nav-btn[data-target="section-asin-blacklist"]', 'section-asin-blacklist')
                 page.locator('#blacklistAsinInput').fill('B0TEST0001')
                 page.locator('#addBlacklistBtn').click()
-                page.wait_for_function("async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.includes('B0TEST0001')")
+                wait_js(page, "async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.includes('B0TEST0001')")
                 assert 'B0TEST0001' in page.locator('#blacklistOutput').inner_text()
                 page.locator('#blacklistFileInput').set_input_files({'name':'asins.txt','mimeType':'text/plain','buffer':b'B0TEST0002\nB0TEST0003'})
                 page.locator('#uploadBlacklistBtn').click()
-                page.wait_for_function("async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.length === 3")
+                wait_js(page, "async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.length === 3")
                 assert len(context.pages) == count_before
                 page.locator('.nav-btn[data-target="section-amazon"][data-amazon-tab="collect"]').click()
                 page.locator('[data-workspace="section-asin-blacklist"]').click()
@@ -380,10 +423,10 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 page.locator("#amazon-target-select").select_option(str(target_id))
                 page.evaluate("chrome.storage.local.set({asinList: [], collectedPages: {}, visitedPages: [], minPrice: 12.5, maxPrice: 0})")
                 page.locator("#updateBtn").click()
-                page.wait_for_function("async () => { const d = await chrome.storage.local.get('asinList'); return d.asinList?.length === 1 && d.asinList[0] === 'B0QA000001'; }", timeout=15000)
+                wait_js(page, "async () => { const d = await chrome.storage.local.get('asinList'); return d.asinList?.length === 1 && d.asinList[0] === 'B0QA000001'; }", timeout=15000)
                 assert "B0QA000001" in page.locator("#asinOutput").inner_text()
                 page.locator("#saveToMemoryBtn").click()
-                page.wait_for_function("async () => (await chrome.storage.local.get('memoryAsins')).memoryAsins.includes('B0QA000001')")
+                wait_js(page, "async () => (await chrome.storage.local.get('memoryAsins')).memoryAsins.includes('B0QA000001')")
                 first.close()
                 page.locator("#updateBtn").click()
                 page.wait_for_timeout(150)

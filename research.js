@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'section-blacklist': ['Satıcı kuralları', 'Taramadan çıkarılan mağazaları ve engel sürelerini yönet.'],
         'section-forbidden-cats': ['Kategori kuralları', 'eBay araştırmasında hariç tutulacak ana ve alt kategorileri belirle.'],
         'section-amazon': ['Amazon toplama', 'Kaynağını seç, ürün filtrelerini belirle ve ASIN havuzunu oluştur.'],
-        'section-settings': ['Görünüm ayarları', 'Amazon ve eBay sayfalarındaki bilgi ve araçları düzenle.']
+        'section-settings': ['Görünüm ayarları', 'Amazon ve eBay sayfalarındaki bilgi ve araçları düzenle.'],
+        'section-ai': ['AI ayarları', 'Gemini ve DeepSeek anahtarlarını, iş başına sağlayıcıyı ve risk kurallarını yönet.']
     };
     function selectWorkspace(button, writeHash = true) {
         if (!button) return;
@@ -327,11 +328,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let bgColor = product.riskScore >= 5 ? "#450a0a" : "#064e3b";
                     let textColor = product.riskScore >= 5 ? "#fca5a5" : "#86efac";
                     let riskText = product.riskScore >= 5 ? "⛔ RİSKLİ" : "DÜŞÜK RİSK TAHMİNİ";
-                    riskAnalysisHtml = `<div class="risk-analysis-result" style="display:block; padding: 8px 15px; border-top: 1px solid #333; font-size: 12px; background-color:${bgColor}; color:${textColor}; font-weight: bold;">Puan: ${product.riskScore}/10 - ${riskText}</div>`;
+                    const riskSource = { rule: 'Kural', deepseek: 'DeepSeek', gemini: 'Gemini' }[product.riskSource] || '';
+                    const riskDetail = [product.riskReason ? escapeHTML(product.riskReason) : '', riskSource].filter(Boolean).join(' · ');
+                    riskAnalysisHtml = `<div class="risk-analysis-result" style="display:block; padding: 8px 15px; border-top: 1px solid #333; font-size: 12px; background-color:${bgColor}; color:${textColor}; font-weight: bold;">Puan: ${product.riskScore}/10 - ${riskText}${riskDetail ? `<br><span style="font-weight:normal;">${riskDetail}</span>` : ''}</div>`;
                     aiBtnText = 'Tekrar';
                     aiBtnStyle = 'background-color: #34495e;';
                 } else {
                     riskAnalysisHtml = `<div class="risk-analysis-result" style="display:none; padding: 8px 15px; border-top: 1px solid #333; font-size: 12px;"></div>`;
+                }
+                if (product.fetchSkipReason) {
+                    riskAnalysisHtml += `<div class="ai-card-status bad">Amazon'dan çekilmedi: ${escapeHTML(product.fetchSkipReason)}</div>`;
+                } else if (product.aiMatch === 'verified') {
+                    riskAnalysisHtml += `<div class="ai-card-status good">AI eşleşmeyi doğruladı (${Number(product.aiMatchCount) || 0} ASIN)</div>`;
+                } else if (product.aiMatch === 'no_match') {
+                    riskAnalysisHtml += `<div class="ai-card-status bad">AI aynı ürünü bulamadı — ASIN kaydedilmedi</div>`;
+                } else if (product.aiMatch === 'unverified') {
+                    riskAnalysisHtml += `<div class="ai-card-status">AI doğrulanamadı, filtre sonucu kaydedildi${product.aiMatchReason ? ': ' + escapeHTML(product.aiMatchReason) : ''}</div>`;
                 }
                 card.innerHTML = `
                     <button class="remove-product-btn" title="Bu ürünü sil">&times;</button>
@@ -416,9 +428,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
             }
-            const { geminiApiKeys } = await chrome.storage.local.get(['geminiApiKeys']);
-            if (!geminiApiKeys || geminiApiKeys.length === 0) {
-                return alert("API Key yok! 'Key Yönetimi'nden ekleyin.");
+            if (!(await hasAnyAiKey())) {
+                return alert("API anahtarı yok. AI ayarları sayfasından Gemini veya DeepSeek anahtarı ekleyin.");
             }
             btn.disabled = true;
             btn.textContent = '...';
@@ -441,6 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 result = await new Promise(resolve => {
                     chrome.runtime.sendMessage({
                         action: "analyzeProductRisk",
+                        itemId: product.itemId,
                         imageUrl: product.imageUrl,
                         title: product.title,
                         price: product.ebayPrice || "0",
@@ -1040,9 +1052,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderBlacklist(changes.sellerBlacklist.newValue || {});
                 loadSellerLinks();
             }
-            if (changes.geminiApiKeys) {
-                updateKeyLabel(changes.geminiApiKeys.newValue || []);
-            }
             if (changes.analysisQueue || changes.analysisState || changes.activeAnalysisTabs) {
                 loadAnalysisQueue();
             }
@@ -1181,62 +1190,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    function updateKeyLabel(keys) {
-        if(keyCountLabel) {
-            keyCountLabel.textContent = `${keys.length} Key`;
-            keyCountLabel.style.color = keys.length > 0 ? '#27ae60' : '#c0392b';
-        }
-    }
-
-    chrome.storage.local.get(['geminiApiKeys'], (d) => {
-        updateKeyLabel(d.geminiApiKeys || []);
-    });
-
-    manageKeysBtn.addEventListener('click', () => {
-        chrome.storage.local.get(['geminiApiKeys'], (d) => {
-            const currentKeys = d.geminiApiKeys || [];
-            showKeyManagerModal(currentKeys);
-        });
-    });
-
-    function showKeyManagerModal(currentKeys) {
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        const content = document.createElement('div');
-        content.className = 'modal-content key-manager-content';
-        content.innerHTML = `
-            <div class="modal-header key-manager-header">
-                <span>🔑 API Key Yönetimi</span>
-                <span style="cursor:pointer; font-size:20px;" id="close-key-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p style="font-size:13px; color:#bbb; margin-bottom:10px;">Her satıra 1 adet API Key yapıştırın. Sistem biri dolunca diğerine geçer.</p>
-                <textarea class="key-textarea" id="keys-input" placeholder="AIzaSy...&#10;AIzaSy...">${currentKeys.join('\n')}</textarea>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn" id="save-keys-btn">Kaydet</button>
-            </div>
-        `;
-        overlay.appendChild(content);
-        document.body.appendChild(overlay);
-        const closeModal = () => document.body.removeChild(overlay);
-        content.querySelector('#close-key-modal').onclick = closeModal;
-
-        content.querySelector('#save-keys-btn').onclick = () => {
-            const text = content.querySelector('#keys-input').value;
-            const newKeys = text.split('\n').map(k => k.trim()).filter(k => k.length > 10);
-            chrome.storage.local.set({ geminiApiKeys: newKeys }, () => {
-                alert(`${newKeys.length} adet API Key kaydedildi.`);
-                updateKeyLabel(newKeys);
-                closeModal();
-            });
-        };
+    async function hasAnyAiKey() {
+        const { geminiApiKeys = [], deepseekApiKeys = [] } = await chrome.storage.local.get(['geminiApiKeys', 'deepseekApiKeys']);
+        return geminiApiKeys.length > 0 || deepseekApiKeys.length > 0;
     }
 
     analyzeRiskBtn.addEventListener('click', async () => {
-        const { geminiApiKeys } = await chrome.storage.local.get(['geminiApiKeys']);
-        if (!geminiApiKeys || geminiApiKeys.length === 0) {
-            return alert("Hiç API Key yok! Lütfen 'Key Yönetimi' butonuna basıp en az 1 key ekleyin.");
+        if (!(await hasAnyAiKey())) {
+            return alert("API anahtarı yok. AI ayarları sayfasından Gemini veya DeepSeek anahtarı ekleyin.");
         }
         if (!confirm("Risk analizi başlatılsın mı? Ürünler API limitlerine (429 Hatası) takılmamak için sırayla analiz edilecektir.")) return;
 
@@ -1288,6 +1249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 result = await new Promise(resolve => {
                     chrome.runtime.sendMessage({
                         action: "analyzeProductRisk",
+                        itemId: product.itemId,
                         imageUrl: product.imageUrl,
                         title: product.title,
                         price: product.ebayPrice || "0",

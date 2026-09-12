@@ -63,3 +63,23 @@ Ek API satın alımı veya ücretli fallback kurulmadı.
 CodexBar başlangıç: Codex 5 saat %32 / hafta %5; Claude %0 / %5.
 Ara kontrol (2026-09-12 23:19 İstanbul): Codex yeni 5 saat penceresinde %9 / hafta %17;
 Claude %4 / %5. Bunlar hesap genelidir; görev veya oturum bazında maliyet ayrımı değildir.
+
+# AI katmanı (13 Eylül)
+
+- `ai-core.js`: sağlayıcı-bağımsız katman. Gemini (`gemini-3.1-flash-lite`) ve DeepSeek
+  (`deepseek-flash`, düşünme modu kapalı, JSON modu) anahtar kuyrukları: 401/402/403/408/429/5xx
+  sıradaki anahtara, 400 ve boş yanıt diğer sağlayıcıya geçer. Kural riski, dHash, istemler.
+- Ö2/Ö3/Ö5: yeni keşfedilen üründe otomatik AI yok. Amazon çekiminden hemen önce kural,
+  kuraldan geçerse tek AI isteği risk + temiz Amazon sorgusu üretir; eşik (varsayılan 7)
+  ve üstü `fetched` + `fetchSkipReason` ile atlanır. AI yoksa orijinal sorguyla çekilir.
+- Ö4: eBay→Amazon çekiminde filtreyi geçen ilk 10 aday görselle doğrulanır, yalnız
+  eşleşenler kalır (BSR isteğinden önce). AI yanıt veremezse filtre sonucu kaydedilir,
+  ürün `aiMatch: unverified` işaretlenir.
+- Ö1: satıcı görsel karşılaştırması önce dHash (≤10 aynı, ≥22 farklı), arası AI.
+- AI ayarları sayfası: iki sağlayıcının anahtarları, iş başına sağlayıcı (diğeri yedek),
+  risk eşiği, eşleşme doğrulaması, `aiStats` sayaçları. Anahtar/toplu analiz kimlikleri korundu.
+- Doğrulama: `node --test tests/ai-core.test.cjs tests/amazon-target.test.cjs` (12),
+  `tests/extension_smoke.py` (22), `tests/ai_flow_e2e.py` (ağ kapalı, sahte DeepSeek/Amazon).
+  Test notu: `wait_for_function` async yüklemi beklemez — storage beklemeleri `wait_js` ile
+  yoklanır; eklentinin `chrome.tabs.create` sekmeleri Playwright route'undan geçmez.
+- Canlı Gemini/DeepSeek anahtarıyla ve gerçek eBay/Amazon sayfalarıyla henüz denenmedi.
