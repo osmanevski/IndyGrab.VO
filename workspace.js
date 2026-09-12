@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (values.minPrice || values.maxPrice) chips.push(`Fiyat: ${values.minPrice || 0}–${values.maxPrice || 'sınırsız'}`);
             if (values.shipping && values.shipping !== 'all') chips.push(`Teslimat: ${{prime:'Prime','1-day':'1 gün','2-day':'2 gün'}[values.shipping] || values.shipping}`);
             if (values.stock && values.stock !== 'ignore') chips.push(values.stock === 'exclude_warning' ? 'Stok uyarısı hariç' : `Stok ≥ ${values.stock}`);
-            if (values.maxBsr) chips.push(`BSR ≤ ${values.maxBsr}`);
+            if (values.maxBsr) chips.push(`Alt kategori sırası: ${({10000:'Gevşek',3000:'Orta',1000:'Sıkı'})[values.maxBsr] || 'Özel'} (≤ ${Number(values.maxBsr).toLocaleString('tr-TR')})`);
             const words = Array.isArray(values.bannedWords) ? values.bannedWords : String(values.bannedWords || '').split(',').filter(w => w.trim());
             if (words.length) chips.push(`${words.length} yasaklı kelime`);
             chips.push(`Arama başına ${values.asinCount || 5} ASIN`);

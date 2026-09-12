@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             stars_4_4: "4.4 Stars and above", stars_4_5: "4.5 Stars and above", stars_4_6: "4.6 Stars and above",
             stars_4_7: "4.7 Stars and above", stars_4_8: "4.8 Stars and above", stars_4_9: "4.9 Stars and above",
             stars_5: "5 Stars and above", banned_words: "Banned Words", feedback_score: "Feedback Score",
-            price_range: "Price Range", max_bsr: "Max Deep BSR", asin_count: "Number of ASINs to Fetch", shipping_selection: "Shipping Selection",
+            price_range: "Price Range", max_bsr: "Subcategory rank", bsr_off: "Off — faster scan", bsr_loose: "Loose — selling (≤ 10,000)", bsr_medium: "Medium — steady sellers (≤ 3,000)", bsr_strict: "Strict — strong sellers (≤ 1,000)", asin_count: "Number of ASINs to Fetch", shipping_selection: "Shipping Selection",
             shipping_all: "All Products", shipping_prime: "Prime Only", shipping_1day: "1-Day Shipping",
             shipping_2day: "2-Day Shipping", min_stock_count: "Minimum Stock Count", stock_ignore: "Ignore Stock Filter",
             stock_exclude_warning: "Exclude Stock Warning", stock_1: "At least 1 stock", stock_2: "At least 2 stock",
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             stars_4_2: "4.2 Yıldız ve üstü", stars_4_3: "4.3 Yıldız ve üstü", stars_4_4: "4.4 Yıldız ve üstü",
             stars_4_5: "4.5 Yıldız ve üstü", stars_4_6: "4.6 Yıldız ve üstü", stars_4_7: "4.7 Yıldız ve üstü",
             stars_4_8: "4.8 Yıldız ve üstü", stars_4_9: "4.9 Yıldız ve üstü", stars_5: "5 Yıldız ve üstü",
-            banned_words: "Yasaklı Kelimeler", feedback_score: "Yorum sayısı", price_range: "Fiyat Aralığı", max_bsr: "Maks Derin BSR",
+            banned_words: "Yasaklı Kelimeler", feedback_score: "Yorum sayısı", price_range: "Fiyat Aralığı", max_bsr: "Alt kategori sırası", bsr_off: "Kapalı — tarama hızlı", bsr_loose: "Gevşek — satışı olanlar (≤ 10.000)", bsr_medium: "Orta — düzenli satanlar (≤ 3.000)", bsr_strict: "Sıkı — güçlü satanlar (≤ 1.000)",
             asin_count: "Arama başına ASIN sayısı", shipping_selection: "Kargo Seçimi", shipping_all: "Tüm Ürünler",
             shipping_prime: "Sadece Prime", shipping_1day: "1 Günlük Kargo", shipping_2day: "2 Günlük Kargo",
             min_stock_count: "Minimum Stok Sayısı", stock_ignore: "Stok Filtresini Önemseme", stock_exclude_warning: "Stok Uyarısı Olanları Hariç Tut",
@@ -439,7 +439,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             asinCountInput.value = data.asinCount || "";
             minPriceFilter.value = data.minPrice || "";
             maxPriceFilter.value = data.maxPrice || "";
-            maxBsrFilter.value = data.maxBsr || "";
+            const storedBsr = data.maxBsr ? String(data.maxBsr) : "";
+            // An older hand-typed value is kept as its own option instead of being silently reset.
+            if (storedBsr && maxBsrFilter.options && ![...maxBsrFilter.options].some(o => o.value === storedBsr)) {
+                const custom = document.createElement("option");
+                custom.value = storedBsr;
+                custom.textContent = `Özel (≤ ${Number(storedBsr).toLocaleString("tr-TR")})`;
+                maxBsrFilter.appendChild(custom);
+            }
+            maxBsrFilter.value = storedBsr;
             stockFilter.value = data.stock || "";
             sortFilter.value = data.sort || "";
 
@@ -562,7 +570,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     asinCountInput.addEventListener("input", updateFilters);
     minPriceFilter.addEventListener("input", updateFilters);
     maxPriceFilter.addEventListener("input", updateFilters);
-    maxBsrFilter.addEventListener("input", updateFilters);
+    maxBsrFilter.addEventListener("change", updateFilters);
     stockFilter.addEventListener("change", updateFilters);
     sortFilter.addEventListener("change", updateFilters);
 

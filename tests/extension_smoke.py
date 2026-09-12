@@ -264,6 +264,11 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 )
                 values = page.evaluate("chrome.storage.local.get(['minPrice', 'maxPrice'])")
                 assert values == {"minPrice": 12.5, "maxPrice": 0}
+                assert page.locator("#maxBsrFilter").evaluate("e => e.tagName") == "SELECT"
+                page.locator("#maxBsrFilter").select_option("3000")
+                page.wait_for_function("async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 3000")
+                page.locator("#maxBsrFilter").select_option("")
+                page.wait_for_function("async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 0")
                 assert page.locator("#amazon-target-select").is_disabled()
                 assert "Amazon sekmesi" in page.locator("#amazon-target-status").inner_text()
 
