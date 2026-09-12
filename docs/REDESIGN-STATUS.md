@@ -35,8 +35,8 @@ kuyruk eşzamanlılığı, BSR istekleri, hafıza şeması ve üretim kurulumu d
 
 # Doğrulama
 
-- `node --test tests/amazon-target.test.cjs`: 5 hedefleme senaryosu.
-- `tests/extension_smoke.py`: gerçek unpacked eklenti, izole Chromium profili,
+- `node --test tests/amazon-target.test.cjs`: 5/5 geçti.
+- `tests/extension_smoke.py`: 18/18 geçti, sıfır pageerror. Gerçek unpacked eklenti, izole Chromium profili,
   dış HTTP/HTTPS istekleri engelli; yerel Amazon HTML fixture'ı ile gerçek content script.
 - Tüm eski research.html ID'lerinin tekilliği; örnek mağaza/ürün/ASIN yükleme;
   gezinme ve tekrar tıklama; sayfa yenilemede havuz; filtre storage değerleri;
