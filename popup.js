@@ -38,8 +38,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_settings: "Search Page Settings", ebay_sch_range: "Date Ranges to Show:", ebay_sch_info: "Info to Show:",
             ebay_sch_sold: "Sold", ebay_sch_watchers: "Watchers", ebay_sch_available: "Available", word_saved: "Word(s) saved!",
             word_exists: "This word(s) already exists.", ebay_sch_display_mode: "Data Display Mode", ebay_sch_mode_standard: "Standard (Info + Breakdown Button)",
-            ebay_sch_mode_direct: "Direct Sales Breakdown", ebay_sch_seller_sale_days_label: "Last Sale Date Filter (Days):",
-            ebay_sch_seller_sale_days_placeholder: "e.g., 7 (for last 7 days)", ebay_asins_saved: "{count} ASIN(s) fetched from Amazon and saved to memory!",
+            ebay_sch_mode_direct: "Direct Sales Breakdown", ebay_sch_seller_sale_days_label: "Last sale window (days)",
+            ebay_sch_seller_sale_days_placeholder: "e.g. 7", ebay_asins_saved: "{count} ASIN(s) fetched from Amazon and saved to memory!",
             send_to_blacklist: "Send to Blacklist", sent_to_blacklist: "ASINs added to Blacklist!", no_asin_memory: "No ASIN in memory!",
             auto_collect: "Auto Collect Settings", auto_page_limit: "Number of Pages to Navigate:", auto_asin_limit: "Total ASINs to Collect:",
             filter_group_product: "Product", filter_group_sales: "Sales conditions", filter_group_collection: "Result selection", result_selection_help: "How many of the products passing the filters on each search page are taken, and in which order. Applies to page collection and to Amazon fetches from eBay products.", auto_limits_title: "Auto collect limits", auto_limits_help: "Auto collect stops when it reaches this page count or total ASIN count. Scan page is not affected."
@@ -82,8 +82,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_info: "Gösterilecek Bilgiler:", ebay_sch_sold: "Satılan", ebay_sch_watchers: "İzleyen",
             ebay_sch_available: "Mevcut", word_saved: "Kelime(ler) kaydedildi!", word_exists: "Bu kelime(ler) zaten kayıtlı.",
             ebay_sch_display_mode: "Veri Gösterim Modu", ebay_sch_mode_standard: "Standart (Bilgi + Detay Butonu)",
-            ebay_sch_mode_direct: "Doğrudan Satış Detayları", ebay_sch_seller_sale_days_label: "Son Satış Tarihi Filtresi (Gün önce):",
-            ebay_sch_seller_sale_days_placeholder: "örn: 7 (son 7 gün için)", ebay_asins_saved: "{count} ASIN Amazon'dan çekilip hafızaya kaydedildi!",
+            ebay_sch_mode_direct: "Doğrudan Satış Detayları", ebay_sch_seller_sale_days_label: "Son satış aralığı (gün)",
+            ebay_sch_seller_sale_days_placeholder: "Örn. 7", ebay_asins_saved: "{count} ASIN Amazon'dan çekilip hafızaya kaydedildi!",
             send_to_blacklist: "Kara Listeye Gönder", sent_to_blacklist: "ASIN'ler Kara Listeye Eklendi!", no_asin_memory: "Hafızada ASIN yok!",
             auto_collect: "Otomatik Toplama Ayarları", auto_page_limit: "Gezilecek Sayfa Sayısı:", auto_asin_limit: "Toplanacak Toplam ASIN:",
             filter_group_product: "Ürün", filter_group_sales: "Satış koşulları", filter_group_collection: "Sonuç seçimi", result_selection_help: "Her arama sayfasında filtreleri geçen ürünlerden kaçının ve hangi sırayla alınacağı. Sayfa toplamada da eBay ürünlerinden Amazon çekiminde de geçerli.", auto_limits_title: "Otomatik toplama sınırları", auto_limits_help: "Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur. Sayfayı tara düğmesini etkilemez."

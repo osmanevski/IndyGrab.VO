@@ -36,52 +36,67 @@
         <section class="store-links-section" id="section-stores">
             <div class="store-links-header">
                 <div class="section-title-group"><span class="section-kicker">Kaynak Yönetimi</span><h2>Araştırma kaynakları</h2></div>
-                <div id="automation-controls">
-                    <label class="toggle-chip" style="cursor: pointer; color: var(--text); font-size: 13px; display: flex; align-items: center; margin-right: 10px; font-weight: bold; background: rgba(46, 204, 113, 0.14); padding: 5px 8px; border-radius: 5px;">
-                        <input type="checkbox" id="auto-queue-checkbox" style="margin-right: 5px; accent-color: #2ecc71;"> Oto AI Kuyruk
-                    </label>
-                    <div class="scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Tarama kapsamı</span>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="scan_mode" value="live" checked> Canlı
-                        </label>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="scan_mode" value="sold"> Satılmış
-                        </label>
+            </div>
+
+            <div class="stores-layout">
+                <div class="stores-panel stores-add">
+                    <h3 class="stores-panel-title">Kaynak ekle</h3>
+                    <p class="stores-panel-help">Mağaza adı, mağaza linki ya da satıcı arama linki yapıştır; her satıra bir tane.</p>
+                    <div class="add-link-form">
+                        <textarea id="store-link-input" placeholder="Her satıra bir mağaza linki gelecek şekilde yapıştırın..." rows="5"></textarea>
+                        <button id="add-link-btn">Ekle</button>
                     </div>
-                    <div class="catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler)." style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Yakalama hassasiyeti</span>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="catch_sensitivity" value="wide"> Geniş
-                        </label>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="catch_sensitivity" value="normal" checked> Normal
-                        </label>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="catch_sensitivity" value="strict"> Sıkı
-                        </label>
-                    </div>
-                    <div class="concurrency-picker" style="background: var(--surface-soft); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px;"><span class="control-label">Eşzamanlılık</span>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="auto_concurrency" value="1" checked> 1 Sekme
-                        </label>
-                        <label style="cursor: pointer; color: var(--text); font-size: 13px;">
-                            <input type="radio" name="auto_concurrency" value="2"> 2 Sekme
-                        </label>
-                    </div>
-                    <div class="sale-window-picker">                <label for="schSellerSaleDays" data-i18n="ebay_sch_seller_sale_days_label">Son satış aralığı (gün)</label>
-                <input type="number" id="schSellerSaleDays" min="1" data-i18n-placeholder="ebay_sch_seller_sale_days_placeholder" placeholder="Örn. 7"><small>İlgili eBay satıcı keşfi adımında uygulanır.</small></div>
-                    <button id="start-automation-btn" class="control-btn start">Taramayı başlat</button>
-                    <button id="pause-automation-btn" class="control-btn pause">Duraklat</button>
-                    <button id="stop-automation-btn" class="control-btn stop">Durdur</button>
                 </div>
-                <div class="toolbar-actions" style="display: flex; gap: 5px; align-items: center;">
-                    <button id="clear-visited-btn" class="secondary-btn">Tarananları Sil (0)</button>
-                    <button id="clear-banned-links-btn" class="danger-btn" style="background-color: #8e44ad;">Yasaklıları Sil</button>
-                    <button id="clear-links-btn" class="danger-btn">Tümünü Sil</button>
+
+                <div id="automation-controls" class="stores-panel stores-scan">
+                    <h3 class="stores-panel-title">Tarama</h3>
+                    <div class="scan-settings">
+                    <fieldset class="scan-group scan-mode-picker" title="Canlı: satıştaki tüm ürünleri tarar (geniş kapsam). Satılmış: yalnızca son ~90 günde satılanları tarar (talep doğrulama).">
+                        <legend class="scan-caption">Tarama kapsamı</legend>
+                        <div class="segmented">
+                            <label><input type="radio" name="scan_mode" value="live" checked> Canlı</label>
+                            <label><input type="radio" name="scan_mode" value="sold"> Satılmış</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="scan-group catch-sensitivity-picker" title="Bir ürünün toplanması için gereken satış hızı. Geniş: son 30 günde ≥1 satış (en çok ürün). Normal: 7 günde ≥1 veya 30 günde ≥3. Sıkı: 7 günde ≥3 alıcı (sadece hot ürünler).">
+                        <legend class="scan-caption">Yakalama hassasiyeti</legend>
+                        <div class="segmented">
+                            <label><input type="radio" name="catch_sensitivity" value="wide"> Geniş</label>
+                            <label><input type="radio" name="catch_sensitivity" value="normal" checked> Normal</label>
+                            <label><input type="radio" name="catch_sensitivity" value="strict"> Sıkı</label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="scan-group concurrency-picker" title="Aynı anda taranacak mağaza sekmesi sayısı.">
+                        <legend class="scan-caption">Eşzamanlılık</legend>
+                        <div class="segmented">
+                            <label><input type="radio" name="auto_concurrency" value="1" checked> 1 sekme</label>
+                            <label><input type="radio" name="auto_concurrency" value="2"> 2 sekme</label>
+                        </div>
+                    </fieldset>
+                    <div class="scan-group sale-window-picker">
+                        <label for="schSellerSaleDays" class="scan-caption" data-i18n="ebay_sch_seller_sale_days_label">Son satış aralığı (gün)</label>
+                        <input type="number" id="schSellerSaleDays" min="1" data-i18n-placeholder="ebay_sch_seller_sale_days_placeholder" placeholder="Örn. 7">
+                        <small>Son satışı bundan eski ürünler atlanır. Yalnız Satılmış kapsamda uygulanır; boşsa kapalı.</small>
+                    </div>
+                    </div>
+                    <div class="scan-footer">
+                        <label class="toggle-chip"><input type="checkbox" id="auto-queue-checkbox"><span>Oto AI Kuyruk<small>Taranan mağazayı analiz kuyruğuna ekler</small></span></label>
+                        <div class="scan-actions">
+                            <button id="start-automation-btn" class="control-btn start">Taramayı başlat</button>
+                            <button id="pause-automation-btn" class="control-btn pause">Duraklat</button>
+                            <button id="stop-automation-btn" class="control-btn stop">Durdur</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="add-link-form">
-                <textarea id="store-link-input" placeholder="Her satıra bir mağaza linki gelecek şekilde yapıştırın..." rows="4"></textarea>
-                <button id="add-link-btn">Ekle</button>
+
+            <div class="stores-list-head">
+                <h3>Kaynak listesi</h3>
+                <div class="toolbar-actions">
+                    <button id="clear-visited-btn" class="secondary-btn">Tarananları Sil (0)</button>
+                    <button id="clear-banned-links-btn" class="danger-btn">Yasaklıları Sil</button>
+                    <button id="clear-links-btn" class="danger-btn">Tümünü Sil</button>
+                </div>
             </div>
             <ul id="store-links-list"></ul>
             <div id="links-pagination" class="pagination-controls hidden"></div>

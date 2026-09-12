@@ -238,6 +238,31 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
 
             result.check("representative products, stores, and memory load from extension storage", seeded_content)
 
+            def stores_layout() -> None:
+                assert_workspace(page, '.nav-btn[data-target="section-stores"]', "section-stores")
+                listing = page.locator("#store-links-list")
+                assert listing.evaluate("e => e.scrollHeight <= e.clientHeight + 1"), "store list must not scroll inside a fixed height"
+                for name in ("scan_mode", "catch_sensitivity", "auto_concurrency"):
+                    assert page.locator(f'#automation-controls input[name="{name}"]:checked').count() == 1, name
+                page.locator('label:has(> input[name="catch_sensitivity"][value="strict"])').click()
+                wait_js(page, "async () => (await chrome.storage.local.get('catchSensitivity')).catchSensitivity === 'strict'")
+                page.locator('label:has(> input[name="catch_sensitivity"][value="normal"])').click()
+                wait_js(page, "async () => (await chrome.storage.local.get('catchSensitivity')).catchSensitivity === 'normal'")
+                page.locator('label:has(> input[name="scan_mode"][value="sold"])').click()
+                wait_js(page, "async () => (await chrome.storage.local.get('scanMode')).scanMode === 'sold'")
+                page.locator('label:has(> input[name="scan_mode"][value="live"])').click()
+                page.locator('label:has(> input[name="auto_concurrency"][value="2"])').click()
+                wait_js(page, "async () => (await chrome.storage.local.get('autoConcurrency')).autoConcurrency === '2'")
+                page.locator('label:has(> input[name="auto_concurrency"][value="1"])').click()
+                page.locator("#schSellerSaleDays").fill("9")
+                wait_js(page, "async () => String((await chrome.storage.local.get('schSellerSaleDays')).schSellerSaleDays) === '9'")
+                page.locator("#schSellerSaleDays").fill("")
+                page.locator("#auto-queue-checkbox").check()
+                wait_js(page, "async () => (await chrome.storage.local.get('autoAddToQueue')).autoAddToQueue === true")
+                page.locator("#auto-queue-checkbox").uncheck()
+
+            result.check("stores page: segmented settings still save and the list is not clipped", stores_layout)
+
             nav_cases = [
                 ('.nav-btn[data-target="section-stores"]', "section-stores"),
                 ('.nav-btn[data-target="section-products"]', "section-products"),
