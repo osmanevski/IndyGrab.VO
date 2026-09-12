@@ -14,10 +14,8 @@
 }
 body { min-width:0; width:100%; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:14px; }
 body .top-nav { position:fixed; inset:0 auto 0 0; width:var(--sidebar-width); padding:30px 16px 18px; display:flex; flex-direction:column; justify-content:flex-start; align-items:stretch; gap:28px; background:var(--rail); border:0; border-right:1px solid var(--border); box-shadow:none; backdrop-filter:none; overflow-y:auto; z-index:100; }
-.brand-lockup { gap:10px; padding:0 7px; }
-.brand-symbol { display:grid; place-items:center; width:36px; height:39px; background:var(--primary); border-radius:10px 10px 10px 2px; color:white; font-weight:800; font-size:21px; letter-spacing:-2px; padding-right:2px; }
-.brand-name { font-size:21px; font-weight:750; letter-spacing:-.8px; line-height:1.2; }
-.brand-name > span { display:block; color:var(--muted); font-size:8px; font-weight:650; letter-spacing:1.7px; margin-top:5px; }
+.brand-lockup { display:flex; align-items:center; padding:0 7px; min-height:44px; }
+.brand-lockup .brand-wordmark { display:block; width:100%; max-width:194px; height:auto; object-fit:contain; }
 body .nav-actions { display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; flex-wrap:nowrap; gap:4px; }
 .nav-group-label { color:var(--muted); font-size:9px; font-weight:750; letter-spacing:1.6px; padding:18px 10px 8px; }
 .nav-group-label:first-child { padding-top:0; }
