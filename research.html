@@ -249,6 +249,20 @@
             <button type="button" id="startAutoBtn" class="collection-action">Otomatik toplamayı başlat</button>
             <button type="button" id="stopAutoBtn" class="collection-action">Toplamayı durdur</button>
         </div>
+        <section class="filter-group auto-limits" aria-labelledby="auto-limits-title">
+            <h3 id="auto-limits-title" data-i18n="auto_limits_title">Otomatik toplama sınırları</h3>
+            <p class="filter-group-help" data-i18n="auto_limits_help">Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur. Sayfayı tara düğmesini etkilemez.</p>
+            <div class="filter-grid">
+<div class="filter-field">
+                        <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
+                        <input type="number" id="autoPageLimit" min="1" placeholder="E.g., 10">
+</div>
+<div class="filter-field">
+                        <label for="autoAsinLimit" data-i18n="auto_asin_limit">Total ASINs to Collect:</label>
+                        <input type="number" id="autoAsinLimit" min="1" placeholder="E.g., 100">
+</div>
+            </div>
+        </section>
         <div id="asinOutput" class="asin-list"></div>
         <button id="saveToMemoryBtn" data-i18n="save_to_memory">Save to Memory (0 ASIN)</button>
     </div>
@@ -280,7 +294,7 @@
                 </select>
 </div>
 <div class="filter-field">
-                <label data-i18n="max_bsr">Max Deep BSR:</label>
+                <label for="maxBsrFilter" data-i18n="max_bsr">Max Deep BSR:</label>
                     <select id="maxBsrFilter">
                         <option value="" data-i18n="bsr_off">Kapalı — tarama hızlı</option>
                         <option value="10000" data-i18n="bsr_loose">Gevşek — satışı olanlar (≤ 10.000)</option>
@@ -365,16 +379,9 @@
                 </div>
 </section>
 <section class="filter-group" aria-labelledby="filter-group-collection">
-    <h3 id="filter-group-collection" data-i18n="filter_group_collection">Toplama ayarları</h3>
+    <h3 id="filter-group-collection" data-i18n="filter_group_collection">Sonuç seçimi</h3>
+    <p class="filter-group-help" data-i18n="result_selection_help">Her arama sayfasında filtreleri geçen ürünlerden kaçının ve hangi sırayla alınacağı. Sayfa toplamada da eBay ürünlerinden Amazon çekiminde de geçerli.</p>
     <div class="filter-grid">
-<div class="filter-field">
-                        <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
-                        <input type="number" id="autoPageLimit" min="1" placeholder="E.g., 10">
-</div>
-<div class="filter-field">
-                        <label for="autoAsinLimit" data-i18n="auto_asin_limit">Total ASINs to Collect:</label>
-                        <input type="number" id="autoAsinLimit" min="1" placeholder="E.g., 100">
-</div>
 <div class="filter-field">
                         <label for="asinCount" data-i18n="asin_count">Number of ASINs to Fetch:</label>
                         <input type="number" id="asinCount" min="1" placeholder="E.g., 10">

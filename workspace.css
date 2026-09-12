@@ -149,6 +149,8 @@ body #section-amazon .filter-sections { max-width:880px; }
 body #section-amazon .filter-group { padding:22px 0 8px; border-top:1px solid var(--border); }
 body #section-amazon .filter-group > h3 { margin:0 0 16px; font-size:13px; font-weight:650; color:var(--text); }
 body #section-amazon .filter-group .filter-grid { row-gap:6px; }
+body #section-amazon .filter-group > .filter-group-help { margin:-8px 0 16px; max-width:640px; line-height:1.55; }
+body #section-amazon #collect .auto-limits { max-width:880px; margin-top:22px; margin-bottom:18px; }
 
 .sale-window-picker { display:flex; flex-direction:column; gap:4px; max-width:185px; }
 .sale-window-picker > label,.sale-window-picker > small { color:var(--muted); font-size:10px; }
