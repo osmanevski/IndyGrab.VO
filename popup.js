@@ -768,26 +768,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     exportCsvBtn.addEventListener("click", function () {
-        chrome.storage.local.get(["memoryAsins", "generatedTitles"], (data) => {
+        chrome.storage.local.get(["memoryAsins"], (data) => {
             let memoryAsins = data.memoryAsins || [];
-            let generatedTitles = data.generatedTitles || {};
             if (memoryAsins.length === 0) {
                 showNotification(translations[currentLang].export_failed, 1000);
                 return;
             }
 
-            let csv = "ASIN,eBay Title\n";
-            memoryAsins.forEach(asin => {
-                let titleData = generatedTitles[asin];
-                let title = titleData ? (typeof titleData === 'string' ? titleData : (titleData.aiTitle || "")) : "";
-                title = title.replace(/"/g, '""');
-                csv += `${asin},"${title}"\n`;
-            });
+            const csv = "ASIN\n" + memoryAsins.join("\n") + "\n";
             const blob = new Blob([csv], { type: "text/csv" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `asins_with_titles_${new Date().toISOString()}.csv`;
+            a.download = `asins_${new Date().toISOString()}.csv`;
             a.click();
             URL.revokeObjectURL(url);
             updateExportHistory("CSV", memoryAsins.length, memoryAsins);
@@ -796,27 +789,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     exportJsonBtn.addEventListener("click", function () {
-        chrome.storage.local.get(["memoryAsins", "generatedTitles"], (data) => {
+        chrome.storage.local.get(["memoryAsins"], (data) => {
             let memoryAsins = data.memoryAsins || [];
-            let generatedTitles = data.generatedTitles || {};
             if (memoryAsins.length === 0) {
                 showNotification(translations[currentLang].export_failed, 1000);
                 return;
             }
-            const exportData = memoryAsins.map(asin => {
-                let titleData = generatedTitles[asin];
-                let title = titleData ? (typeof titleData === 'string' ? titleData : (titleData.aiTitle || "")) : "";
-                return {
-                    asin: asin,
-                    ebayTitle: title
-                };
-            });
+            const exportData = memoryAsins.map(asin => ({ asin }));
             const json = JSON.stringify({ items: exportData }, null, 2);
             const blob = new Blob([json], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `asins_with_titles_${new Date().toISOString()}.json`;
+            a.download = `asins_${new Date().toISOString()}.json`;
             a.click();
             URL.revokeObjectURL(url);
             updateExportHistory("JSON", memoryAsins.length, memoryAsins);
@@ -916,11 +901,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         extension = "txt";
                     } else if (item.type === "CSV") {
                         blobType = "text/csv";
-                        content = "ASIN\n" + asins.join("\n");
+                        content = "ASIN\n" + asins.join("\n") + "\n";
                         extension = "csv";
                     } else {
                         blobType = "application/json";
-                        content = JSON.stringify({ asins }, null, 2);
+                        // Same shape as the original JSON export.
+                        content = JSON.stringify({ items: asins.map(asin => ({ asin })) }, null, 2);
                         extension = "json";
                     }
                     const blob = new Blob([content], { type: blobType });

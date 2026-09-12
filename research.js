@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navButtons = [...document.querySelectorAll('.nav-btn')];
     const allSections = [...document.querySelectorAll('.container > section')];
     const workspaceLabels = {
+        'section-mixer': ['Liste karıştırıcı', 'ASIN listesini tekilleştir, karıştır ve dışa aktar.'],
+        'section-asin-blacklist': ['ASIN kara listesi', 'Amazon toplamasında hariç tutulacak ASIN’leri yönet.'],
         'section-stores': ['Mağaza araştırması', 'Kaynaklarını ekle, tarama kapsamını belirle ve ürün keşfini başlat.'],
         'section-products': ['Keşfedilen ürünler', 'Satış verilerini incele, riskleri değerlendir ve Amazon aramasına geç.'],
         'section-queue': ['Mağaza analiz kuyruğu', 'Bekleyen mağazaları ve analiz ilerlemesini takip et.'],
@@ -30,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tabName = button.dataset.amazonTab;
         if (tabName) document.querySelector('.tab[data-tab="' + tabName + '"]')?.click();
         const [title, description] = tabName === 'memory'
-            ? ['ASIN havuzu', 'Toplanan ASIN’leri düzenle, başlık hazırlamaya veya dışa aktarmaya geç.']
+            ? ['ASIN havuzu', 'Toplanan ASIN’leri düzenle ve dışa aktar.']
             : workspaceLabels[targetId];
         document.getElementById('workspace-title').textContent = title;
         document.getElementById('workspace-description').textContent = description;
@@ -41,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectWorkspace(navButtons.find(b => b.dataset.target === section && (!tab || b.dataset.amazonTab === tab)) || navButtons[0], false);
     }
     navButtons.forEach(btn => btn.addEventListener('click', () => selectWorkspace(btn)));
+    document.querySelectorAll('[data-workspace]').forEach(button => button.addEventListener('click', () => selectWorkspace(navButtons.find(b => b.dataset.target === button.dataset.workspace))));
     window.addEventListener('hashchange', restoreWorkspace);
     // popup.js installs its inner-tab listeners during DOMContentLoaded as well.
     setTimeout(restoreWorkspace, 0);

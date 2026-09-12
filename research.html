@@ -20,13 +20,12 @@
             <span class="nav-group-label">TOPLAMA & HAZIRLAMA</span>
             <button class="nav-btn" data-target="section-amazon" data-amazon-tab="collect"><span>Amazon toplama</span></button>
             <button class="nav-btn" data-target="section-amazon" data-amazon-tab="memory"><span>ASIN havuzu</span></button>
-            <a class="nav-link" href="titles.html" target="_blank">Başlık hazırlama <span aria-hidden="true">↗</span></a>
             <span class="nav-group-label">KURALLAR & ARAÇLAR</span>
             <button class="nav-btn" data-target="section-blacklist"><span>Satıcı kara listesi</span><span id="badge-blacklist" class="nav-badge">0</span></button>
             <button class="nav-btn" data-target="section-forbidden-cats"><span>Yasaklı kategoriler</span></button>
-            <a class="nav-link" href="blacklist.html" target="_blank">ASIN kara listesi <span aria-hidden="true">↗</span></a>
+            <button class="nav-btn" data-target="section-asin-blacklist"><span>ASIN kara listesi</span></button>
             <button class="nav-btn" data-target="section-settings"><span>Görünüm ayarları</span></button>
-            <a class="nav-link" href="mixer.html" target="_blank">Liste karıştırıcı <span aria-hidden="true">↗</span></a>
+            <button class="nav-btn" data-target="section-mixer"><span>Liste karıştırıcı</span></button>
         </div>
         <div class="sidebar-footer"><span>Senin araştırma alanın</span><button id="theme-toggle" aria-label="Temayı değiştir" title="Temayı değiştir">◐</button></div>
     </nav>
@@ -223,7 +222,7 @@
             <div class="section-header">
                 <div class="section-title-group"><span class="section-kicker">Amazon</span><h2>Amazon çalışma alanı</h2></div>
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <a href="blacklist.html" target="_blank" class="action-btn" style="text-decoration:none; background-color:#34495e;" title="Toplamada yok sayılacak ASIN'ler">⛔ ASIN Kara Listesi</a>
+                    <button type="button" class="action-btn" data-workspace="section-asin-blacklist">ASIN kara listesi</button>
                     <div class="flag-container" title="Arayüz dili">
                         <img src="images/us.png" alt="EN" data-lang="en" class="lang-flag selected">
                         <img src="images/tr.png" alt="TR" data-lang="tr" class="lang-flag">
@@ -541,11 +540,42 @@
                 </div>
             </div>
         </details></section>
+<section id="section-asin-blacklist" class="embedded-tool">        <h2 data-blacklist-i18n="blacklist_title">ASIN kara listesi</h2>
+        <div class="input-group">
+            <input type="text" id="blacklistAsinInput" class="input" placeholder="ASIN gir (B0…)" maxlength="10">
+            <button id="addBlacklistBtn" class="button" data-blacklist-i18n="add_to_blacklist">Add to Blacklist</button>
+        </div>
+        <div class="input-group">
+            <input type="file" id="blacklistFileInput" accept=".txt,.csv">
+            <button id="uploadBlacklistBtn" class="button">Dosyadan ekle</button>
+        </div>
+        <div class="control-group">
+            <input type="checkbox" id="selectAllCheckbox">
+            <label for="selectAllCheckbox" class="select-all-label">Select All</label>
+            <button id="deleteSelectedBtn" class="button">Delete Selected</button>
+        </div>
+        <div id="blacklistOutput" class="asin-list"></div>
+        <div id="paginationControls" class="pagination-controls" style="display: none;">
+            <button id="prevPageBtn" class="button">◀</button>
+            <span id="pageInfo"></span>
+            <button id="nextPageBtn" class="button">▶</button>
+        </div>
+        <div id="blacklist-notification" class="notification"></div></section>
+<section id="section-mixer" class="embedded-tool">
+<h2>Liste karıştırıcı</h2><p class="section-help">Her satıra bir ASIN yaz. Listeyi karıştırırken tekrar eden kayıtlar çıkarılır.</p>
+<div class="mixer-columns"><div><label for="inputAsins">Girdi listesi</label><textarea id="inputAsins" placeholder="Her satıra bir ASIN"></textarea></div>
+<div><label for="outputAsins">Karıştırılmış liste</label><textarea id="outputAsins" readonly></textarea></div></div>
+<div class="tool-actions"><button id="mixButton" class="action-btn">Karıştır</button><button id="copyButton" class="secondary-btn" disabled>Kopyala</button><button id="downloadButton" class="secondary-btn" disabled>TXT indir</button><button id="duplicatesButton" class="secondary-btn" disabled>Tekrarları göster</button></div>
+<div id="duplicatesList" class="hidden"><strong>Çıkarılan tekrarlar</strong><ul id="duplicatesContent"></ul></div>
+<p id="mixer-notification" class="hidden" role="status"></p>
+</section>
     </main>
     <script src="theme.js"></script>
     <script src="research.js"></script>
     <script src="amazon-target.js"></script>
     <script src="popup.js"></script>
     <script src="workspace.js"></script>
+    <script src="blacklist.js"></script>
+    <script src="mixer.js"></script>
 </body>
 </html>

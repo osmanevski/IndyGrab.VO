@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         outputAsins: document.getElementById("outputAsins"),
         copyButton: document.getElementById("copyButton"),
         downloadButton: document.getElementById("downloadButton"),
-        notification: document.getElementById("notification"),
+        notification: document.getElementById("mixer-notification"),
         duplicatesButton: document.getElementById("duplicatesButton"),
         duplicatesList: document.getElementById("duplicatesList"),
         duplicatesContent: document.getElementById("duplicatesContent")
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     elements.mixButton.addEventListener("click", function () {
         const inputText = elements.inputAsins.value.trim();
         if (!inputText) {
-            showNotification("Please enter at least one ASIN.", 2000);
+            showNotification("En az bir ASIN gir.", 2000);
             return;
         }
 
@@ -41,31 +41,31 @@ document.addEventListener("DOMContentLoaded", function () {
         elements.duplicatesButton.disabled = duplicates.length === 0;
 
         if (duplicates.length > 0) {
-            elements.duplicatesContent.innerHTML = duplicates.map(asin => `<li>${asin}</li>`).join("");
+            elements.duplicatesContent.replaceChildren(...duplicates.map(asin => { const item = document.createElement("li"); item.textContent = asin; return item; }));
         } else {
-            elements.duplicatesContent.innerHTML = "<li>No duplicates found.</li>";
+            elements.duplicatesContent.innerHTML = "<li>Tekrar eden kayıt yok.</li>";
         }
 
-        showNotification(`Shuffled ${uniqueAsins.length} unique ASINs!`, 2000);
+        showNotification(`${uniqueAsins.length} benzersiz ASIN karıştırıldı.`, 2000);
     });
 
     elements.copyButton.addEventListener("click", function () {
         const outputText = elements.outputAsins.value;
         if (!outputText) {
-            showNotification("Nothing to copy!", 2000);
+            showNotification("Kopyalanacak kayıt yok.", 2000);
             return;
         }
         navigator.clipboard.writeText(outputText).then(() => {
-            showNotification("ASINs copied to clipboard!", 1000);
+            showNotification("ASIN’ler kopyalandı.", 1000);
         }).catch(() => {
-            showNotification("Failed to copy ASINs!", 1000);
+            showNotification("Kopyalama başarısız.", 1000);
         });
     });
 
     elements.downloadButton.addEventListener("click", function () {
         const outputText = elements.outputAsins.value;
         if (!outputText) {
-            showNotification("Nothing to download!", 2000);
+            showNotification("İndirilecek kayıt yok.", 2000);
             return;
         }
         const blob = new Blob([outputText], { type: "text/plain" });
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
         a.download = `shuffled_asins_${new Date().toISOString()}.txt`;
         a.click();
         URL.revokeObjectURL(url);
-        showNotification("ASINs downloaded successfully!", 1000);
+        showNotification("ASIN’ler indirildi.", 1000);
     });
 
     elements.duplicatesButton.addEventListener("click", function () {

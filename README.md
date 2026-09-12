@@ -13,13 +13,12 @@ AI destekli, **tamamen yerel çalışan** bir Chrome eklentisi (Manifest V3). Am
 **AI (Google Gemini)**
 - Ürün görseli + başlık üzerinden VeRO/marka/patent **risk skorlaması**
 - Aynı ürünü satan rakip satıcıları bulmak için **görsel karşılaştırma**
-- eBay Cassini algoritmasına optimize **AI başlık üretici**
 - Kullanıcının kendi Gemini API anahtarıyla çalışır (yerel depoda saklanır)
 
 **Amazon**
 - Ürün/arama sayfalarında ASIN toplama, filtreleme ve toplu detay çekme
 
-**Yardımcı sayfalar:** AI Araştırma paneli, AI Başlık paneli, Blacklist, Mixer.
+**Ana panel:** Araştırma, Amazon toplama, ASIN havuzu, kara listeler ve Mixer.
 
 ## Kurulum
 

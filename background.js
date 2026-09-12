@@ -1,4 +1,3 @@
-importScripts('title_generator.js');
 
 let settings = { extensionCookies: {} };
 const domainId = 1;

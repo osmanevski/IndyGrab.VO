@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('workspace-title').textContent = isMemory ? 'ASIN havuzu' : 'Amazon toplama';
         document.getElementById('workspace-description').textContent = isMemory
-            ? 'Toplanan ASIN’leri düzenle, başlık hazırlamaya veya dışa aktarmaya geç.'
+            ? 'Toplanan ASIN’leri düzenle ve dışa aktar.'
             : 'Kaynağını seç, ürün filtrelerini belirle ve ASIN havuzunu oluştur.';
         document.querySelector('.source-picker').hidden = isMemory;
         history.replaceState(null, '', '#section-amazon/' + (isMemory ? 'memory' : 'collect'));

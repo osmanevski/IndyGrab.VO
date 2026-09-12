@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "IndyGrab.VO",
   "version": "1881",
-  "description": "Yerel çalışan, AI destekli Amazon & eBay ürün araştırma ve başlık üretme aracı.",
+  "description": "Yerel çalışan, AI destekli Amazon ve eBay ürün araştırma aracı.",
   "permissions": [
     "storage",
     "activeTab",
@@ -97,9 +97,7 @@
         "research.html",
         "research.js",
         "popup.js",
-        "theme.js",
-        "titles.html",
-        "titles.js"
+        "theme.js"
       ],
       "matches": [
         "<all_urls>"

@@ -74,10 +74,6 @@ def fixture_storage() -> dict[str, Any]:
             {"url": "https://www.ebay.com/sch/i.html?_ssn=desk-works&_ipg=240", "visited": False},
         ],
         "memoryAsins": ["B0FIXTURE01", "B0FIXTURE02", "B0FIXTURE03"],
-        "generatedTitles": {
-            "B0FIXTURE01": {"title": "Fixture Camp Wagon", "status": "completed"},
-            "B0FIXTURE02": {"title": "Fixture Kitchen Rack", "status": "completed"},
-        },
         "analysisQueue": [],
         "sellerBlacklist": {},
         "forbiddenMainCategories": ["Restricted fixture"],
@@ -303,6 +299,49 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 assert all(value == 1 for value in counts.values()), counts
 
             result.check("moved Amazon and eBay display settings remain present", settings_controls)
+
+            def embedded_tools() -> None:
+                count_before = len(context.pages)
+                assert page.locator('a[href="titles.html"]').count() == 0
+                assert_workspace(page, '.nav-btn[data-target="section-mixer"]', 'section-mixer')
+                page.locator('#inputAsins').fill('B0TEST0001\nB0TEST0002\nB0TEST0001')
+                page.locator('#mixButton').click()
+                assert set(page.locator('#outputAsins').input_value().splitlines()) == {'B0TEST0001','B0TEST0002'}
+                page.locator('#duplicatesButton').click()
+                assert page.locator('#duplicatesContent').inner_text() == 'B0TEST0001'
+                with page.expect_download() as info:
+                    page.locator('#downloadButton').click()
+                assert set(Path(info.value.path()).read_text().splitlines()) == {'B0TEST0001','B0TEST0002'}
+                assert_workspace(page, '.nav-btn[data-target="section-asin-blacklist"]', 'section-asin-blacklist')
+                page.locator('#blacklistAsinInput').fill('B0TEST0001')
+                page.locator('#addBlacklistBtn').click()
+                page.wait_for_function("async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.includes('B0TEST0001')")
+                assert 'B0TEST0001' in page.locator('#blacklistOutput').inner_text()
+                page.locator('#blacklistFileInput').set_input_files({'name':'asins.txt','mimeType':'text/plain','buffer':b'B0TEST0002\nB0TEST0003'})
+                page.locator('#uploadBlacklistBtn').click()
+                page.wait_for_function("async () => (await chrome.storage.local.get('blacklistAsins')).blacklistAsins.length === 3")
+                assert len(context.pages) == count_before
+                page.locator('.nav-btn[data-target="section-amazon"][data-amazon-tab="collect"]').click()
+                page.locator('[data-workspace="section-asin-blacklist"]').click()
+                assert visible_top_sections(page) == ['section-asin-blacklist']
+                result.screenshot(page, 'blacklist-embedded.png')
+                page.locator('.nav-btn[data-target="section-mixer"]').click()
+                result.screenshot(page, 'mixer-embedded.png')
+
+            result.check('Mixer and ASIN blacklist work within panel without new tabs', embedded_tools)
+
+            def asin_exports() -> None:
+                page.locator('.nav-btn[data-target="section-amazon"][data-amazon-tab="memory"]').click()
+                with page.expect_download() as info:
+                    page.locator('#exportCsvBtn').click()
+                lines = Path(info.value.path()).read_text().splitlines()
+                assert lines[0] == 'ASIN' and set(lines[1:]) == {'B0FIXTURE01','B0FIXTURE02','B0FIXTURE03'}
+                with page.expect_download() as info:
+                    page.locator('#exportJsonBtn').click()
+                items = json.loads(Path(info.value.path()).read_text())['items']
+                assert all(set(item) == {'asin'} for item in items) and len(items) == 3
+
+            result.check('CSV and JSON export ASIN data without title preparation', asin_exports)
 
             def real_collection_fixture() -> None:
                 # Fulfil synthetic HTML locally: the extension runs its real content script,

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const translations = {
         en: {
-            blacklist_title: "Blacklist",
+            blacklist_title: "ASIN Blacklist",
             add_to_blacklist: "Add to Blacklist",
             added_to_blacklist: "Added to blacklist!",
             blacklist_asin_invalid: "Invalid ASIN! Must be 10 characters starting with 'B0'.",
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
             selected_asins_deleted: "{count} ASIN(s) removed from blacklist!"
         },
         tr: {
-            blacklist_title: "Kara Liste",
+            blacklist_title: "ASIN kara listesi",
             add_to_blacklist: "Kara Listeye Ekle",
             added_to_blacklist: "Kara listeye eklendi!",
             blacklist_asin_invalid: "Geçersiz ASIN! 10 karakter olmalı ve 'B0' ile başlamalı.",
@@ -39,33 +39,39 @@ document.addEventListener("DOMContentLoaded", function () {
     let selectAllCheckbox = document.getElementById("selectAllCheckbox");
     let deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
     let blacklistOutput = document.getElementById("blacklistOutput");
-    let notification = document.getElementById("notification");
+    let notification = document.getElementById("blacklist-notification");
     let prevPageBtn = document.getElementById("prevPageBtn");
     let nextPageBtn = document.getElementById("nextPageBtn");
     let pageInfo = document.getElementById("pageInfo");
     let paginationControls = document.getElementById("paginationControls");
 
-    let currentLang = "en";
+    let currentLang = "tr";
     let allAsins = [];
     let selectedAsins = new Set();
     let currentPage = 1;
     const ITEMS_PER_PAGE = 100;
 
     chrome.storage.local.get("language", (data) => {
-        currentLang = data.language || "en";
+        currentLang = data.language || "tr";
         updateLanguage();
         updateBlacklistUI();
     });
 
     function updateLanguage() {
-        document.querySelectorAll("[data-i18n]").forEach(element => {
-            const key = element.getAttribute("data-i18n");
+        document.querySelectorAll("#section-asin-blacklist [data-blacklist-i18n]").forEach(element => {
+            const key = element.getAttribute("data-blacklist-i18n");
             element.textContent = translations[currentLang][key];
         });
         document.documentElement.lang = currentLang;
         document.querySelector('label[for="selectAllCheckbox"]').textContent = translations[currentLang].select_all;
         deleteSelectedBtn.textContent = translations[currentLang].delete_selected;
     }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== "local") return;
+        if (changes.blacklistAsins) updateBlacklistUI();
+        if (changes.language) { currentLang = changes.language.newValue || "tr"; updateLanguage(); }
+    });
 
     function updateBlacklistUI() {
         chrome.storage.local.get("blacklistAsins", (data) => {
@@ -277,7 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const count = selectedAsins.size;
         allAsins = allAsins.filter(asin => !selectedAsins.has(asin));
-        
+
         chrome.storage.local.set({ blacklistAsins: allAsins }, () => {
             selectedAsins.clear();
             const maxPage = Math.ceil(allAsins.length / ITEMS_PER_PAGE) || 1;
