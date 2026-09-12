@@ -20,20 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
         });
     }
-    const filterForm = document.querySelector('#filtering details:nth-of-type(2) > div');
-    if (filterForm) {
-        let group;
-        [...filterForm.children].forEach(child => {
-            if (child.classList.contains('flex-container-inline')) { child.classList.add('filter-field-wide'); group = null; return; }
-            if (child.tagName === 'LABEL') {
-                group = document.createElement('div'); group.className = 'filter-field';
-                if (child.dataset.i18n === 'banned_words') group.classList.add('filter-field-wide');
-                filterForm.insertBefore(group, child);
-            }
-            if (group) group.appendChild(child);
-        });
-        filterForm.classList.add('filter-grid');
-    }
     renderFilters();
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local' && fields.some(key => key in changes)) renderFilters();

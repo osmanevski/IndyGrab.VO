@@ -255,31 +255,11 @@
 
     <div id="filtering" class="tab-content">
         <div class="filter-intro"><strong>Amazon ürün filtreleri</strong><p>Bu kurallar hem sayfa toplamada hem eBay ürünlerinden Amazon çekiminde uygulanır. Değişiklikler otomatik kaydedilir; eBay ürün keşfini filtrelemez.</p><div id="active-filter-summary" aria-live="polite"></div></div>
-        <details>
-            <summary>
-                <span class="summary-icon">+</span>
-                <span data-i18n="auto_collect">Auto Collect Settings</span>
-            </summary>
-            <div>
-                <div class="flex-container-inline">
-                    <div>
-                        <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
-                        <input type="number" id="autoPageLimit" min="1" placeholder="E.g., 10">
-                    </div>
-                    <div>
-                        <label for="autoAsinLimit" data-i18n="auto_asin_limit">Total ASINs to Collect:</label>
-                        <input type="number" id="autoAsinLimit" min="1" placeholder="E.g., 100">
-                    </div>
-                </div>
-            </div>
-        </details>
-
-        <details>
-            <summary>
-                <span class="summary-icon">+</span>
-                <span data-i18n="tab_filter">Normal Filters</span>
-            </summary>
-            <div>
+        <div class="filter-sections">
+<section class="filter-group" aria-labelledby="filter-group-product">
+    <h3 id="filter-group-product" data-i18n="filter_group_product">Ürün</h3>
+    <div class="filter-grid">
+<div class="filter-field">
                 <label for="ratingFilter" data-i18n="feedback_stars">Feedback Stars:</label>
                 <select id="ratingFilter">
                     <option value="" selected disabled data-i18n="select_value">Seç…</option>
@@ -298,46 +278,33 @@
                     <option value="4.9" data-i18n="stars_4_9">4.9 Stars and above</option>
                     <option value="5" data-i18n="stars_5">5 Stars and above</option>
                 </select>
-
-                <label data-i18n="banned_words">Banned Words:</label>
-                <div class="banned-words-controls">
-                    <div class="banned-words-add-container">
-                        <input type="text" id="bannedWordInput" data-i18n-placeholder="add_words" placeholder="Kelime ekle…">
-                        <button id="addBannedWordBtn" data-i18n="add_word">Ekle</button>
-                    </div>
-                    <div>
-                        <input type="text" id="searchBannedWordInput" data-i18n-placeholder="search_words" placeholder="Kelime ara…">
-                    </div>
+</div>
+<div class="filter-field">
+                <label data-i18n="max_bsr">Max Deep BSR:</label>
+                <div class="flex-container">
+                    <input type="number" id="maxBsrFilter" min="1" placeholder="Max BSR">
                 </div>
-                <div id="bannedWordsContainer"></div>
-                <div class="banned-words-footer">
-                    <button id="copyBannedWordsBtn" data-i18n="copy_words">Kelimeleri kopyala</button>
-                    <span id="bannedWordCount">0 words</span>
-                </div>
-
+</div>
+<div class="filter-field">
                 <label data-i18n="feedback_score">Feedback Score:</label>
                 <div class="flex-container">
                     <input type="number" id="feedbackFilter" min="0" placeholder="Min">
                     <input type="number" id="maxFeedbackFilter" min="0" placeholder="Max">
                 </div>
-
+</div>
+<div class="filter-field">
                 <label data-i18n="price_range">Price Range:</label>
                 <div class="flex-container">
                     <input type="number" id="minPriceFilter" min="0" placeholder="Min">
                     <input type="number" id="maxPriceFilter" min="0" placeholder="Max">
                 </div>
-
-                <label data-i18n="max_bsr">Max Deep BSR:</label>
-                <div class="flex-container">
-                    <input type="number" id="maxBsrFilter" min="1" placeholder="Max BSR">
-                </div>
-
-                <div class="flex-container-inline">
-                    <div>
-                        <label for="asinCount" data-i18n="asin_count">Number of ASINs to Fetch:</label>
-                        <input type="number" id="asinCount" min="1" placeholder="E.g., 10">
-                    </div>
-                    <div>
+</div>
+    </div>
+</section>
+<section class="filter-group" aria-labelledby="filter-group-sales">
+    <h3 id="filter-group-sales" data-i18n="filter_group_sales">Satış koşulları</h3>
+    <div class="filter-grid">
+<div class="filter-field">
                         <label for="shippingFilter" data-i18n="shipping_selection">Shipping Selection:</label>
                         <select id="shippingFilter">
                             <option value="" selected disabled data-i18n="select_value">Seç…</option>
@@ -346,11 +313,8 @@
                             <option value="1-day" data-i18n="shipping_1day">1-Day Shipping</option>
                             <option value="2-day" data-i18n="shipping_2day">2-Day Shipping</option>
                         </select>
-                    </div>
-                </div>
-
-                <div class="flex-container-inline">
-                    <div>
+</div>
+<div class="filter-field">
                         <label for="stockFilter" data-i18n="min_stock_count">Minimum Stock Count:</label>
                         <select id="stockFilter">
                             <option value="" selected disabled data-i18n="select_value">Seç…</option>
@@ -377,8 +341,42 @@
                             <option value="19" data-i18n="stock_19">At least 19 stock</option>
                             <option value="20" data-i18n="stock_20">At least 20 stock</option>
                         </select>
+</div>
+    </div>
+</section>
+<section class="filter-group" aria-labelledby="filter-group-banned">
+    <h3 id="filter-group-banned" data-i18n="banned_words">Yasaklı kelimeler</h3>
+                <div class="banned-words-controls">
+                    <div class="banned-words-add-container">
+                        <input type="text" id="bannedWordInput" data-i18n-placeholder="add_words" placeholder="Kelime ekle…">
+                        <button id="addBannedWordBtn" data-i18n="add_word">Ekle</button>
                     </div>
                     <div>
+                        <input type="text" id="searchBannedWordInput" data-i18n-placeholder="search_words" placeholder="Kelime ara…">
+                    </div>
+                </div>
+                <div id="bannedWordsContainer"></div>
+                <div class="banned-words-footer">
+                    <button id="copyBannedWordsBtn" data-i18n="copy_words">Kelimeleri kopyala</button>
+                    <span id="bannedWordCount">0 words</span>
+                </div>
+</section>
+<section class="filter-group" aria-labelledby="filter-group-collection">
+    <h3 id="filter-group-collection" data-i18n="filter_group_collection">Toplama ayarları</h3>
+    <div class="filter-grid">
+<div class="filter-field">
+                        <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
+                        <input type="number" id="autoPageLimit" min="1" placeholder="E.g., 10">
+</div>
+<div class="filter-field">
+                        <label for="autoAsinLimit" data-i18n="auto_asin_limit">Total ASINs to Collect:</label>
+                        <input type="number" id="autoAsinLimit" min="1" placeholder="E.g., 100">
+</div>
+<div class="filter-field">
+                        <label for="asinCount" data-i18n="asin_count">Number of ASINs to Fetch:</label>
+                        <input type="number" id="asinCount" min="1" placeholder="E.g., 10">
+</div>
+<div class="filter-field">
                         <label for="sortFilter" data-i18n="sort_order">Sort Order:</label>
                         <select id="sortFilter">
                             <option value="" selected disabled data-i18n="select_value">Seç…</option>
@@ -389,10 +387,10 @@
                             <option value="feedbackHighToLow" data-i18n="sort_feedback_high_to_low">Feedback Score: High to Low</option>
                             <option value="bsrLowToHigh" data-i18n="sort_bsr_low_to_high">BSR: Best to Worst (1...)</option>
                         </select>
-                    </div>
-                </div>
-            </div>
-        </details>
+</div>
+    </div>
+</section>
+        </div>
 
         </div>
 

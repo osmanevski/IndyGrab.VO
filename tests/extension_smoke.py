@@ -254,7 +254,8 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 page.locator('.nav-btn[data-target="section-amazon"][data-amazon-tab="collect"]').click()
                 page.locator('.tab[data-tab="filtering"]').click()
                 assert_inner_panel(page, "filtering")
-                page.locator("#filtering details").nth(1).locator("summary").click()
+                assert page.locator("#filtering details").count() == 0
+                assert page.locator("#minPriceFilter").is_visible()
                 page.locator("#minPriceFilter").fill("12.5")
                 page.locator("#maxPriceFilter").fill("0")
                 page.wait_for_function(

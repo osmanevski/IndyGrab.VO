@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_mode_direct: "Direct Sales Breakdown", ebay_sch_seller_sale_days_label: "Last Sale Date Filter (Days):",
             ebay_sch_seller_sale_days_placeholder: "e.g., 7 (for last 7 days)", ebay_asins_saved: "{count} ASIN(s) fetched from Amazon and saved to memory!",
             send_to_blacklist: "Send to Blacklist", sent_to_blacklist: "ASINs added to Blacklist!", no_asin_memory: "No ASIN in memory!",
-            auto_collect: "Auto Collect Settings", auto_page_limit: "Number of Pages to Navigate:", auto_asin_limit: "Total ASINs to Collect:"
+            auto_collect: "Auto Collect Settings", auto_page_limit: "Number of Pages to Navigate:", auto_asin_limit: "Total ASINs to Collect:",
+            filter_group_product: "Product", filter_group_sales: "Sales conditions", filter_group_collection: "Collection settings"
         },
         tr: {
             add_words: "Kelime ekle…", search_words: "Kelime ara…", add_word: "Ekle", copy_words: "Kelimeleri kopyala", select_value: "Seç…",
@@ -84,7 +85,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_mode_direct: "Doğrudan Satış Detayları", ebay_sch_seller_sale_days_label: "Son Satış Tarihi Filtresi (Gün önce):",
             ebay_sch_seller_sale_days_placeholder: "örn: 7 (son 7 gün için)", ebay_asins_saved: "{count} ASIN Amazon'dan çekilip hafızaya kaydedildi!",
             send_to_blacklist: "Kara Listeye Gönder", sent_to_blacklist: "ASIN'ler Kara Listeye Eklendi!", no_asin_memory: "Hafızada ASIN yok!",
-            auto_collect: "Otomatik Toplama Ayarları", auto_page_limit: "Gezilecek Sayfa Sayısı:", auto_asin_limit: "Toplanacak Toplam ASIN:"
+            auto_collect: "Otomatik Toplama Ayarları", auto_page_limit: "Gezilecek Sayfa Sayısı:", auto_asin_limit: "Toplanacak Toplam ASIN:",
+            filter_group_product: "Ürün", filter_group_sales: "Satış koşulları", filter_group_collection: "Toplama ayarları"
         }
     };
 

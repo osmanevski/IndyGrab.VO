@@ -110,7 +110,6 @@ body #section-amazon .memory-buttons button { background:var(--surface-soft); co
 body #section-amazon #clearMemoryBtn { color:var(--danger); background:transparent; border-color:var(--border); }
 body .category-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 body #section-forbidden-cats h3 { color:var(--text) !important; }
-@media (min-width:1400px) { body #section-amazon #filtering > details { max-width:880px; } }
 @media (max-width:1100px) { :root { --sidebar-width:204px; } body .container { padding:25px 20px; } .workspace-mode { display:none; } body #product-list { grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); } }
 @media (max-width:760px) {
   body .top-nav { position:relative; width:100%; inset:auto; padding:16px; gap:16px; border:0; border-bottom:1px solid var(--border); overflow:visible; }
@@ -146,6 +145,10 @@ body #section-amazon .filter-grid { display:grid; grid-template-columns:repeat(2
 .filter-field > label { display:block; margin-bottom:7px; }
 .filter-field-wide { grid-column:1/-1; }
 @media(max-width:760px) { body #section-amazon .filter-grid { grid-template-columns:1fr; } }
+body #section-amazon .filter-sections { max-width:880px; }
+body #section-amazon .filter-group { padding:22px 0 8px; border-top:1px solid var(--border); }
+body #section-amazon .filter-group > h3 { margin:0 0 16px; font-size:13px; font-weight:650; color:var(--text); }
+body #section-amazon .filter-group .filter-grid { row-gap:6px; }
 
 .sale-window-picker { display:flex; flex-direction:column; gap:4px; max-width:185px; }
 .sale-window-picker > label,.sale-window-picker > small { color:var(--muted); font-size:10px; }
