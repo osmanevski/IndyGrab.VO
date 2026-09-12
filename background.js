@@ -175,12 +175,24 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await processFetchAllQueue();
 });
 
+// Concurrent analysis tabs, set on the analysis queue page (default 2, max 7).
+async function getAnalysisConcurrency() {
+    const { analysisConcurrency } = await chrome.storage.local.get('analysisConcurrency');
+    const n = parseInt(analysisConcurrency, 10);
+    return Number.isFinite(n) ? Math.min(7, Math.max(1, n)) : 2;
+}
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.analysisConcurrency && analysisState === 'running') processQueueLoop();
+});
+
 async function processQueueLoop() {
     if (analysisState !== 'running') return;
     await validateActiveTabs();
     let { analysisQueue = [] } = await chrome.storage.local.get('analysisQueue');
     analysisQueue = analysisQueue.map(item => typeof item === 'string' ? { url: item, status: 'waiting' } : item);
-    while (activeAnalysisTabs.length < 7) {
+    const limit = await getAnalysisConcurrency();
+    while (activeAnalysisTabs.length < limit) {
         const nextItemIndex = analysisQueue.findIndex(item => item.status === 'waiting');
         if (nextItemIndex === -1) break;
         const item = analysisQueue[nextItemIndex];
@@ -189,9 +201,9 @@ async function processQueueLoop() {
         const tab = await chrome.tabs.create({ url: analysisUrl, active: false, windowId: analysisWindowId || undefined });
         activeAnalysisTabs.push({ tabId: tab.id, url: item.url });
         await chrome.storage.local.set({ analysisQueue, activeAnalysisTabs });
-        // Aynı anda 7 sekme birden açılınca hepsi eBay taramasına neredeyse aynı anda
+        // Sekmeler aynı anda açılınca hepsi eBay taramasına neredeyse aynı anda
         // başlıyordu; açılışları biraz yayarak ani istek yığılmasını azaltıyoruz.
-        if (activeAnalysisTabs.length < 7) await new Promise(r => setTimeout(r, 2000));
+        if (activeAnalysisTabs.length < limit) await new Promise(r => setTimeout(r, 2000));
     }
     const hasWaiting = analysisQueue.some(i => i.status === 'waiting');
     if (!hasWaiting && activeAnalysisTabs.length === 0) {
@@ -1129,8 +1141,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     if (message.action === "forceProcessItem") {
         (async () => {
-            if (activeAnalysisTabs.length >= 7) {
-                sendResponse({ status: "full", message: "Limit full" });
+            const limit = await getAnalysisConcurrency();
+            if (activeAnalysisTabs.length >= limit) {
+                sendResponse({ status: "full", message: "Limit full", limit });
                 return;
             }
             let { analysisQueue = [] } = await chrome.storage.local.get('analysisQueue');

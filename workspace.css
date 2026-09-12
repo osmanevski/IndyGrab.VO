@@ -277,6 +277,49 @@ body #section-products #no-products { padding:28px; border:1px dashed var(--bord
   body #section-products .products-maintenance button { flex:1 1 0; }
 }
 
+/* Analiz kuyruğu: what it does, controls (status · tab limit · run), then the queue. */
+body #section-queue { margin-top:0 !important; }
+body #section-queue .queue-head { margin-bottom:18px; }
+body #section-queue .queue-help { max-width:680px; margin:8px 0 0; font-size:12px; line-height:1.55; color:var(--muted); }
+body #section-queue .queue-panel { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto; align-items:end; gap:16px; padding:18px; background:var(--surface-strong); border:1px solid var(--border); border-radius:10px; }
+body #section-queue .queue-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+body #section-queue .scan-caption { font-size:11px; font-weight:600; color:var(--muted); }
+body #section-queue #queue-status { display:flex; align-items:center; min-height:36px; padding:0 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:13px; font-variant-numeric:tabular-nums; color:var(--text) !important; }
+body #section-queue #queue-status[data-state="running"] { border-color:var(--primary); color:var(--primary-light) !important; }
+body #section-queue #analysis-concurrency-input { width:96px; min-height:36px; }
+body #section-queue .queue-field small { font-size:11px; line-height:1.4; color:var(--muted); }
+body #section-queue .queue-run { display:flex; gap:8px; }
+body #section-queue .queue-run button { min-height:36px; padding:8px 16px; }
+body #section-queue .queue-list-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin:26px 0 12px; padding-top:22px; border-top:1px solid var(--border); }
+body #section-queue .queue-list-head h3 { margin:0; font-size:14px; font-weight:650; color:var(--text); }
+body #section-queue .queue-list-head .toolbar-actions button { min-height:32px; padding:6px 12px; font-size:12px; }
+body #section-queue #analysis-queue-list { display:flex; flex-direction:column; gap:6px; max-height:none; margin:0; padding:0; overflow:visible; list-style:none; }
+body #section-queue #analysis-queue-list > li.queue-item { display:grid; grid-template-columns:28px minmax(0,1fr) auto auto; align-items:center; gap:10px; padding:6px 8px 6px 10px; background:var(--surface-strong); border:1px solid var(--border); border-radius:8px; }
+body #section-queue .queue-index { font-size:12px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; }
+body #section-queue .queue-store { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:13px; font-weight:600; color:var(--text); }
+body #section-queue .queue-badge { padding:3px 9px; background:var(--surface); border:1px solid var(--border); border-radius:999px; font-size:11px; font-weight:600; color:var(--muted); white-space:nowrap; }
+body #section-queue .queue-item.is-active { border-color:var(--primary); }
+body #section-queue .queue-item.is-active .queue-badge { background:var(--accent-soft); border-color:var(--primary); color:var(--primary-light); }
+body #section-queue .queue-item.is-completed .queue-store { color:var(--muted); }
+body #section-queue .queue-item.is-completed .queue-badge { border-color:rgba(34,201,131,.45); color:#22c983; }
+body #section-queue .queue-actions { display:flex; gap:6px; }
+body #section-queue .queue-actions button { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; min-height:0; padding:0; background:var(--surface); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); cursor:pointer; }
+body #section-queue .queue-actions button:hover { border-color:var(--border-strong); }
+body #section-queue .queue-actions .remove-queue-item { font-size:16px; color:var(--danger); }
+body #section-queue .queue-actions .remove-queue-item:hover { background:var(--danger-soft); }
+body #section-queue #analysis-queue-list > li.queue-empty { padding:28px; border:1px dashed var(--border); border-radius:10px; text-align:center; font-size:13px; color:var(--muted); }
+@media (max-width:900px) {
+  body #section-queue .queue-panel { grid-template-columns:1fr 1fr; }
+  body #section-queue .queue-run { grid-column:1/-1; }
+  body #section-queue .queue-run button { flex:1; }
+}
+@media (max-width:560px) {
+  body #section-queue .queue-panel { grid-template-columns:1fr; }
+  body #section-queue #analysis-queue-list > li.queue-item { grid-template-columns:22px minmax(0,1fr) auto; row-gap:4px; }
+  body #section-queue .queue-badge { grid-column:2; grid-row:2; justify-self:start; }
+  body #section-queue .queue-actions { grid-column:3; grid-row:1 / span 2; }
+}
+
 .sale-window-picker { display:flex; flex-direction:column; gap:4px; max-width:185px; }
 .sale-window-picker > label,.sale-window-picker > small { color:var(--muted); font-size:10px; }
 .sale-window-picker input { width:100%; }

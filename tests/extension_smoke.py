@@ -285,6 +285,35 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
 
             result.check("products page: toolbar controls stay wired, cards align and search still filters", products_layout)
 
+            def queue_layout() -> None:
+                queue = ([{"url": f"https://www.ebay.com/sch/i.html?_ssn=done-{i}&_ipg=240", "status": "completed"} for i in range(2)]
+                         + [{"url": f"https://www.ebay.com/sch/i.html?_ssn=wait-{i}&_ipg=240", "status": "waiting"} for i in range(5)])
+                page.evaluate("q => chrome.storage.local.set({analysisQueue: q})", queue)
+                assert_workspace(page, '.nav-btn[data-target="section-queue"]', "section-queue")
+                wait_js(page, "() => document.querySelectorAll('#analysis-queue-list > li.queue-item').length === 7")
+                listing = page.locator("#analysis-queue-list")
+                assert listing.evaluate("e => e.scrollHeight <= e.clientHeight + 1"), "queue list must not scroll inside a fixed height"
+                assert page.locator("#analysis-queue-list .force-start-item-btn").count() == 5
+                concurrency = page.locator("#analysis-concurrency-input")
+                assert concurrency.input_value() == "2"
+                wait_js(page, "() => document.getElementById('queue-status').textContent.includes('/2')")
+                assert worker.evaluate("getAnalysisConcurrency()") == 2, "background default must be 2"
+                concurrency.fill("4")
+                concurrency.dispatch_event("change")
+                wait_js(page, "async () => (await chrome.storage.local.get('analysisConcurrency')).analysisConcurrency === 4")
+                wait_js(page, "() => document.getElementById('queue-status').textContent.includes('/4')")
+                assert worker.evaluate("getAnalysisConcurrency()") == 4
+                concurrency.fill("12")
+                concurrency.dispatch_event("change")
+                wait_js(page, "async () => (await chrome.storage.local.get('analysisConcurrency')).analysisConcurrency === 7")
+                assert concurrency.input_value() == "7"
+                page.locator("#analysis-queue-list .remove-queue-item").first.click()
+                wait_js(page, "async () => (await chrome.storage.local.get('analysisQueue')).analysisQueue.length === 6")
+                result.screenshot(page, "queue-dark-1440x1000.png")
+                page.evaluate("chrome.storage.local.set({analysisQueue: [], analysisConcurrency: 2})")
+
+            result.check("analysis queue: tab limit defaults to 2, is adjustable 1-7 and the list is not clipped", queue_layout)
+
             nav_cases = [
                 ('.nav-btn[data-target="section-stores"]', "section-stores"),
                 ('.nav-btn[data-target="section-products"]', "section-products"),

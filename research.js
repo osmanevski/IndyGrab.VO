@@ -1052,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderBlacklist(changes.sellerBlacklist.newValue || {});
                 loadSellerLinks();
             }
-            if (changes.analysisQueue || changes.analysisState || changes.activeAnalysisTabs) {
+            if (changes.analysisQueue || changes.analysisState || changes.activeAnalysisTabs || changes.analysisConcurrency) {
                 loadAnalysisQueue();
             }
             if (changes.fetchAllQueue || changes.activeFetchAllTabs || changes.fetchAllState) {
@@ -1381,8 +1381,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert("Risk puanları başarıyla temizlendi!");
     });
 
+    // Concurrent analysis tabs: background.js reads the same key (default 2, max 7).
+    const analysisConcurrencyInput = document.getElementById('analysis-concurrency-input');
+    function clampAnalysisConcurrency(value) {
+        const n = parseInt(value, 10);
+        return Number.isFinite(n) ? Math.min(7, Math.max(1, n)) : 2;
+    }
+    chrome.storage.local.get('analysisConcurrency', d => {
+        analysisConcurrencyInput.value = clampAnalysisConcurrency(d.analysisConcurrency);
+    });
+    analysisConcurrencyInput.addEventListener('change', () => {
+        const n = clampAnalysisConcurrency(analysisConcurrencyInput.value);
+        analysisConcurrencyInput.value = n;
+        chrome.storage.local.set({ analysisConcurrency: n }, loadAnalysisQueue);
+    });
+
     function loadAnalysisQueue() {
-        chrome.storage.local.get(['analysisQueue', 'analysisState', 'activeAnalysisTabs'], (data) => {
+        chrome.storage.local.get(['analysisQueue', 'analysisState', 'activeAnalysisTabs', 'analysisConcurrency'], (data) => {
             let queue = data.analysisQueue || [];
             queue = queue.map(item => typeof item === 'string' ? { url: item, status: 'waiting' } : item);
             const state = data.analysisState || 'stopped';
@@ -1392,60 +1407,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (badgeQueue) badgeQueue.textContent = queue.length;
 
             renderAnalysisQueue(queue);
-            updateQueueStatus(state, queue.filter(i => i.status === 'waiting').length, activeCount);
+            updateQueueStatus(state, queue.filter(i => i.status === 'waiting').length, activeCount, clampAnalysisConcurrency(data.analysisConcurrency));
         });
     }
 
     function renderAnalysisQueue(queue) {
         analysisQueueList.innerHTML = '';
         if (queue.length === 0) {
-            analysisQueueList.innerHTML = '<li style="padding:5px; color:#999; text-align:center;">Kuyruk boş. Mağaza listelerindeki (+) butonuyla ekleyin.</li>';
+            analysisQueueList.innerHTML = '<li class="queue-empty">Kuyruk boş. Mağazalar listesindeki ➕ butonuyla ekleyin.</li>';
             return;
         }
+        const statusLabels = { active: 'Çalışıyor', completed: 'Bitti', waiting: 'Bekliyor' };
         const fragment = document.createDocumentFragment();
         queue.forEach((item, index) => {
+            const status = item.status === 'active' || item.status === 'completed' ? item.status : 'waiting';
             const li = document.createElement('li');
-            li.style.cssText = "padding: 5px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;";
-            const storeName = getStoreNameFromUrl(item.url);
-            let statusIcon = '';
-            let actionBtn = '';
-            let rowStyle = '';
-            if (item.status === 'active') {
-                statusIcon = '<span style="color:#f39c12; font-weight:bold;">⚡ Çalışıyor</span>';
-                rowStyle = 'background-color: #422006;';
-            } else if (item.status === 'completed') {
-                statusIcon = '<span style="color:#27ae60; font-weight:bold;">✅ Bitti</span>';
-                rowStyle = 'background-color: #064e3b; opacity: 0.7;';
-            } else {
-                statusIcon = '<span style="color:#95a5a6;">⏳ Bekliyor</span>';
-                actionBtn = `<button class="force-start-item-btn" data-index="${index}" title="Sıra beklemeden hemen aç (Yer varsa)" style="background:none; border:1px solid #2ecc71; color:#2ecc71; border-radius:50%; width:24px; height:24px; cursor:pointer; margin-right:5px; display:flex; align-items:center; justify-content:center;">▶</button>`;
-            }
-            li.style.cssText += rowStyle;
+            li.className = `queue-item is-${status}`;
             li.innerHTML = `
-                <div style="display:flex; align-items:center;">
-                    <span style="font-size:12px; font-weight:bold; margin-right:5px; color:#777;">${index + 1}.</span>
-                    <span style="font-size:13px; margin-right:10px; color:#e0e0e0;">${storeName}</span>
-                    ${statusIcon}
-                </div>
-                <div style="display:flex; align-items:center;">
-                    ${actionBtn}
-                    <button class="remove-queue-item" data-index="${index}" style="color:#e74c3c; background:none; border:none; cursor:pointer; font-size:16px;">&times;</button>
-                </div>
-            `;
+                <span class="queue-index">${index + 1}</span>
+                <span class="queue-store" title="${escapeHTML(item.url)}">${escapeHTML(getStoreNameFromUrl(item.url))}</span>
+                <span class="queue-badge">${statusLabels[status]}</span>
+                <span class="queue-actions">
+                    ${status === 'waiting' ? `<button class="force-start-item-btn" data-index="${index}" title="Sıra beklemeden hemen aç (yer varsa)" aria-label="Hemen başlat">▶</button>` : ''}
+                    <button class="remove-queue-item" data-index="${index}" title="Kuyruktan çıkar" aria-label="Kuyruktan çıkar">×</button>
+                </span>`;
             fragment.appendChild(li);
         });
         analysisQueueList.appendChild(fragment);
     }
-
-    function updateQueueStatus(state, waitingCount, activeCount) {
-        queueStatusLabel.textContent = `Durum: ${state === 'running' ? 'Çalışıyor 🚀' : 'Durdu'} | Bekleyen: ${waitingCount} | Aktif Sekme: ${activeCount}/7`;
-        if (state === 'running') {
-            startQueueBtn.disabled = true;
-            stopQueueBtn.disabled = false;
-        } else {
-            startQueueBtn.disabled = false;
-            stopQueueBtn.disabled = true;
-        }
+    function updateQueueStatus(state, waitingCount, activeCount, limit) {
+        const running = state === 'running';
+        queueStatusLabel.textContent = `${running ? 'Çalışıyor' : 'Durdu'} · Bekleyen ${waitingCount} · Aktif sekme ${activeCount}/${limit}`;
+        queueStatusLabel.dataset.state = running ? 'running' : 'stopped';
+        startQueueBtn.disabled = running;
+        stopQueueBtn.disabled = !running;
     }
 
     document.addEventListener('click', (e) => {
@@ -1482,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             chrome.runtime.sendMessage({ action: "forceProcessItem", index: index }, (response) => {
                 if (response.status === "success") {
                 } else if (response.status === "full") {
-                    alert("7'li kontenjan dolu! Lütfen bir sekmenin kapanmasını bekleyin.");
+                    alert(`Eşzamanlı sekme sınırı (${response.limit || 'ayar'}) dolu. Bir sekmenin kapanmasını bekleyin ya da sınırı artırın.`);
                     btn.disabled = false;
                 } else {
                     alert("Hata: " + response.message);

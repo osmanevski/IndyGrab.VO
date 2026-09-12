@@ -141,19 +141,35 @@
             </div>
         </section>
 
-        <section class="analysis-queue-section" id="section-queue" style="margin-top: 30px;">
-            <div class="section-header">
-                <div class="section-title-group"><span class="section-kicker">Akıllı İşleme</span><h2>Mağaza analiz kuyruğu</h2></div>
-                <div class="header-buttons">
-                    <button id="start-queue-btn" class="action-btn" style="background-color: #2ecc71;">Kuyruğu Başlat</button>
-                    <button id="stop-queue-btn" class="danger-btn" style="background-color: #e74c3c;" disabled>Durdur</button>
-                    <button id="clear-completed-queue-btn" class="secondary-btn" style="background-color: #d35400;">Bitenleri Sil</button>
-                    <button id="clear-blacklisted-queue-btn" class="danger-btn" style="background-color: #6d28d9;" title="Kara listede süresiz yasaklı olan mağazaları kuyruktan sil">🚫 Yasaklıları Sil</button>
-                    <button id="clear-queue-btn" class="secondary-btn">Temizle</button>
+        <section class="analysis-queue-section" id="section-queue">
+            <div class="queue-head">
+                <div class="section-title-group"><span class="section-kicker">Akıllı İşleme</span><h2>Mağaza keşfi</h2></div>
+                <p class="queue-help">Kuyruktaki her mağazanın ürünleri için aynı fotoğrafı kullanan başka satıcılar aranır; bulunanlar Mağazalar listesine eklenir. Bu sayfa ürün toplamaz.</p>
+            </div>
+
+            <div class="queue-panel">
+                <div class="queue-field">
+                    <span class="scan-caption">Durum</span>
+                    <span id="queue-status">Durdu · Bekleyen 0 · Aktif sekme 0/2</span>
+                </div>
+                <div class="queue-field">
+                    <label for="analysis-concurrency-input" class="scan-caption">Eşzamanlı sekme</label>
+                    <input type="number" id="analysis-concurrency-input" min="1" max="7" step="1" value="2">
+                    <small>1–7 arası. Az sekme eBay'e daha az yük bindirir.</small>
+                </div>
+                <div class="queue-run">
+                    <button id="start-queue-btn" class="action-btn">Kuyruğu Başlat</button>
+                    <button id="stop-queue-btn" class="danger-btn" disabled>Durdur</button>
                 </div>
             </div>
-            <div class="status-strip" style="background: var(--surface-soft); padding: 10px; border: 1px solid var(--border); border-radius: 5px; margin-bottom: 10px;">
-                <span id="queue-status" style="color: var(--muted);">Durum: Bekliyor | Kuyrukta: 0 | Aktif Sekme: 0/5</span>
+
+            <div class="queue-list-head">
+                <h3>Kuyruk</h3>
+                <div class="toolbar-actions">
+                    <button id="clear-completed-queue-btn" class="secondary-btn">Bitenleri Sil</button>
+                    <button id="clear-blacklisted-queue-btn" class="danger-btn" title="Kara listede süresiz yasaklı olan mağazaları kuyruktan sil">Yasaklıları Sil</button>
+                    <button id="clear-queue-btn" class="danger-btn">Temizle</button>
+                </div>
             </div>
             <ul id="analysis-queue-list"></ul>
         </section>
