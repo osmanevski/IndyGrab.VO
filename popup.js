@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_seller_sale_days_placeholder: "e.g. 7", ebay_asins_saved: "{count} ASIN(s) fetched from Amazon and saved to memory!",
             send_to_blacklist: "Send to Blacklist", sent_to_blacklist: "ASINs added to Blacklist!", no_asin_memory: "No ASIN in memory!",
             auto_collect: "Auto Collect Settings", auto_page_limit: "Number of Pages to Navigate:", auto_asin_limit: "Total ASINs to Collect:",
-            filter_group_product: "Product", filter_group_sales: "Sales conditions", filter_group_collection: "Result selection", result_selection_help: "How many of the products passing the filters on each search page are taken, and in which order. Applies to page collection and to Amazon fetches from eBay products.", auto_limits_title: "Auto collect limits", auto_limits_help: "Auto collect stops when it reaches this page count or total ASIN count. Scan page is not affected."
+            filter_group_product: "Product", filter_group_sales: "Sales conditions", filter_group_collection: "Result selection", result_selection_help: "How many of the products passing the filters on each search page are taken, and in which order. Applies to page collection and to Amazon fetches from eBay products.", auto_limits_title: "Auto collect limits", auto_limits_help: "Auto collect stops at this page count or total ASIN count; leave empty for no limit. Scan page is not affected."
         },
         tr: {
             add_words: "Kelime ekle…", search_words: "Kelime ara…", add_word: "Ekle", copy_words: "Kelimeleri kopyala", select_value: "Seç…",
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             ebay_sch_seller_sale_days_placeholder: "Örn. 7", ebay_asins_saved: "{count} ASIN Amazon'dan çekilip hafızaya kaydedildi!",
             send_to_blacklist: "Kara Listeye Gönder", sent_to_blacklist: "ASIN'ler Kara Listeye Eklendi!", no_asin_memory: "Hafızada ASIN yok!",
             auto_collect: "Otomatik Toplama Ayarları", auto_page_limit: "Gezilecek Sayfa Sayısı:", auto_asin_limit: "Toplanacak Toplam ASIN:",
-            filter_group_product: "Ürün", filter_group_sales: "Satış koşulları", filter_group_collection: "Sonuç seçimi", result_selection_help: "Her arama sayfasında filtreleri geçen ürünlerden kaçının ve hangi sırayla alınacağı. Sayfa toplamada da eBay ürünlerinden Amazon çekiminde de geçerli.", auto_limits_title: "Otomatik toplama sınırları", auto_limits_help: "Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur. Sayfayı tara düğmesini etkilemez."
+            filter_group_product: "Ürün", filter_group_sales: "Satış koşulları", filter_group_collection: "Sonuç seçimi", result_selection_help: "Her arama sayfasında filtreleri geçen ürünlerden kaçının ve hangi sırayla alınacağı. Sayfa toplamada da eBay ürünlerinden Amazon çekiminde de geçerli.", auto_limits_title: "Otomatik toplama sınırları", auto_limits_help: "Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur; boş bırakırsan sınır yok. Sayfayı tara düğmesini etkilemez."
         }
     };
 
@@ -136,7 +136,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     let toggleSaveIcon = document.getElementById("toggleSaveIcon");
     let toggleEbayIcon = document.getElementById("toggleEbayIcon");
     let bsrDisplayMode = document.getElementById("bsrDisplayMode");
-    const amazonTarget = window.IndyGrabAmazonTarget;
 
     let ebayChartDefaultDays = document.getElementById("ebayChartDefaultDays");
     let ebayChartDisplay = document.getElementById("ebayChartDisplay");
@@ -154,27 +153,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     let currentMemoryPage = 1;
     const MEMORY_ITEMS_PER_PAGE = 100;
 
-    if (amazonTarget) void amazonTarget.initialize().catch(() => {
-        amazonTarget.setStatus("Amazon sekmeleri okunamadı. Yenile düğmesiyle tekrar deneyin.", "error");
-    });
 
-    async function sendAmazonMessage(message, showErrors = false, knownTab = null) {
-        if (!amazonTarget) {
-            if (showErrors) showNotification("Amazon hedef seçicisi yüklenemedi. Paneli yenileyin.", 3000);
-            return false;
-        }
+    // Display settings still reach every open Amazon tab. Collection runs only in the panel's
+    // own background window (background.js) and never in the user's tabs.
+    async function broadcastToAmazonTabs(message) {
         try {
-            await amazonTarget.sendMessage(message, knownTab);
-            return true;
-        } catch (error) {
-            const noTarget = error && error.code === "AMAZON_TARGET_UNAVAILABLE";
-            const guidance = noTarget
-                ? "Desteklenen bir Amazon sekmesi açın veya hedef seçin."
-                : "Amazon sekmesine ulaşılamadı. Sekmeyi yenileyip tekrar deneyin.";
-            if (showErrors || !noTarget) amazonTarget.setStatus(guidance, "error");
-            if (showErrors) showNotification(guidance, 3000);
-            return false;
-        }
+            const tabs = await chrome.tabs.query({ url: ["*://*.amazon.com/*", "*://*.amazon.co.uk/*", "*://*.amazon.de/*", "*://*.amazon.ca/*", "*://*.amazon.com.au/*"] });
+            await Promise.all(tabs.map(tab => chrome.tabs.sendMessage(tab.id, message).catch(() => {})));
+        } catch (e) {}
     }
 
     chrome.storage.local.get("language", (data) => {
@@ -347,7 +333,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             bsrDisplayMode: bsrDisplayMode.value
         };
         chrome.storage.local.set(featureToggles, () => {
-            void sendAmazonMessage({ updateFeatures: featureToggles });
+            void broadcastToAmazonTabs({ updateFeatures: featureToggles });
         });
     }
 
@@ -558,9 +544,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             sort: sortFilter.value
         };
 
-        chrome.storage.local.set(filters, () => {
-            void sendAmazonMessage({ requestASINs: true });
-        });
+        chrome.storage.local.set(filters);
     }
 
     ratingFilter.addEventListener("change", updateFilters);
@@ -574,48 +558,94 @@ document.addEventListener("DOMContentLoaded", async function () {
     stockFilter.addEventListener("change", updateFilters);
     sortFilter.addEventListener("change", updateFilters);
 
-    chrome.storage.local.get(["autoPageLimit", "autoAsinLimit", "autoCollectActive"], (data) => {
+    chrome.storage.local.get(["autoPageLimit", "autoAsinLimit"], (data) => {
         autoPageLimitInput.value = Number.isFinite(data.autoPageLimit) ? data.autoPageLimit : "";
         autoAsinLimitInput.value = Number.isFinite(data.autoAsinLimit) ? data.autoAsinLimit : "";
-        startAutoBtn.disabled = data.autoCollectActive === true;
-        stopAutoBtn.disabled = data.autoCollectActive !== true;
     });
 
-    function saveAutoCollectLimits() {
-        const autoPageLimit = Math.max(1, parseInt(autoPageLimitInput.value, 10) || 1);
-        const autoAsinLimit = Math.max(1, parseInt(autoAsinLimitInput.value, 10) || 1);
-        autoPageLimitInput.value = autoPageLimit;
-        autoAsinLimitInput.value = autoAsinLimit;
-        return chrome.storage.local.set({ autoPageLimit, autoAsinLimit });
+    // An empty limit means "no limit": the engine reads a missing value as Infinity.
+    async function saveAutoCollectLimits() {
+        const updates = {};
+        const removals = [];
+        [["autoPageLimit", autoPageLimitInput], ["autoAsinLimit", autoAsinLimitInput]].forEach(([key, input]) => {
+            const value = parseInt(input.value, 10);
+            if (value > 0) {
+                updates[key] = value;
+                input.value = value;
+            } else {
+                removals.push(key);
+                input.value = "";
+            }
+        });
+        if (removals.length) await chrome.storage.local.remove(removals);
+        await chrome.storage.local.set(updates);
     }
 
     autoPageLimitInput.addEventListener("change", saveAutoCollectLimits);
     autoAsinLimitInput.addEventListener("change", saveAutoCollectLimits);
 
-    startAutoBtn.addEventListener("click", async () => {
-        const targetTab = amazonTarget ? await amazonTarget.getTab() : null;
-        if (!targetTab) {
-            showNotification("Desteklenen bir Amazon sekmesi açın veya hedef seçin.", 3000);
+    const bgCollectInput = document.getElementById("bg-collect-input");
+    const bgCollectStatus = document.getElementById("bg-collect-status");
+    const BG_COLLECT_REASONS = {
+        single_done: "Tarama bitti, arka plan penceresi kapandı.",
+        auto_collect_page_limit: "Otomatik toplama sayfa sınırına ya da son sayfaya ulaştı, pencere kapandı.",
+        auto_collect_asin_limit: "Otomatik toplama ASIN sınırına ulaştı, pencere kapandı.",
+        auto_collect_stopped: "Toplama durduruldu.",
+        stopped_by_user: "Toplama durduruldu.",
+        window_closed: "Arka plan penceresi kapatıldı, toplama durdu.",
+        timeout: "Sayfa yanıt vermedi, toplama durduruldu."
+    };
+    function renderBgCollect(session, last) {
+        const running = Boolean(session);
+        updateBtn.disabled = running;
+        startAutoBtn.disabled = running;
+        stopAutoBtn.disabled = !running;
+        if (!bgCollectStatus) return;
+        bgCollectStatus.dataset.state = running ? "running" : "idle";
+        if (running) {
+            bgCollectStatus.textContent = session.mode === "auto"
+                ? "Otomatik toplama arka plan penceresinde sürüyor…"
+                : "Sayfa arka plan penceresinde taranıyor…";
+        } else if (last) {
+            bgCollectStatus.textContent = BG_COLLECT_REASONS[last.reason] || "Toplama bitti.";
+        } else {
+            bgCollectStatus.textContent = "Hazır.";
+        }
+    }
+    chrome.storage.local.get(["bgCollectSession", "bgCollectLast", "bgCollectInput"], (data) => {
+        if (bgCollectInput) bgCollectInput.value = data.bgCollectInput || "";
+        renderBgCollect(data.bgCollectSession, data.bgCollectLast);
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== "local" || !(changes.bgCollectSession || changes.bgCollectLast)) return;
+        chrome.storage.local.get(["bgCollectSession", "bgCollectLast"], (data) => renderBgCollect(data.bgCollectSession, data.bgCollectLast));
+    });
+    if (bgCollectInput) {
+        bgCollectInput.addEventListener("change", () => chrome.storage.local.set({ bgCollectInput: bgCollectInput.value.trim() }));
+    }
+
+    async function startBackgroundCollect(mode) {
+        const input = bgCollectInput ? bgCollectInput.value.trim() : "";
+        if (!input) {
+            showNotification("Önce bir Amazon arama linki ya da anahtar kelime gir.", 3000);
+            if (bgCollectInput) bgCollectInput.focus();
             return;
         }
-
-        await saveAutoCollectLimits();
-        await chrome.storage.local.set({ autoCollectActive: true, visitedPages: [], collectedPages: {} });
-        const started = await sendAmazonMessage({ startAutoCollect: true }, true, targetTab);
-        if (!started) {
-            await chrome.storage.local.set({ autoCollectActive: false });
-            return;
+        if (mode === "auto") await saveAutoCollectLimits();
+        await chrome.storage.local.set({ bgCollectInput: input });
+        const response = await chrome.runtime.sendMessage({ action: "bgCollectStart", input, mode });
+        if (response && response.status === "invalid") {
+            showNotification("Bu bir Amazon adresi değil. Desteklenen bir Amazon linki ya da anahtar kelime gir.", 3500);
+        } else if (response && response.status === "busy") {
+            showNotification("Arka planda zaten bir toplama sürüyor.", 3000);
+        } else if (!response || response.status !== "started") {
+            showNotification("Arka plan penceresi açılamadı.", 3000);
         }
-        startAutoBtn.disabled = true;
-        stopAutoBtn.disabled = false;
-    });
+    }
 
-    stopAutoBtn.addEventListener("click", async () => {
-        await chrome.storage.local.set({ autoCollectActive: false, visitedPages: [] });
-        await sendAmazonMessage({ stopAutoCollect: true }, true);
-        startAutoBtn.disabled = false;
-        stopAutoBtn.disabled = true;
-    });
+    updateBtn.addEventListener("click", () => void startBackgroundCollect("single"));
+    startAutoBtn.addEventListener("click", () => void startBackgroundCollect("auto"));
+    stopAutoBtn.addEventListener("click", () => void chrome.runtime.sendMessage({ action: "bgCollectStop" }));
 
     toggleStock.addEventListener("change", updateFeatureToggles);
     togglePrime.addEventListener("change", updateFeatureToggles);
@@ -664,10 +694,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             });
             return true;
-        }
-        if (message.autoCollectStopped) {
-            startAutoBtn.disabled = false;
-            stopAutoBtn.disabled = true;
         }
     });
 
@@ -970,13 +996,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    updateBtn.addEventListener("click", async () => {
-        if (await sendAmazonMessage({ refreshASINs: true }, true)) {
-            showNotification(translations[currentLang].asins_refreshed, 1000);
-        }
-    });
-
-    void sendAmazonMessage({ requestASINs: true });
 });
 
 const style = document.createElement("style");

@@ -194,6 +194,7 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
             args=[
                 f"--disable-extensions-except={extension_dir}",
                 f"--load-extension={extension_dir}",
+                "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
             ],
         )
         try:
@@ -367,8 +368,7 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
                 wait_js(page, "async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 3000")
                 page.locator("#maxBsrFilter").select_option("")
                 wait_js(page, "async () => (await chrome.storage.local.get('maxBsr')).maxBsr === 0")
-                assert page.locator("#amazon-target-select").is_disabled()
-                assert "Amazon sekmesi" in page.locator("#amazon-target-status").inner_text()
+                assert page.locator("#bg-collect-input").count() == 1
 
             result.check("filters save numeric minimum and zero upper limit without an Amazon tab", filtering_and_no_target)
 
@@ -475,45 +475,22 @@ def run(playwright: Playwright, extension_dir: Path, artifact_dir: Path, result:
 
             result.check('CSV and JSON export ASIN data without title preparation', asin_exports)
 
-            def real_collection_fixture() -> None:
-                # Fulfil synthetic HTML locally: the extension runs its real content script,
-                # target selection and filters, but no Amazon server is contacted.
-                def amazon_fixture(route: Any) -> None:
-                    asin = "B0QA000001" if "first" in route.request.url else "B0QA000002"
-                    html = "<html><head><title>Fixture Amazon search</title></head><body>" + (
-                        '<div data-component-type="s-search-result" data-asin="' + asin + '">'
-                        '<h2><span>Plain storage basket</span></h2>'
-                        '<span class="a-price"><span class="a-offscreen">$25.00</span></span>'
-                        '<i class="a-icon-star"><span>4.5 out of 5 stars</span></i>'
-                        '<span aria-label="120 ratings">120</span></div>'
-                    ) + "</body></html>"
-                    route.fulfill(status=200, content_type="text/html", body=html)
-                context.route("https://www.amazon.com/s?*", amazon_fixture)
-                first = context.new_page()
-                first.goto("https://www.amazon.com/s?k=fixture-first")
-                second = context.new_page()
-                second.goto("https://www.amazon.com/s?k=fixture-second")
-                page.bring_to_front()
+            def background_collect_controls() -> None:
+                # The full background-window flow runs offline in tests/bg_collect_e2e.py.
                 page.locator('.nav-btn[data-target="section-amazon"][data-amazon-tab="collect"]').click()
-                page.locator("#amazon-target-refresh").click()
-                page.wait_for_function("document.getElementById('amazon-target-select').options.length === 2")
-                target_id = page.evaluate("async () => (await chrome.tabs.query({})).find(t => t.url.includes('fixture-first')).id")
-                page.locator("#amazon-target-select").select_option(str(target_id))
-                page.evaluate("chrome.storage.local.set({asinList: [], collectedPages: {}, visitedPages: [], minPrice: 12.5, maxPrice: 0})")
+                assert page.locator("#amazon-target-select").count() == 0
+                windows_before = worker.evaluate("async () => (await chrome.windows.getAll()).length")
+                page.locator("#bg-collect-input").fill("")
                 page.locator("#updateBtn").click()
-                wait_js(page, "async () => { const d = await chrome.storage.local.get('asinList'); return d.asinList?.length === 1 && d.asinList[0] === 'B0QA000001'; }", timeout=15000)
-                assert "B0QA000001" in page.locator("#asinOutput").inner_text()
-                page.locator("#saveToMemoryBtn").click()
-                wait_js(page, "async () => (await chrome.storage.local.get('memoryAsins')).memoryAsins.includes('B0QA000001')")
-                first.close()
-                page.locator("#updateBtn").click()
-                page.wait_for_timeout(150)
-                assert page.locator("#amazon-target-select").input_value() == ""
-                assert "B0QA000002" not in page.evaluate("chrome.storage.local.get('memoryAsins')")["memoryAsins"]
-                second.close()
-                page.evaluate("chrome.storage.local.set({memoryAsins:['B0FIXTURE01','B0FIXTURE02','B0FIXTURE03'],asinList:[]})")
+                page.wait_for_timeout(300)
+                assert worker.evaluate("async () => (await chrome.windows.getAll()).length") == windows_before, "empty input must not open a window"
+                invalid = page.evaluate("chrome.runtime.sendMessage({action: 'bgCollectStart', input: 'https://example.com/s?k=x', mode: 'single'})")
+                assert invalid["status"] == "invalid", invalid
+                assert worker.evaluate("amazonCollectUrl('bamboo tray')") == "https://www.amazon.com/s?k=bamboo+tray"
+                assert worker.evaluate("amazonCollectUrl('www.amazon.de/s?k=x')") == "https://www.amazon.de/s?k=x"
+                assert page.locator("#stopAutoBtn").is_disabled() and not page.locator("#updateBtn").is_disabled()
 
-            result.check("real content-script collection targets selected fixture and saves filtered ASIN", real_collection_fixture)
+            result.check("background collect: empty or non-Amazon input opens no window", background_collect_controls)
 
             def restore_memory_deep_link() -> None:
                 page.goto(f"chrome-extension://{extension_id}/research.html#section-amazon/memory", wait_until="networkidle")

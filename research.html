@@ -249,10 +249,10 @@
                     </div>
                 </div>
             </div>
-            <div class="source-picker">
-                <div><label for="amazon-target-select">Toplama yapılacak Amazon sekmesi</label><p>Sayfa toplama komutları seçtiğin sekmeye gider. eBay ürünlerinden toplu çekim ayrı çalışır.</p></div>
-                <div class="source-picker-controls"><select id="amazon-target-select" aria-describedby="amazon-target-status"><option value="">Amazon sekmeleri aranıyor…</option></select><button id="amazon-target-refresh" type="button">Yenile</button></div>
-                <p id="amazon-target-status" role="status" aria-live="polite"></p>
+            <div class="source-picker bg-collect">
+                <div><label for="bg-collect-input">Arka planda taranacak Amazon araması</label><p>Amazon arama ya da kategori linki yapıştır veya anahtar kelime yaz. Tarama ayrı bir pencerede yapılır; açık Amazon sekmelerine dokunulmaz ve iş bitince pencere kapanır.</p></div>
+                <div class="source-picker-controls"><input type="text" id="bg-collect-input" placeholder="https://www.amazon.com/s?k=… ya da anahtar kelime" spellcheck="false" autocomplete="off" aria-describedby="bg-collect-status"></div>
+                <p id="bg-collect-status" role="status" aria-live="polite"></p>
             </div>
             <div class="amazon-panel">
 <div class="tab-container">
@@ -271,7 +271,7 @@
         </div>
         <section class="filter-group auto-limits" aria-labelledby="auto-limits-title">
             <h3 id="auto-limits-title" data-i18n="auto_limits_title">Otomatik toplama sınırları</h3>
-            <p class="filter-group-help" data-i18n="auto_limits_help">Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur. Sayfayı tara düğmesini etkilemez.</p>
+            <p class="filter-group-help" data-i18n="auto_limits_help">Otomatik toplama bu sayfa sayısına ya da toplam ASIN sayısına ulaşınca durur; boş bırakırsan sınır yok. Sayfayı tara düğmesini etkilemez.</p>
             <div class="filter-grid">
 <div class="filter-field">
                         <label for="autoPageLimit" data-i18n="auto_page_limit">Number of Pages to Navigate:</label>
@@ -636,7 +636,6 @@
     </main>
     <script src="theme.js"></script>
     <script src="research.js"></script>
-    <script src="amazon-target.js"></script>
     <script src="ai-core.js"></script>
     <script src="ai-page.js"></script>
     <script src="popup.js"></script>

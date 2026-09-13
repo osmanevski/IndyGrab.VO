@@ -829,7 +829,112 @@ async function verifyAmazonMatch(itemId, candidates) {
     return { matches, provider: r.provider };
 }
 
+// ---- Background Amazon collection from the panel ---------------------------------------
+// The panel never drives the user's own Amazon tabs: it opens a separate unfocused window,
+// collects there and closes it when the single scan or the auto-collect run ends.
+const BG_COLLECT_SINGLE_TIMEOUT_MS = 90000;
+const BG_COLLECT_IDLE_TIMEOUT_MS = 180000;
+const BG_COLLECT_WATCHDOG_ALARM = 'bgCollectWatchdog';
+const BG_AMAZON_HOSTS = ['amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.ca', 'amazon.com.au'];
+
+// Accepts a supported Amazon URL (kept as is) or a keyword (amazon.com search).
+function amazonCollectUrl(input) {
+    let text = String(input || '').trim();
+    if (!text) return null;
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text) && /^[\w-]+(\.[\w-]+)+(:\d+)?(\/|$)/i.test(text)) text = 'https://' + text;
+    try {
+        const url = new URL(text);
+        const host = url.hostname.toLowerCase();
+        const supported = /^https?:$/.test(url.protocol) && BG_AMAZON_HOSTS.some(d => host === d || host.endsWith('.' + d));
+        return supported ? url.toString() : null;
+    } catch (e) {
+        return 'https://www.amazon.com/s?k=' + encodeURIComponent(text).replace(/%20/g, '+');
+    }
+}
+
+async function getBgCollect() {
+    const { bgCollectSession = null } = await chrome.storage.local.get('bgCollectSession');
+    return bgCollectSession;
+}
+
+async function endBgCollect(reason) {
+    const session = await getBgCollect();
+    if (!session) return;
+    const reset = { bgCollectSession: null, bgCollectLast: { reason, mode: session.mode, endedAt: Date.now() } };
+    if (session.mode === 'auto') Object.assign(reset, { autoCollectActive: false, autoCollectTabId: null, visitedPages: [] });
+    await chrome.storage.local.set(reset);
+    chrome.alarms.clear(BG_COLLECT_WATCHDOG_ALARM);
+    try { await chrome.windows.remove(session.windowId); } catch (e) {}
+}
+
+async function startBgCollect(input, mode) {
+    if (await getBgCollect()) return { status: 'busy' };
+    const url = amazonCollectUrl(input);
+    if (!url) return { status: 'invalid' };
+    mode = mode === 'auto' ? 'auto' : 'single';
+    // Open blank first so the tab id is recorded before any Amazon page can read the flags.
+    const win = await chrome.windows.create({ url: 'about:blank', focused: false, type: 'normal', width: 1280, height: 900 });
+    const tabId = win.tabs && win.tabs[0] ? win.tabs[0].id : null;
+    if (tabId === null) {
+        try { await chrome.windows.remove(win.id); } catch (e) {}
+        return { status: 'error' };
+    }
+    const session = { windowId: win.id, tabId, mode, url, startedAt: Date.now(), lastActivity: Date.now() };
+    const state = { bgCollectSession: session, collectedPages: {} };
+    if (mode === 'auto') Object.assign(state, { autoCollectActive: true, autoCollectTabId: tabId, visitedPages: [] });
+    await chrome.storage.local.set(state);
+    chrome.alarms.create(BG_COLLECT_WATCHDOG_ALARM, { periodInMinutes: 0.5 });
+    await chrome.tabs.update(tabId, { url });
+    return { status: 'started', mode, url };
+}
+
+async function onBgCollectTabMessage(tabId, message) {
+    const session = await getBgCollect();
+    if (!session || session.tabId !== tabId) return;
+    if (message.autoCollectStopped) return endBgCollect(message.reason || 'stopped');
+    if (session.mode === 'single') return endBgCollect('single_done');
+    session.lastActivity = Date.now();
+    await chrome.storage.local.set({ bgCollectSession: session });
+}
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name !== BG_COLLECT_WATCHDOG_ALARM) return;
+    const session = await getBgCollect();
+    if (!session) {
+        chrome.alarms.clear(BG_COLLECT_WATCHDOG_ALARM);
+        return;
+    }
+    const limit = session.mode === 'single' ? BG_COLLECT_SINGLE_TIMEOUT_MS : BG_COLLECT_IDLE_TIMEOUT_MS;
+    if (Date.now() - (session.lastActivity || session.startedAt) > limit) await endBgCollect('timeout');
+});
+
+chrome.windows.onRemoved.addListener(async (windowId) => {
+    const session = await getBgCollect();
+    if (session && session.windowId === windowId) await endBgCollect('window_closed');
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+    if (changeInfo.status !== 'complete') return;
+    const session = await getBgCollect();
+    if (!session || session.tabId !== tabId) return;
+    session.lastActivity = Date.now();
+    await chrome.storage.local.set({ bgCollectSession: session });
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (sender && sender.tab && (message.asinList || message.autoCollectStopped)) void onBgCollectTabMessage(sender.tab.id, message);
+    if (message.action === "whoAmI") {
+        sendResponse({ tabId: sender && sender.tab ? sender.tab.id : null });
+        return true;
+    }
+    if (message.action === "bgCollectStart") {
+        startBgCollect(message.input, message.mode).then(sendResponse, () => sendResponse({ status: "error" }));
+        return true;
+    }
+    if (message.action === "bgCollectStop") {
+        endBgCollect("stopped_by_user").then(() => sendResponse({ status: "stopped" }));
+        return true;
+    }
     if (message.action === "analyzeProductRisk") {
         (async () => {
             const result = await triageProduct({

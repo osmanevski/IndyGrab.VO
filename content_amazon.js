@@ -14,6 +14,25 @@
         chrome.runtime.sendMessage({ action: 'closeSelf' });
     }
 
+    // Auto collect belongs to exactly one tab (the panel's background window, or the tab the
+    // popup started it in). Other Amazon tabs must never react to the shared storage flag.
+    let currentTabId = null;
+    const myTabIdPromise = new Promise(resolve => {
+        try {
+            chrome.runtime.sendMessage({ action: 'whoAmI' }, response => {
+                resolve(chrome.runtime.lastError ? null : (response && Number.isInteger(response.tabId) ? response.tabId : null));
+            });
+        } catch (e) {
+            resolve(null);
+        }
+    });
+    myTabIdPromise.then(id => { currentTabId = id; });
+    async function autoCollectOwnedHere(data) {
+        if (!data.autoCollectActive) return false;
+        const myTabId = await myTabIdPromise;
+        return myTabId !== null && data.autoCollectTabId === myTabId;
+    }
+
     const stockCache = {};
     const cacheExpiry = {};
     const CACHE_DURATION = 3600000;
@@ -1276,11 +1295,11 @@
 
             const data = await new Promise(resolve => chrome.storage.local.get([
                 'collectedPages', 'autoCollectActive', 'autoPageLimit', 
-                'autoAsinLimit', 'memoryAsins', 'blacklistAsins'
+                'autoAsinLimit', 'memoryAsins', 'blacklistAsins', 'autoCollectTabId'
             ], resolve));
 
             let collectedPages = data.collectedPages || {};
-            let autoCollectActive = data.autoCollectActive || false;
+            let autoCollectActive = await autoCollectOwnedHere(data);
             let autoPageLimit = data.autoPageLimit || Infinity;
             let autoAsinLimit = data.autoAsinLimit || Infinity;
             let memoryAsins = data.memoryAsins || [];
@@ -1500,9 +1519,10 @@
     }
 
     function navigateToNextPage() {
-        chrome.storage.local.get(['autoPageLimit', 'autoCollectActive', 'visitedPages'], (data) => {
+        chrome.storage.local.get(['autoPageLimit', 'autoCollectActive', 'autoCollectTabId', 'visitedPages'], async (data) => {
             let autoPageLimit = data.autoPageLimit || Infinity;
-            let autoCollectActive = data.autoCollectActive || false;
+            let autoCollectActive = await autoCollectOwnedHere(data);
+            if (!autoCollectActive) return;
             let visitedPages = data.visitedPages || [];
 
             const currentUrl = window.location.href;
@@ -1531,7 +1551,7 @@
     }
 
     function stopAutoCollect(reason) {
-        chrome.storage.local.set({ autoCollectActive: false, visitedPages: [] }, () => {
+        chrome.storage.local.set({ autoCollectActive: false, autoCollectTabId: null, visitedPages: [] }, () => {
             clearInterval(autoCollectInterval);
             autoCollectInterval = null;
             totalAsinsCollected = 0;
@@ -1549,7 +1569,7 @@
             extractASINs();
         }
         if (message.startAutoCollect) {
-            chrome.storage.local.set({ autoCollectActive: true, visitedPages: [] }, () => {
+            chrome.storage.local.set({ autoCollectActive: true, autoCollectTabId: currentTabId, visitedPages: [] }, () => {
                 hasFetched = false;
                 totalAsinsCollected = 0;
                 extractASINs();

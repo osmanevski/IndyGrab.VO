@@ -79,10 +79,9 @@ body .pagination-info { color:var(--muted); }
 .source-picker label { color:var(--text); font-size:13px; font-weight:650; }
 #section-amazon .source-picker p { margin:5px 0 12px; font-size:12px; line-height:1.5; }
 .source-picker-controls { display:flex; gap:10px; }
-#amazon-target-select { flex:1; min-width:0; width:100%; }
-#section-amazon #amazon-target-refresh { background:var(--surface-soft); color:var(--text); border:1px solid var(--border); }
-#section-amazon #amazon-target-status { margin:10px 0 0; font-size:11px; color:var(--muted); }
-#section-amazon #amazon-target-status[data-state=error] { color:var(--danger); }
+#section-amazon #bg-collect-input { flex:1; min-width:0; width:100%; font:13px/1.4 ui-monospace,monospace; }
+#section-amazon #bg-collect-status { margin:10px 0 0; font-size:11px; color:var(--muted); }
+#section-amazon #bg-collect-status[data-state=running] { color:var(--primary-light); }
 body #section-amazon .tab-container { border:0; border-bottom:1px solid var(--border); background:none; padding:0; border-radius:0; gap:20px; display:flex; margin-bottom:24px; }
 body #section-amazon button.tab { width:auto; background:none; color:var(--muted); border:0; border-bottom:2px solid transparent; border-radius:0; padding:12px 4px; font-size:13px; }
 body #section-amazon button.tab.active { color:var(--primary-light); border-bottom-color:var(--primary); }

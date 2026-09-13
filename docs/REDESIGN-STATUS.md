@@ -11,7 +11,8 @@ tags: [indygrab, design, testing]
 
 - Ana panel: sol gezinme, tek çalışma alanı, hash ile konum ve yenilemede geri dönüş.
 - Araştırma: mağaza, ürün, kuyruk, satıcı/kategori kuralları birbirinden ayrıldı.
-- Amazon: açık hedef sekme seçimi; tarama/toplama komutları seçilen sekmeye gider.
+- Amazon: panel toplaması ayrı, odak almayan bir arka plan penceresinde çalışır; açık Amazon
+  sekmelerine dokunmaz, bitince pencere kapanır (13 Eylül; önceki hedef sekme seçicisi kaldırıldı).
   Açıkça seçilen sekme kapanırsa başka bir sekmeye sessiz geçiş yapılmaz.
 - Filtre: mevcut kriterler ve storage değerleri korunarak gruplama, etkin filtre
   özeti, Türkçe varsayılan ve temel metin düzeltmeleri. Kayıtlı dil tercihi korunur.
@@ -24,7 +25,7 @@ tags: [indygrab, design, testing]
 
 # Mimari
 
-`amazon-target.js`: hedef seçimi. `popup.js`: mevcut filtre/ASIN denetleyicisi.
+`popup.js`: mevcut filtre/ASIN denetleyicisi; arka plan toplama oturumu `background.js` içinde.
 `research.js`: mevcut araştırma işlevleri + açık gezinme.
 `workspace.js`: yalnız sunum (filtre özeti, alan gruplama ve gezinme eşleme).
 `workspace.css`: yeni tasarım sistemi. `workspace-legacy.css`: korunmuş eski
@@ -78,7 +79,7 @@ Claude %4 / %5. Bunlar hesap genelidir; görev veya oturum bazında maliyet ayr�
 - Ö1: satıcı görsel karşılaştırması önce dHash (≤10 aynı, ≥22 farklı), arası AI.
 - AI ayarları sayfası: iki sağlayıcının anahtarları, iş başına sağlayıcı (diğeri yedek),
   risk eşiği, eşleşme doğrulaması, `aiStats` sayaçları, ayarlı ve son yanıt veren model (`aiLastModels`). Anahtar/toplu analiz kimlikleri korundu.
-- Doğrulama: `node --test tests/ai-core.test.cjs tests/amazon-target.test.cjs` (12),
+- Doğrulama: `node --test tests/ai-core.test.cjs`,
   `tests/extension_smoke.py` (22), `tests/ai_flow_e2e.py` (ağ kapalı, sahte DeepSeek/Amazon).
   Test notu: `wait_for_function` async yüklemi beklemez — storage beklemeleri `wait_js` ile
   yoklanır; eklentinin `chrome.tabs.create` sekmeleri Playwright route'undan geçmez.
