@@ -337,3 +337,48 @@ body #section-queue #analysis-queue-list > li.queue-empty { padding:28px; border
 .mixer-columns textarea { width:100%; min-height:260px; resize:vertical; font:13px/1.7 ui-monospace,monospace; }
 #duplicatesContent { overflow-wrap:anywhere; }
 @media(max-width:760px) { .mixer-columns { grid-template-columns:1fr; } }
+
+/* ASIN pool: the same list / controls hierarchy as stores and the queue. */
+body #memory .pool-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; }
+body #memory .pool-heading h2 { display:flex; align-items:center; gap:10px; margin:6px 0 0; }
+body #memory .pool-heading > p { margin:0; font-size:11px; }
+.pool-count { padding:4px 8px; border-radius:6px; background:var(--accent-soft); color:var(--primary-light); font:12px ui-monospace,SFMono-Regular,monospace; letter-spacing:0; }
+body #memory .pool-layout { display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:24px; align-items:start; }
+body #memory :is(.pool-list-panel,.pool-actions-panel) { min-width:0; }
+body #memory h3 { margin:0 0 8px; color:var(--text); font-size:14px; font-weight:650; }
+body #memory p { line-height:1.6; }
+body #memory .pool-list-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
+body #memory .pool-list-heading h3 { margin:0; }
+body #memory button { min-height:36px; border:1px solid var(--border); border-radius:8px; background:var(--surface-soft); color:var(--text); box-shadow:none; transform:none; }
+body #memory button:hover { border-color:var(--border-strong); background:var(--accent-soft); }
+body #memory #mixMemoryBtn { padding:6px 12px; font-size:12px; }
+body #memory #memoryOutput { padding:0; margin:14px 0 0; border-radius:8px; max-height:480px; min-height:0; }
+body #memory .asin-row { display:flex; align-items:center; gap:12px; min-height:42px; padding:8px 14px; border-bottom:1px solid var(--border); }
+body #memory .asin-row:last-child { border-bottom:0; }
+body #memory .asin-row:hover { background:var(--surface-soft); }
+body #memory .asin-column { flex:1; min-width:0; order:-1; font:13px ui-monospace,SFMono-Regular,monospace; letter-spacing:.4px; }
+body #memory .asin-column a { color:var(--primary-light); text-decoration:none; }
+body #memory .asin-column a:hover { text-decoration:underline; }
+body #memory .delete-icon { width:16px; height:16px; object-fit:contain; cursor:pointer; opacity:.65; }
+body #memory .delete-icon:hover { opacity:1; }
+body #memory #memoryPagination { justify-content:center; align-items:center; gap:12px; margin-top:14px; }
+body #memory .pool-actions-panel { padding:18px; background:var(--surface-strong); border:1px solid var(--border); border-radius:10px; }
+body #memory #copyAllBtn { width:100%; margin:4px 0 10px; background:var(--primary); border-color:var(--primary); color:#fff; }
+body #memory #copyAllBtn:hover { filter:brightness(1.1); }
+body #memory .memory-buttons { gap:8px; margin:0; }
+body #memory .memory-buttons button { padding:9px 8px; font-size:12px; }
+body #memory .pool-maintenance { border-top:1px solid var(--border); margin-top:20px; padding-top:18px; }
+body #memory :is(#sendToBlacklistBtn,#clearMemoryBtn) { width:100%; margin:6px 0 0; }
+body #memory #clearMemoryBtn { color:var(--danger); background:transparent; }
+body #memory #clearMemoryBtn:hover { background:var(--danger-soft); }
+body #memory .export-history { margin-top:26px; padding-top:22px; }
+body #memory .export-history ul { max-height:280px; }
+body #memory .history-item { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+body #memory .history-details { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+body #memory .type-asin { font:12px ui-monospace,SFMono-Regular,monospace; color:var(--primary-light); }
+body #memory .custom-date { color:var(--muted); }
+body #memory .history-actions { display:flex; align-items:center; gap:12px; }
+body #memory .history-icon { width:18px; height:18px; object-fit:contain; cursor:pointer; }
+body #memory :is(#pool-empty,#pool-history-empty) { padding:24px; border:1px dashed var(--border); border-radius:8px; margin:14px 0 0; }
+body #memory #memoryOutput:has(> p:only-child) { display:none; }
+@media (max-width:1100px) { body #memory .pool-layout { grid-template-columns:1fr; } }

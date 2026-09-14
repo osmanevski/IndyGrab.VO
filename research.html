@@ -425,26 +425,39 @@
         </div>
 
     <div id="memory" class="tab-content">
-        <p data-i18n="memory_limit">Memory Limit: 20000 ASIN</p>
-        <div id="memoryOutput" class="asin-list"></div>
-        <div id="memoryPagination" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;"></div>
-
-        <div class="memory-buttons">
-            <button id="copyAllBtn" data-i18n="copy_all">Copy All (0 ASIN)</button>
-            <button id="mixMemoryBtn" data-i18n="shuffle">Shuffle</button>
+        <div class="pool-heading">
+            <div class="section-title-group"><span class="section-kicker">TOPLAMA & HAZIRLAMA</span><h2>Kaydedilen ASIN’ler <span id="pool-count" class="pool-count" aria-live="polite">0</span></h2></div>
+            <p data-i18n="memory_limit">Hafıza Limiti: 20000 ASIN</p>
         </div>
-        <div class="memory-buttons">
-            <button id="exportCsvBtn" data-i18n="export_csv">Export as CSV</button>
-            <button id="exportJsonBtn" data-i18n="export_json">Export as JSON</button>
+        <div class="pool-layout">
+            <div class="pool-list-panel">
+                <div class="pool-list-heading"><h3>Havuzdaki kayıtlar</h3><button id="mixMemoryBtn" data-i18n="shuffle">Karıştır</button></div>
+                <p>ASIN’e tıklayarak Amazon’da açabilirsin.</p>
+                <div id="memoryOutput" class="asin-list"></div>
+                <p id="pool-empty" hidden>Havuz henüz boş. Amazon toplama sayfasından veya keşfedilen ürünlerden ASIN ekleyebilirsin.</p>
+                <div id="memoryPagination"></div>
+            </div>
+            <aside class="pool-actions-panel" aria-label="Havuz işlemleri">
+                <h3>Dışa aktar</h3>
+                <p>Havuzun tamamını kopyala veya dosya olarak indir.</p>
+                <button id="copyAllBtn" data-i18n="copy_all">Tümünü Kopyala (0 ASIN)</button>
+                <div class="memory-buttons">
+                    <button id="exportCsvBtn" data-i18n="export_csv">CSV olarak dışa aktar</button>
+                    <button id="exportJsonBtn" data-i18n="export_json">JSON olarak dışa aktar</button>
+                </div>
+                <div class="pool-maintenance">
+                    <h3>Havuzu düzenle</h3>
+                    <p>Bu işlemler havuzun tamamına uygulanır.</p>
+                    <button id="sendToBlacklistBtn" data-i18n="send_to_blacklist">Kara listeye gönder</button>
+                    <button id="clearMemoryBtn" data-i18n="clear_memory">Hafızayı temizle</button>
+                </div>
+            </aside>
         </div>
-
-        <button id="sendToBlacklistBtn" style="background-color: #34495e; color: white; margin-bottom: 5px;" data-i18n="send_to_blacklist">Send to Blacklist</button>
-
-        <button id="clearMemoryBtn" data-i18n="clear_memory">Clear Memory</button>
-
         <div class="export-history">
-            <h3 data-i18n="export_history">Export History</h3>
+            <h3 data-i18n="export_history">Dışa aktarma geçmişi</h3>
+            <p>Son kopyalama ve dosya indirmelerin.</p>
             <ul id="exportHistoryList"></ul>
+            <p id="pool-history-empty" hidden>Henüz dışa aktarma yok. Kopyaladığın veya indirdiğin listeler burada görünür.</p>
         </div>
     </div>
             </div>

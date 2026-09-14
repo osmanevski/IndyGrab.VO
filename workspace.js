@@ -24,6 +24,21 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local' && fields.some(key => key in changes)) renderFilters();
     });
+    // Pool summary reads the existing store; collection and export handlers stay in popup.js.
+    function renderPoolSummary() {
+        chrome.storage.local.get(['memoryAsins', 'exportHistory'], values => {
+            const count = (values.memoryAsins || []).length;
+            const badge = document.getElementById('pool-count');
+            if (!badge) return;
+            badge.textContent = count.toLocaleString('tr-TR');
+            document.getElementById('pool-empty').hidden = count !== 0;
+            document.getElementById('pool-history-empty').hidden = (values.exportHistory || []).length !== 0;
+        });
+    }
+    renderPoolSummary();
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && ('memoryAsins' in changes || 'exportHistory' in changes)) renderPoolSummary();
+    });
     // Inner Amazon navigation and sidebar must describe the same visible workspace.
     document.querySelectorAll('.tab[data-tab]').forEach(tab => tab.addEventListener('click', () => {
         const isMemory = tab.dataset.tab === 'memory';
